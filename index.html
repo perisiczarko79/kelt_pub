@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KELT PUB - Premium QR Menu</title>
+    <style>
+        /* CSS Reset & Varijable */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-dark: #0a0e0b;
+            --bg-card: rgba(16, 28, 20, 0.65);
+            --bg-card-hover: rgba(24, 43, 30, 0.8);
+            --gold-primary: #d4af37;
+            --gold-light: #f3e5ab;
+            --gold-dark: #aa7c11;
+            --green-accent: #0f341e;
+            --green-bright: #1c5231;
+            --text-cream: #f4ebd0;
+            --text-muted: #a8a29e;
+            --border-gold: rgba(212, 175, 55, 0.35);
+            --border-gold-hover: rgba(212, 175, 55, 0.7);
+            --font-family: 'Times New Roman', Times, serif;
+            --font-sans: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-cream);
+            font-family: var(--font-sans);
+            line-height: 1.5;
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Ambijentalna pub pozadina sa gradijentima (menja tešku sliku radi brzine QR koda) */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: 
+                radial-gradient(circle at 50% 20%, rgba(15, 52, 30, 0.4) 0%, rgba(10, 14, 11, 0.95) 80%),
+                linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.85));
+            z-index: -2;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 120vw;
+            height: 120vh;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(15, 52, 30, 0.15) 0%, transparent 50%);
+            filter: blur(40px);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .menu-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 24px 16px 40px 16px;
+            position: relative;
+        }
+
+        /* Header / Logo Sekcija */
+        header {
+            text-align: center;
+            margin-bottom: 35px;
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        header::after {
+            content: "❖";
+            color: var(--gold-primary);
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            letter-spacing: 4px;
+            opacity: 0.8;
+        }
+
+        .pub-subtitle {
+            font-family: var(--font-family);
+            color: var(--gold-primary);
+            font-size: 11px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        /* CSS Filteri koji vaš crni logo pretvaraju u luksuzno zlato */
+        .pub-logo-container {
+            width: 100%;
+            max-width: 260px;
+            margin: 0 auto 10px auto;
+            padding: 0 10px;
+        }
+
+        .pub-logo {
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: invert(90%) sepia(30%) saturate(800%) hue-rotate(355deg) brightness(105%) drop-shadow(0 4px 12px rgba(212, 175, 55, 0.3));
+        }
+
+        .pub-tagline {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 12px;
+        }
+
+        /* Brza Navigacija na vrhu (Staje na ekran i prati skrol) */
+        .section-nav {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            position: sticky;
+            top: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(10, 14, 11, 0.85);
+            border: 1px solid var(--border-gold);
+            color: var(--text-cream);
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+
+        .nav-btn span {
+            display: block;
+            font-size: 9px;
+            color: var(--gold-primary);
+            opacity: 0.8;
+            margin-top: 1px;
+            font-weight: normal;
+        }
+
+        .nav-btn:active, .nav-btn:hover {
+            border-color: var(--gold-primary);
+            background: var(--green-accent);
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.15);
+        }
+
+        /* Sekcije */
+        .menu-section {
+            margin-bottom: 48px;
+            scroll-margin-top: 80px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .section-title-sr {
+            font-family: var(--font-family);
+            font-size: 22px;
+            color: var(--gold-primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .section-title-en {
+            font-family: var(--font-family);
+            font-size: 14px;
+            color: var(--text-cream);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            opacity: 0.7;
+            margin-top: 1px;
+            font-style: italic;
+        }
+
+        .section-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        .section-divider::before, .section-divider::after {
+            content: "";
+            height: 1px;
+            width: 40px;
+            background: linear-gradient(to right, transparent, var(--gold-primary));
+        }
+
+        .section-divider::after {
+            background: linear-gradient(to left, transparent, var(--gold-primary));
+        }
+
+        .section-divider .dot {
+            width: 5px;
+            height: 5px;
+            background-color: var(--gold-primary);
+            transform: rotate(45deg);
+            margin: 0 8px;
+        }
+
+        .cards-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Glassmorphism Kartice */
+        .beer-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-gold);
+            border-radius: 14px;
+            padding: 20px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .beer-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.4), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .beer-card:active {
+            transform: scale(0.98);
+            border-color: var(--border-gold-hover);
+            background: var(--bg-card-hover);
+            box-shadow: 0 12px 36px rgba(212, 175, 55, 0.1);
+        }
+        
+        @media (hover: hover) {
+            .beer-card:hover {
+                transform: translateY(-4px);
+                border-color: var(--border-gold-hover);
+                background: var(--bg-card-hover);
+                box-shadow: 0 12px 36px rgba(212, 175, 55, 0.15);
+            }
+            .beer-card:hover::before {
+                opacity: 1;
+            }
+        }
+
+        .beer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .beer-name {
+            font-family: var(--font-family);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-cream);
+            letter-spacing: 0.5px;
+            line-height: 1.2;
+        }
+
+        .beer-price {
+            font-family: var(--font-family);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gold-primary);
+            white-space: nowrap;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+        }
+
+        .beer-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .beer-type {
+            color: var(--gold-light);
+            background: rgba(212, 175, 55, 0.15);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 0.5px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .beer-origin {
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .beer-origin::before {
+            content: "•";
+            color: var(--gold-primary);
+        }
+
+        .beer-description-block {
+            border-left: 2px solid rgba(212, 175, 55, 0.2);
+            padding-left: 10px;
+            margin-top: 8px;
+        }
+
+        .desc-sr {
+            font-size: 12.5px;
+            color: var(--text-cream);
+            opacity: 0.95;
+            margin-bottom: 4px;
+        }
+
+        .desc-en {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 24px 0;
+            border-top: 1px solid rgba(212, 175, 55, 0.15);
+            position: relative;
+        }
+
+        .footer-motto {
+            font-family: var(--font-family);
+            font-size: 11px;
+            color: var(--gold-primary);
+            letter-spacing: 3px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .footer-qr-notice {
+            font-size: 9px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu-container">
+        
+        <header>
+            <div class="pub-subtitle">The Celtic Experience</div>
+            
+            <div class="pub-logo-container">
+                <img src="logo.png" alt="Kelt Pub Logo" class="pub-logo">
+            </div>
+            
+            <div class="pub-tagline">Premium Digital Beer Menu / Digitalni Meni Za Pivo</div>
+        </header>
+
+        <div class="section-nav">
+            <a href="#toceno" class="nav-btn">
+                Točeno Pivo
+                <span>Draft Beer</span>
+            </a>
+            <a href="#flasice" class="nav-btn">
+                U Flašici
+                <span>Bottled Beer</span>
+            </a>
+        </div>
+
+        <section id="toceno" class="menu-section">
+            <div class="section-header">
+                <h2 class="section-title-sr">1. Točeno Pivo</h2>
+                <h3 class="section-title-en">Draft Beer</h3>
+                <div class="section-divider"><span class="dot"></span></div>
+            </div>
+
+            <div class="cards-grid">
+                
+                <div class="beer-card">
+                    <div class="beer-header">
+                        <div class="beer-name">Madri Excepcional</div>
+                        <div class="beer-price">3.00 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Lager</span>
+                        <span class="beer-origin">Španija / Spain</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Svetli premijum lager, izuzetno osvežavajući sa čistom, hrskavom završnicom i prijatnom aromom hmelja.</p>
+                        <p class="desc-en">Crisp European premium lager, exceptionally refreshing with a clean finish and light floral hop aromas.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card">
+                    <div class="beer-header">
+                        <div class="beer-name">Stella Artois</div>
+                        <div class="beer-price">2.40 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Premium Lager</span>
+                        <span class="beer-origin">Belgija / Belgium</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Kultno belgijsko pivo prepoznatljive gorčine, bogate pene i prefinjenog, elegantnog ukusa.</p>
+                        <p class="desc-en">Classic Belgian lager featuring a distinctive hop profile, rich creamy head, and a sophisticated, crisp taste.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card">
+                    <div class="beer-header">
+                        <div class="beer-name">Nikšićko Tamno</div>
+                        <div class="beer-price">2.40 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Dark Lager</span>
+                        <span class="beer-origin">Crna Gora / Montenegro</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Bogato tamno pivo sa savršenim balansom nota pržene kafe, čokolade i fine, diskretne gorčine.</p>
+                        <p class="desc-en">A rich dark lager perfectly balancing smooth roasted coffee tones, chocolate hints, and a balanced bitterness.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card">
+                    <div class="beer-header">
+                        <div class="beer-name">Jelen</div>
+                        <div class="beer-price">2.40 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Lager</span>
+                        <span class="beer-origin">Srbija / Serbia</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Tradicionalni svetli lager punog ukusa, prepoznatljive prijatne gorčine i bogate penušavosti.</p>
+                        <p class="desc-en">A traditional pale lager featuring a full-bodied taste, distinct pleasant bitterness, and rich carbonation.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="flasice" class="menu-section">
+            <div class="section-header">
+                <h2 class="section-title-sr">2. Pivo u Flašici</h2>
+                <h3 class="section-title-en">Bottled Beer</h3>
+                <div class="section-divider"><span class="dot"></span></div>
+            </div>
+
+            <div class="cards-grid">
+                
+                <div class="beer-card">
+                    <div class="beer-header">
+                        <div class="beer-name">Nikšićko <span style="font-size:13px; color:var(--text-muted);">0.33l</span></div>
+                        <div class="beer-price">2.50 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Pale Lager</span>
+                        <span class="beer-origin">Crna Gora / Montenegro</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Osvežavajuće svetlo pivo napravljeno od prirodne planinske vode, prepoznatljivog kvaliteta i tradicije.</p>
+                        <p class="desc-en">Refreshing pale lager crafted with natural mountain water, holding a timeless tradition of crisp quality.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card">
+                    <div class="beer-header">
+                        <div class="beer-name">Jelen <span style="font-size:13px; color:var(--text-muted);">0.33l</span></div>
+                        <div class="beer-price">2.40 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Lager</span>
+                        <span class="beer-origin">Srbija / Serbia</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Dobro poznati regionalni svetli lager u praktičnom pakovanju, idealno balansiran za svaku priliku.</p>
+                        <p class="desc-en">The well-known regional pale lager in a convenient bottle size, perfectly balanced for any casual occasion.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card">
+                    <div class="beer-header">
+                        <div class="beer-name">Bavaria <span style="font-size:13px; color:var(--text-muted);">0.25l</span></div>
+                        <div class="beer-price">3.50 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Premium Pilsner</span>
+                        <span class="beer-origin">Holandija / Netherlands</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Čisto i lagano premium pilsner pivo, blagog i pitkog tela sa finim završnim tonovima slada.</p>
+                        <p class="desc-en">Pure, light, and premium pilsner style beer, offering a smooth, drinkable body with a clean malt finish.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card">
+                    <div class="beer-header">
+                        <div class="beer-name">Stella Artois <span style="font-size:13px; color:var(--text-muted);">0.33l</span></div>
+                        <div class="beer-price">3.50 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Premium Lager</span>
+                        <span class="beer-origin">Belgija / Belgium</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Sofisticirano flaširano belgijsko pivo, vrhunskog ukusa stvorenog za istinske ljubitelje tradicije.</p>
+                        <p class="desc-en">Sophisticated bottled Belgian lager, delivering a premium crisp profile crafted for authentic connoisseurs.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card">
+                    <div class="beer-header">
+                        <div class="beer-name">Staropramen <span style="font-size:13px; color:var(--text-muted);">0.33l</span></div>
+                        <div class="beer-price">3.00 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Czech Pilsner</span>
+                        <span class="beer-origin">Češka / Czech Republic</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Autentični praški pilsner sa finim balansom slatkoće slada i prepoznatljive češke gorčine hmelja.</p>
+                        <p class="desc-en">Authentic Prague pilsner showcasing a flawless balance of malty sweetness and traditional Czech hop aroma.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card">
+                    <div class="beer-header">
+                        <div class="beer-name">Beck's <span style="font-size:13px; color:var(--text-muted);">0.33l</span></div>
+                        <div class="beer-price">3.00 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">German Pilsner</span>
+                        <span class="beer-origin">Nemačka / Germany</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Legendarno nemačko pivo, prepoznatljivo po oštrom, čistom ukusu i izuzetno osvežavajućem karakteru.</p>
+                        <p class="desc-en">Legendary German pilsner, distinguished by its crisp, sharp flavor profile and intensely refreshing nature.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card">
+                    <div class="beer-header">
+                        <div class="beer-name">Blue Moon <span style="font-size:13px; color:var(--text-muted);">0.33l</span></div>
+                        <div class="beer-price">4.00 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Belgian-Style Wheat</span>
+                        <span class="beer-origin">SAD / USA</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Mutno pšenično pivo kuvano sa korom pomorandže i korijanderom za jedinstven, suptilno sladak citrusni ukus.</p>
+                        <p class="desc-en">Unfiltered wheat ale brewed with orange peel and coriander, offering a unique, subtly sweet citrus burst.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card">
+                    <div class="beer-header">
+                        <div class="beer-name">Madri Excepcional <span style="font-size:13px; color:var(--text-muted);">0.33l</span></div>
+                        <div class="beer-price">3.50 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Lager</span>
+                        <span class="beer-origin">Španija / Spain</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Flaširano špansko osveženje koje donosi živopisnu atmosferu i svetle, čiste tonove madridskog stila.</p>
+                        <p class="desc-en">Bottled Spanish lager capturing the vibrant spirit of Madrid with its bright, crisp taste profile.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card">
+                    <div class="beer-header">
+                        <div class="beer-name">Franziskaner <span style="font-size:13px; color:var(--text-muted);">0.50l</span></div>
+                        <div class="beer-price">6.00 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Hefe-Weissbier</span>
+                        <span class="beer-origin">Nemačka / Germany</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Vrhunsko bavarsko nefiltrirano pšenično pivo sa bogatim voćnim aromama i prepoznatljivim notama banane i karanfilića.</p>
+                        <p class="desc-en">Premium Bavarian unfiltered wheat beer with elegant carbonation, aromatic banana, and clove fruitiness.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card">
+                    <div class="beer-header">
+                        <div class="beer-name">Corona Extra <span style="font-size:13px; color:var(--text-muted);">0.33l</span></div>
+                        <div class="beer-price">5.00 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Mexican Lager</span>
+                        <span class="beer-origin">Meksiko / Mexico</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Svetski poznat lagani meksički lager, izuzetno pitak i osvežavajući, tradicionalno se služi sa kriškom limete.</p>
+                        <p class="desc-en">Globally celebrated smooth Mexican lager, highly refreshing and traditionally served with a wedge of fresh lime.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-motto">“GOOD BEER • GOOD PEOPLE • GOOD TIMES”</div>
+            <div class="footer-qr-notice">Kelt Pub • Hvala na poseti / Thank you for visiting</div>
+        </footer>
+
+    </div>
+
+</body>
+</html>
