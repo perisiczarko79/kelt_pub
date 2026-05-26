@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelt Pub - Digitalni Meni</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Ubuntu', sans-serif; background-color: #0b130e; }
+        .beer-card { background: linear-gradient(145deg, #111d16, #0d1712); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); border: 1px solid rgba(255, 255, 255, 0.03); }
+        .gold-glow { text-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+        .tab-active { background-color: #059669; color: white; border-color: #10b981; }
+    </style>
+</head>
+<body class="text-gray-200 min-h-screen pb-24">
+
+    <div class="bg-[#070c09] text-center py-2 px-4 text-xs text-emerald-400 border-b border-emerald-950 flex justify-between items-center">
+        <span id="welcome-text"><i class="fas fa-user-circle mr-1"></i> Gost na šanku</span>
+        <button onclick="openGuestModal()" class="text-[10px] bg-emerald-950 border border-emerald-800 text-emerald-300 px-2 py-0.5 rounded-md hover:bg-emerald-900 transition">
+            <i class="fas fa-sign-in-alt"></i> Prijavi se
+        </button>
+    </div>
+
+    <header class="relative overflow-hidden bg-gradient-to-b from-[#070c09] to-[#0b130e] text-center py-8 px-4 border-b border-[#1b3324]">
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#1e3f2b_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        
+        <div class="flex justify-center mb-3">
+            <img src="logo.png" alt="Kelt Pub Logo" class="h-24 w-auto object-contain drop-shadow-[0_0_15px_rgba(214,175,55,0.2)]" onerror="this.style.display='none'; document.getElementById('alt-logo').style.display='block';">
+            <h1 id="alt-logo" class="hidden text-4xl font-bold tracking-wider text-[#d4af37] gold-glow uppercase">Kelt Pub</h1>
+        </div>
+        
+        <p class="text-xs text-emerald-500 tracking-widest uppercase font-medium bg-[#112217] inline-block px-3 py-1 rounded-full border border-emerald-900/50 mb-3">✨ Živjeli / Cheers ✨</p>
+        <p class="text-sm text-gray-400 max-w-xs mx-auto">Dobrodošli! Izaberite omiljeno piće sa našeg šanka. Cijene su izražene u KM.</p>
+    </header>
+
+    <div class="max-w-md mx-auto px-4 mt-6">
+        <div class="grid grid-cols-3 gap-2 bg-[#070c09] p-1 rounded-xl border border-emerald-950">
+            <button onclick="filterCategory('all')" id="btn-cat-all" class="tab-active py-2.5 text-xs font-bold rounded-lg border border-transparent transition flex items-center justify-center gap-1.5">
+                <i class="fas fa-list"></i> Sve
+            </button>
+            <button onclick="filterCategory('toceno')" id="btn-cat-toceno" class="text-gray-400 py-2.5 text-xs font-bold rounded-lg border border-transparent hover:text-white transition flex items-center justify-center gap-1.5">
+                <i class="fas fa-beer"></i> Točeno
+            </button>
+            <button onclick="filterCategory('flasica')" id="btn-cat-flasica" class="text-gray-400 py-2.5 text-xs font-bold rounded-lg border border-transparent hover:text-white transition flex items-center justify-center gap-1.5">
+                <i class="fas fa-wine-bottle"></i> Flašice
+            </button>
+        </div>
+    </div>
+
+    <main class="max-w-md mx-auto px-4 mt-6">
+        <div id="beer-container" class="space-y-4">
+            </div>
+    </main>
+
+    <footer class="text-center py-8 mt-12 border-t border-emerald-950/30">
+        <p id="admin-trigger" class="text-xs text-gray-600 cursor-pointer select-none py-2">© 2026 Kelt Pub Meni • Sva prava zadržana</p>
+    </footer>
+
+    <div id="guest-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-[#111d16] border border-emerald-900 rounded-2xl w-full max-w-xs p-6 shadow-2xl">
+            <h3 class="text-lg font-bold text-center text-[#d4af37] mb-2"><i class="fas fa-user-edit mr-2"></i> Kako se zoveš?</h3>
+            <p class="text-xs text-gray-400 text-center mb-4">Unesite ime za personalizovani pozdrav na šanku.</p>
+            <input type="text" id="guest-name-input" placeholder="Tvoje ime..." class="w-full bg-[#0b130e] border border-emerald-950 rounded-xl px-4 py-3 text-center text-white font-medium focus:outline-none focus:border-emerald-500 mb-4">
+            <div class="flex gap-2">
+                <button onclick="closeModal('guest-modal')" class="w-1/2 bg-gray-800 hover:bg-gray-700 py-2.5 rounded-xl text-sm font-medium transition">Preskoči</button>
+                <button onclick="saveGuestName()" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white transition">Potvrdi</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-[#111d16] border border-emerald-900 rounded-2xl w-full max-w-xs p-6 shadow-2xl">
+            <h3 class="text-lg font-bold text-center text-[#d4af37] mb-4"><i class="fas fa-lock mr-2"></i> Upravnik Panel</h3>
+            <input type="password" id="admin-password" placeholder="Šifra..." class="w-full bg-[#0b130e] border border-emerald-950 rounded-xl px-4 py-3 text-center text-white font-mono tracking-widest focus:outline-none focus:border-emerald-500 mb-4">
+            <div class="flex gap-2">
+                <button onclick="closeModal('login-modal')" class="w-1/2 bg-gray-800 hover:bg-gray-700 py-2.5 rounded-xl text-sm font-medium transition">Odustani</button>
+                <button onclick="checkPassword()" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-sm font-bold text-white transition">Ulaz</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Kompletan meni spreman za rad na uređaju
+        var menuData = {
+            "madri": { id: "madri", name: "Madrí Excepcional", type: "toceno", size: "malo", priceMalo: 2.20, priceVeliko: 3.00, volumeMalo: "0.33l", volumeVeliko: "0.5l" },
+            "stella": { id: "stella", name: "Stella Artois", type: "flasica", size: "standard", price: 2.40, volume: "0.33l" },
+            "niksicko": { id: "niksicko", name: "Nikšićko Svijetlo", type: "toceno", size: "malo", priceMalo: 1.80, priceVeliko: 2.50, volumeMalo: "0.33l", volumeVeliko: "0.5l" },
+            "jelen": { id: "jelen", name: "Jelen Pivo", type: "flasica", size: "standard", price: 2.30, volume: "0.5l" }
+        };
+
+        var currentFilter = "all";
+
+        // Renderovanje menija bez ikakvog pozivanja spoljnih servera
+        function renderMenu() {
+            var container = document.getElementById('beer-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            Object.keys(menuData).forEach(function(key) {
+                var beer = menuData[key];
+                
+                if (currentFilter !== "all" && beer.type !== currentFilter) return;
+
+                var card = document.createElement('div');
+                card.className = 'beer-card relative p-5 rounded-2xl flex justify-between items-center transition-all duration-300 border border-emerald-950/20';
+
+                var leftSide = '';
+                var rightSide = '';
+
+                if (beer.type === "toceno") {
+                    var isMalo = beer.size === "malo";
+                    var currentPrice = isMalo ? beer.priceMalo : beer.priceVeliko;
+
+                    leftSide = 
+                        '<div class="flex items-center gap-4">' +
+                            '<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-950 to-emerald-900 flex items-center justify-center border border-emerald-800/30 text-[#d4af37]">' +
+                                '<i class="fas fa-faucet text-lg"></i>' +
+                            '</div>' +
+                            '<div>' +
+                                '<h3 class="font-bold text-white tracking-wide">' + beer.name + ' <span class="text-[10px] uppercase font-bold text-emerald-500 tracking-wider ml-1 bg-[#091a10] px-1.5 py-0.5 rounded border border-emerald-900/40">Točeno</span></h3>' +
+                                '<div class="flex gap-1.5 mt-2">' +
+                                    '<button onclick="switchSize(\'' + key + '\', \'malo\')" class="text-[10px] font-bold px-2.5 py-1 rounded-md transition ' + (isMalo ? 'bg-emerald-600 text-white' : 'bg-[#070c09] text-gray-400 hover:text-white') + '">Malo ' + beer.volumeMalo + '</button>' +
+                                    '<button onclick="switchSize(\'' + key + '\', \'veliko\')" class="text-[10px] font-bold px-2.5 py-1 rounded-md transition ' + (!isMalo ? 'bg-emerald-600 text-white' : 'bg-[#070c09] text-gray-400 hover:text-white') + '">Veliko ' + beer.volumeVeliko + '</button>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>';
+
+                    rightSide = '<div class="text-right flex flex-col justify-center"><span class="text-[#d4af37] font-bold text-lg">' + parseFloat(currentPrice).toFixed(2) + ' KM</span></div>';
+                } else {
+                    leftSide = 
+                        '<div class="flex items-center gap-4">' +
+                            '<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-950 to-emerald-900 flex items-center justify-center border border-emerald-800/30 text-[#d4af37]">' +
+                                '<i class="fas fa-wine-bottle text-lg"></i>' +
+                            '</div>' +
+                            '<div>' +
+                                '<h3 class="font-bold text-white tracking-wide">' + beer.name + '</h3>' +
+                                '<p class="text-xs text-gray-400 mt-0.5">' + beer.volume + '</p>' +
+                            '</div>' +
+                        '</div>';
+
+                    rightSide = '<div class="text-right flex flex-col justify-center"><span class="text-[#d4af37] font-bold text-lg">' + parseFloat(beer.price).toFixed(2) + ' KM</span></div>';
+                }
+
+                card.innerHTML = leftSide + rightSide;
+                container.appendChild(card);
+            });
+        }
+
+        // Promjena cijene na klik dugmeta (Malo / Veliko)
+        function switchSize(key, size) {
+            menuData[key].size = size;
+            renderMenu();
+        }
+
+        // Prebacivanje kategorija (Sve, Točeno, Flašice)
+        function filterCategory(cat) {
+            currentFilter = cat;
+            ["all", "toceno", "flasica"].forEach(function(c) {
+                var btn = document.getElementById("btn-cat-" + c);
+                if (c === cat) {
+                    btn.className = "tab-active py-2.5 text-xs font-bold rounded-lg border border-transparent transition flex items-center justify-center gap-1.5";
+                } else {
+                    btn.className = "text-gray-400 py-2.5 text-xs font-bold rounded-lg border border-transparent hover:text-white transition flex items-center justify-center gap-1.5";
+                }
+            });
+            renderMenu();
+        }
+
+        // Logovanje gosta (Ime i pozdrav)
+        function openGuestModal() {
+            document.getElementById('guest-modal').style.display = 'flex';
+            document.getElementById('guest-name-input').focus();
+        }
+
+        function saveGuestName() {
+            var name = document.getElementById('guest-name-input').value.trim();
+            if (name) {
+                document.getElementById('welcome-text').innerHTML = '<i class="fas fa-beer mr-1 text-emerald-400"></i> Živjeli, <strong class="text-white">' + name + '</strong>! 🍻';
+                localStorage.setItem('kelt_gost_ime', name);
+            }
+            closeModal('guest-modal');
+        }
+
+        // Pamćenje gosta nakon osvežavanja
+        window.addEventListener('DOMContentLoaded', function() {
+            var staroIme = localStorage.getItem('kelt_gost_ime');
+            if (staroIme) {
+                document.getElementById('welcome-text').innerHTML = '<i class="fas fa-beer mr-1 text-emerald-400"></i> Živjeli, <strong class="text-white">' + staroIme + '</strong>! 🍻';
+            }
+            renderMenu();
+        });
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+    </script>
+</body>
+</html>
