@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>KELT PUB - Premium QR Menu</title>
+    <style>
+        /* CSS Reset & Varijable */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-dark: #0a0e0b;
+            --bg-card: rgba(16, 28, 20, 0.65);
+            --bg-card-hover: rgba(24, 43, 30, 0.8);
+            --gold-primary: #d4af37;
+            --gold-light: #f3e5ab;
+            --gold-dark: #aa7c11;
+            --red-accent: #a62626;
+            --red-light: #ff4d4d;
+            --green-accent: #0f341e;
+            --text-cream: #f4ebd0;
+            --text-muted: #a8a29e;
+            --border-gold: rgba(212, 175, 55, 0.35);
+            --font-family: 'Times New Roman', Times, serif;
+            --font-sans: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-cream);
+            font-family: var(--font-sans);
+            line-height: 1.5;
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: padding-top 0.2s ease;
+        }
+
+        body.admin-mode {
+            padding-top: 42px;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: 
+                radial-gradient(circle at 50% 20%, rgba(15, 52, 30, 0.4) 0%, rgba(10, 14, 11, 0.95) 80%),
+                linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.85));
+            z-index: -2;
+        }
+
+        .menu-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 24px 16px 120px 16px;
+            position: relative;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        header::after {
+            content: "❖";
+            color: var(--gold-primary);
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            letter-spacing: 4px;
+            opacity: 0.8;
+        }
+
+        .pub-logo-container {
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto 5px auto;
+        }
+
+        .pub-logo {
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: invert(90%) sepia(30%) saturate(800%) hue-rotate(355deg) brightness(105%) drop-shadow(0 4px 15px rgba(212, 175, 55, 0.35));
+        }
+
+        .logo-fallback {
+            font-size: 24px;
+            color: var(--gold-primary);
+            letter-spacing: 4px;
+            padding: 20px;
+        }
+
+        .pub-tagline {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 15px;
+        }
+
+        /* Fiksna Admin Traka */
+        .admin-top-bar {
+            background: #cc3333;
+            color: white;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 9999;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .admin-exit-btn {
+            background: white;
+            color: #cc3333;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        /* Personalizaciona Zona */
+        .personalization-zone {
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .welcome-msg {
+            font-family: var(--font-family);
+            font-size: 18px;
+            color: var(--gold-primary);
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+            background: rgba(15, 52, 30, 0.4);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px dashed rgba(212, 175, 55, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .change-name-btn {
+            background: transparent;
+            border: 1px solid var(--gold-primary);
+            color: var(--gold-primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .name-panel {
+            background: rgba(16, 28, 20, 0.85);
+            border: 1px solid var(--border-gold);
+            border-radius: 12px;
+            padding: 16px;
+            backdrop-filter: blur(8px);
+        }
+
+        .name-panel p { font-size: 12px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .name-input-group { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
+        .name-input { background: rgba(0,0,0,0.5); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 20px; padding: 8px 16px; color: var(--text-cream); text-align: center; width: 65%; outline: none; }
+        .name-submit-btn { background: var(--gold-primary); color: var(--bg-dark); border: none; padding: 8px 18px; border-radius: 20px; font-weight: bold; text-transform: uppercase; cursor: pointer; font-size: 12px; }
+        .name-skip-btn { background: transparent; border: none; color: var(--text-muted); font-size: 11px; text-decoration: underline; cursor: pointer; text-transform: uppercase; }
+
+        /* Navigacija */
+        .section-nav {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            position: sticky;
+            top: 15px;
+            z-index: 100;
+        }
+        body.admin-mode .section-nav {
+            top: 57px;
+        }
+
+        .nav-btn {
+            background: rgba(10, 14, 11, 0.85);
+            border: 1px solid var(--border-gold);
+            color: var(--text-cream);
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .nav-btn span { display: block; font-size: 9px; color: var(--gold-primary); }
+
+        .menu-section { margin-bottom: 48px; scroll-margin-top: 80px; }
+        body.admin-mode .menu-section { scroll-margin-top: 120px; }
+
+        .section-header { text-align: center; margin-bottom: 24px; }
+        .section-title-sr { font-family: var(--font-family); font-size: 22px; color: var(--gold-primary); text-transform: uppercase; letter-spacing: 2px; }
+        .section-title-en { font-family: var(--font-family); font-size: 14px; color: var(--text-muted); font-style: italic; letter-spacing: 2px; }
+
+        .cards-grid { display: flex; flex-direction: column; gap: 20px; }
+
+        /* Kartice */
+        .beer-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-gold);
+            border-radius: 14px;
+            padding: 20px;
+            backdrop-filter: blur(12px);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .beer-card.featured-recommendation {
+            border: 1.5px solid var(--gold-primary);
+            background: rgba(24, 43, 30, 0.75);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+        .recommendation-badge {
+            position: absolute; top: 0; right: 0;
+            background: linear-gradient(135deg, var(--gold-dark), var(--gold-primary));
+            color: var(--bg-dark); font-size: 8.5px; font-weight: 800;
+            text-transform: uppercase; padding: 4px 12px; border-bottom-left-radius: 10px;
+        }
+
+        .beer-card.featured-promo {
+            border: 1.5px solid var(--red-light);
+            background: rgba(45, 20, 20, 0.75);
+            box-shadow: 0 0 15px rgba(230, 38, 38, 0.25);
+        }
+        .promo-badge {
+            position: absolute; top: 0; right: 0;
+            background: linear-gradient(135deg, var(--red-accent), var(--red-light));
+            color: white; font-size: 8.5px; font-weight: 800;
+            text-transform: uppercase; padding: 4px 12px; border-bottom-left-radius: 10px;
+        }
+        .old-price { text-decoration: line-through; color: var(--text-muted); font-size: 14px; margin-right: 6px; font-weight: normal; }
+
+        .beer-header { display: flex; justify-content: space-between; align-items: center; }
+        .beer-name { font-family: var(--font-family); font-size: 18px; font-weight: 700; }
+        .beer-price { font-family: var(--font-family); font-size: 18px; font-weight: 700; color: var(--gold-primary); }
+
+        .beer-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; font-size: 11px; text-transform: uppercase; }
+        .beer-type { color: var(--gold-light); background: rgba(212, 175, 55, 0.15); padding: 2px 8px; border-radius: 4px; }
+        .beer-origin::before { content: "•"; color: var(--gold-primary); margin-right: 4px; }
+
+        .size-selector { display: inline-flex; background: rgba(10, 14, 11, 0.6); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 20px; padding: 2px; margin-bottom: 12px; }
+        .size-btn { background: transparent; border: none; color: var(--text-muted); padding: 4px 12px; font-size: 11px; font-weight: 600; border-radius: 16px; cursor: pointer; transition: all 0.2s; }
+        .size-btn.active { background: var(--gold-primary); color: var(--bg-dark); }
+
+        .beer-description-block { border-left: 2px solid rgba(212, 175, 55, 0.2); padding-left: 10px; margin-top: 8px; }
+        .desc-sr { font-size: 12.5px; color: var(--text-cream); }
+        .desc-en { font-size: 11.5px; color: var(--text-muted); font-style: italic; }
+
+        /* Admin kontrole */
+        .admin-controls { background: rgba(0, 0, 0, 0.6); border-top: 1px solid rgba(255,255,255,0.1); margin-top: 15px; padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+        .admin-input-group { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+        .admin-input-group label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); }
+        .admin-txt-input { background: #111; border: 1px solid #444; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; width: 80px; text-align: center; }
+        .admin-actions-btns { display: flex; gap: 6px; }
+        .admin-btn-toggle { flex: 1; background: #222; border: 1px solid #444; color: #ccc; padding: 6px; font-size: 10px; font-weight: bold; text-transform: uppercase; border-radius: 4px; cursor: pointer; }
+        .admin-btn-toggle.active-rec { background: var(--gold-dark); color: white; border-color: var(--gold-primary); }
+        .admin-btn-toggle.active-promo { background: var(--red-accent); color: white; border-color: var(--red-light); }
+
+        .admin-footer-save { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(10, 14, 11, 0.95); border-top: 2px solid var(--gold-primary); padding: 15px; text-align: center; z-index: 9998; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
+        .save-all-btn { background: linear-gradient(to right, var(--gold-dark), var(--gold-primary)); color: black; font-weight: bold; text-transform: uppercase; border: none; padding: 12px 40px; border-radius: 25px; cursor: pointer; font-size: 13px; }
+
+        footer { text-align: center; margin-top: 60px; padding: 24px 0; border-top: 1px solid rgba(212, 175, 55, 0.15); }
+        .footer-motto { font-family: var(--font-family); font-size: 11px; color: var(--gold-primary); letter-spacing: 3px; cursor: pointer; }
+
+        .error-msg { color: var(--red-light); font-size: 11px; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div id="adminTopBar" class="admin-top-bar" style="display: none;">
+        <span>🔐 KELT PUB - ADMIN MOD AKTIVAN</span>
+        <button class="admin-exit-btn" id="exitAdminBtn">Završi / Izađi</button>
+    </div>
+
+    <div class="menu-container">
+        <header>
+            <div class="pub-logo-container">
+                <img src="logo.png" alt="Kelt Pub logo - zlatni keltski simbol" class="pub-logo" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'logo-fallback\'>⚜️ KELT PUB ⚜️</div>';">
+            </div>
+            <div class="pub-tagline">Premium Digital Beer Menu</div>
+        </header>
+
+        <div id="personalizationZone" class="personalization-zone"></div>
+
+        <div class="section-nav">
+            <a href="#toceno" class="nav-btn">Točeno Pivo<span>Draft Beer</span></a>
+            <a href="#flasice" class="nav-btn">U Flašici<span>Bottled Beer</span></a>
+        </div>
+
+        <section id="toceno" class="menu-section">
+            <div class="section-header">
+                <h2 class="section-title-sr">1. Točeno Pivo</h2>
+                <h3 class="section-title-en">Draft Beer</h3>
+            </div>
+            <div class="cards-grid">
+                <div class="beer-card" data-beer="madri">
+                    <div class="beer-header">
+                        <div class="beer-name">Madri Excepcional</div>
+                        <div class="beer-price" id="display-price-madri">3.00 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Lager</span><span class="beer-origin">Španija / Spain</span>
+                    </div>
+                    <div class="size-selector" data-beer="madri">
+                        <button class="size-btn active" data-size="malog">0.30l</button>
+                        <button class="size-btn" data-size="velikog">0.50l</button>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Svetli premijum lager, izuzetno osvežavajući sa čistom završnicom.</p>
+                        <p class="desc-en">Crisp European premium lager, exceptionally refreshing with a clean finish.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card" data-beer="stella">
+                    <div class="beer-header">
+                        <div class="beer-name">Stella Artois</div>
+                        <div class="beer-price" id="display-price-stella">2.40 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Premium Lager</span><span class="beer-origin">Belgija / Belgium</span>
+                    </div>
+                    <div class="size-selector" data-beer="stella">
+                        <button class="size-btn active" data-size="malog">0.25l</button>
+                        <button class="size-btn" data-size="velikog">0.50l</button>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Kultno belgijsko pivo prepoznatljive gorčine i prefinjenog ukusa.</p>
+                        <p class="desc-en">Classic Belgian lager featuring a distinctive hop profile and crisp taste.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card" data-beer="niktamno">
+                    <div class="beer-header">
+                        <div class="beer-name">Nikšićko Tamno</div>
+                        <div class="beer-price" id="display-price-niktamno">2.40 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Dark Lager</span><span class="beer-origin">Crna Gora / Montenegro</span>
+                    </div>
+                    <div class="size-selector" data-beer="niktamno">
+                        <button class="size-btn active" data-size="malog">0.30l</button>
+                        <button class="size-btn" data-size="velikog">0.50l</button>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Bogato tamno pivo sa savršenim balansom nota pržene kafe i čokolade.</p>
+                        <p class="desc-en">A rich dark lager perfectly balancing smooth roasted coffee tones.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card" data-beer="jelen">
+                    <div class="beer-header">
+                        <div class="beer-name">Jelen Točeno</div>
+                        <div class="beer-price" id="display-price-jelen">2.40 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Lager</span><span class="beer-origin">Srbija / Serbia</span>
+                    </div>
+                    <div class="size-selector" data-beer="jelen">
+                        <button class="size-btn active" data-size="malog">0.30l</button>
+                        <button class="size-btn" data-size="velikog">0.50l</button>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Tradicionalni svetli lager punog ukusa i prepoznatljive gorčine.</p>
+                        <p class="desc-en">Traditional pale lager with a full-bodied taste and recognizable bitterness.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="flasice" class="menu-section">
+            <div class="section-header">
+                <h2 class="section-title-sr">2. Pivo u Flašici</h2>
+                <h3 class="section-title-en">Bottled Beer</h3>
+            </div>
+            <div class="cards-grid">
+                <div class="beer-card" data-beer="nikflasica">
+                    <div class="beer-header">
+                        <div class="beer-name">Nikšićko <span style="font-size:13px; color:var(--text-muted);">0.33l</span></div>
+                        <div class="beer-price" id="display-price-nikflasica">2.50 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Pale Lager</span><span class="beer-origin">Crna Gora / Montenegro</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Osvežavajuće svetlo pivo napravljeno od prirodne planinske vode.</p>
+                        <p class="desc-en">Refreshing pale lager crafted with natural mountain water.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card" data-beer="jelenflasica">
+                    <div class="beer-header">
+                        <div class="beer-name">Jelen <span style="font-size:13px; color:var(--text-muted);">0.33l</span></div>
+                        <div class="beer-price" id="display-price-jelenflasica">2.40 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Lager</span><span class="beer-origin">Srbija / Serbia</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Dobro poznati regionalni svetli lager, idealno balansiran.</p>
+                        <p class="desc-en">Well-known regional pale lager, perfectly balanced.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card" data-beer="bavaria">
+                    <div class="beer-header">
+                        <div class="beer-name">Bavaria <span style="font-size:13px; color:var(--text-muted);">0.25l</span></div>
+                        <div class="beer-price" id="display-price-bavaria">3.50 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Premium Pilsner</span><span class="beer-origin">Holandija / Netherlands</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Čisto i lagano premium pilsner pivo, pitkog i glatkog tela.</p>
+                        <p class="desc-en">Pure and light premium pilsner, with a smooth drinkable body.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card" data-beer="stellaflasica">
+                    <div class="beer-header">
+                        <div class="beer-name">Stella Artois <span style="font-size:13px; color:var(--text-muted);">0.33l</span></div>
+                        <div class="beer-price" id="display-price-stellaflasica">3.50 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Premium Lager</span><span class="beer-origin">Belgija / Belgium</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Sofisticirano flaširano belgijsko pivo vrhunskog, čistog ukusa.</p>
+                        <p class="desc-en">Sophisticated bottled Belgian lager delivering a premium crisp profile.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card" data-beer="staropramen">
+                    <div class="beer-header">
+                        <div class="beer-name">Staropramen <span style="font-size:13px; color:var(--text-muted);">0.33l</span></div>
+                        <div class="beer-price" id="display-price-staropramen">3.00 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Czech Pilsner</span><span class="beer-origin">Češka / Czech Republic</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Autentični praški pilsner sa finim balansom slada i gorčine.</p>
+                        <p class="desc-en">Authentic Prague pilsner showcasing a flawless balance of hops.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card" data-beer="becks">
+                    <div class="beer-header">
+                        <div class="beer-name">Beck's <span style="font-size:13px; color:var(--text-muted);">0.33l</span></div>
+                        <div class="beer-price" id="display-price-becks">3.00 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">German Pilsner</span><span class="beer-origin">Nemačka / Germany</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Legendarno nemačko pivo, prepoznatljivo po oštrom i čistom ukusu.</p>
+                        <p class="desc-en">Legendary German pilsner, distinguished by its crisp, sharp flavor.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card" data-beer="bluemoon">
+                    <div class="beer-header">
+                        <div class="beer-name">Blue Moon <span style="font-size:13px; color:var(--text-muted);">0.33l</span></div>
+                        <div class="beer-price" id="display-price-bluemoon">4.00 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Wheat Ale</span><span class="beer-origin">SAD / USA</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Mutno pšenično pivo sa korom pomorandže i korijanderom.</p>
+                        <p class="desc-en">Unfiltered wheat ale brewed with orange peel and coriander.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card" data-beer="madriflasica">
+                    <div class="beer-header">
+                        <div class="beer-name">Madri Excepcional <span style="font-size:13px; color:var(--text-muted);">0.33l</span></div>
+                        <div class="beer-price" id="display-price-madriflasica">3.50 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Lager</span><span class="beer-origin">Španija / Spain</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Flaširano špansko osveženje koje donosi čist madridski stil.</p>
+                        <p class="desc-en">Bottled Spanish lager capturing the vibrant spirit of Madrid.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card" data-beer="franziskaner">
+                    <div class="beer-header">
+                        <div class="beer-name">Franziskaner <span style="font-size:13px; color:var(--text-muted);">0.50l</span></div>
+                        <div class="beer-price" id="display-price-franziskaner">6.00 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Hefe-Weissbier</span><span class="beer-origin">Nemačka / Germany</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Vrhunsko bavarsko pšenično pivo sa notama banane i karanfilića.</p>
+                        <p class="desc-en">Premium Bavarian unfiltered wheat beer with aromatic banana hints.</p>
+                    </div>
+                </div>
+
+                <div class="beer-card" data-beer="corona">
+                    <div class="beer-header">
+                        <div class="beer-name">Corona Extra <span style="font-size:13px; color:var(--text-muted);">0.33l</span></div>
+                        <div class="beer-price" id="display-price-corona">5.00 KM</div>
+                    </div>
+                    <div class="beer-meta">
+                        <span class="beer-type">Mexican Lager</span><span class="beer-origin">Meksiko / Mexico</span>
+                    </div>
+                    <div class="beer-description-block">
+                        <p class="desc-sr">Svetski poznat meksički lager, tradicionalno sa kriškom limete.</p>
+                        <p class="desc-en">Globally celebrated smooth Mexican lager, served with fresh lime.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-motto" onclick="handleAdminClick()">❖  ❖  ❖</div>
+        </footer>
+    </div>
+
+    <div id="adminFooterSave" class="admin-footer-save" style="display: none;">
+        <button class="save-all-btn" id="saveAllBtn">Sačuvaj sve izmjene 💾</button>
+    </div>
+
+    <script>
+        // Helper: escape HTML za XSS zaštitu
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+                return c;
+            });
+        }
+
+        // Sanitizacija cijene (samo broj sa opcionom tačkom, zamjena zareza)
+        function sanitizePrice(value, oldValue) {
+            let cleaned = value.trim().replace(',', '.');
+            if (cleaned === '') return oldValue;
+            if (/^\d+(\.\d{1,2})?$/.test(cleaned)) {
+                return cleaned;
+            }
+            return oldValue;
+        }
+
+        // Centralna baza podataka
+        let beerData = {
+            madri: { cijena_malog: "3.00", cijena_velikog: "5.00", ponuda_dana_cijena: "" },
+            stella: { cijena_malog: "2.40", cijena_velikog: "4.80", ponuda_dana_cijena: "" },
+            niktamno: { cijena_malog: "2.40", cijena_velikog: "4.00", ponuda_dana_cijena: "" },
+            jelen: { cijena_malog: "2.40", cijena_velikog: "4.00", ponuda_dana_cijena: "" },
+            nikflasica: { cijena_flasica: "2.50", ponuda_dana_cijena: "" },
+            jelenflasica: { cijena_flasica: "2.40", ponuda_dana_cijena: "" },
+            bavaria: { cijena_flasica: "3.50", ponuda_dana_cijena: "" },
+            stellaflasica: { cijena_flasica: "3.50", ponuda_dana_cijena: "" },
+            staropramen: { cijena_flasica: "3.00", ponuda_dana_cijena: "" },
+            becks: { cijena_flasica: "3.00", ponuda_dana_cijena: "" },
+            bluemoon: { cijena_flasica: "4.00", ponuda_dana_cijena: "" },
+            madriflasica: { cijena_flasica: "3.50", ponuda_dana_cijena: "" },
+            franziskaner: { cijena_flasica: "6.00", ponuda_dana_cijena: "" },
+            corona: { cijena_flasica: "5.00", ponuda_dana_cijena: "" }
+        };
+
+        let currentFeatured = "madri";
+        let currentPromo = "";
+
+        let adminClickCount = 0;
+        let isAdminMode = false;
+
+        // Učitavanje iz localStorage
+        function loadFromStorage() {
+            const localData = localStorage.getItem('kelt_beer_data');
+            const localFeatured = localStorage.getItem('kelt_featured_beer');
+            const localPromo = localStorage.getItem('kelt_promo_beer');
+
+            if (localData) {
+                try {
+                    const parsed = JSON.parse(localData);
+                    // Provjeri da li postoje sva piva, ako ne - zadrži default
+                    for (let key in beerData) {
+                        if (parsed[key]) {
+                            beerData[key] = { ...beerData[key], ...parsed[key] };
+                        }
+                    }
+                } catch(e) {}
+            }
+            if (localFeatured && beerData[localFeatured]) currentFeatured = localFeatured;
+            else if (localFeatured && !beerData[localFeatured]) currentFeatured = "";
+            if (localPromo !== null && localPromo !== "" && beerData[localPromo]) currentPromo = localPromo;
+            else if (localPromo && !beerData[localPromo]) currentPromo = "";
+        }
+
+        window.onload = function() {
+            loadFromStorage();
+            initPersonalization();
+            attachSizeSelectorEvents();
+            refreshMenuDisplay();
+
+            // Dugmad koja su dinamički dodana moraju imati event listenere
+            document.getElementById('exitAdminBtn').onclick = () => exitAdminMode();
+            document.getElementById('saveAllBtn').onclick = () => saveAllAdminChanges();
+        };
+
+        // Event listeneri za veličine (umjesto inline onclick)
+        function attachSizeSelectorEvents() {
+            document.querySelectorAll('.size-selector').forEach(selector => {
+                const beerId = selector.getAttribute('data-beer');
+                selector.querySelectorAll('.size-btn').forEach(btn => {
+                    btn.removeEventListener('click', sizeClickHandler);
+                    btn.addEventListener('click', sizeClickHandler);
+                    btn.setAttribute('data-beer', beerId);
+                });
+            });
+        }
+
+        function sizeClickHandler(e) {
+            const btn = e.currentTarget;
+            const beerId = btn.getAttribute('data-beer');
+            const size = btn.getAttribute('data-size');
+            const container = document.getElementById(`size-container-${beerId}`);
+            if (!container) {
+                // za flašice nema size-selector, ne radi ništa
+                return;
+            }
+            container.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateCardPriceDisplay(beerId, size);
+        }
+
+        function refreshMenuDisplay() {
+            document.querySelectorAll('.beer-card').forEach(card => {
+                const beerId = card.getAttribute('data-beer');
+                if (!beerId || !beerData[beerId]) return;
+
+                card.classList.remove('featured-recommendation', 'featured-promo');
+                const oldBadge = card.querySelector('.recommendation-badge, .promo-badge');
+                if (oldBadge) oldBadge.remove();
+
+                if (beerId === currentFeatured) {
+                    card.classList.add('featured-recommendation');
+                    card.insertAdjacentHTML('afterbegin', '<div class="recommendation-badge">Preporuka / Recommended</div>');
+                } else if (beerId === currentPromo) {
+                    card.classList.add('featured-promo');
+                    card.insertAdjacentHTML('afterbegin', '<div class="promo-badge">Ponuda Dana / Action</div>');
+                }
+
+                // Odredi aktivnu veličinu
+                let activeSize = 'flasica';
+                const sizeSelector = card.querySelector('.size-selector');
+                if (sizeSelector) {
+                    const activeBtn = sizeSelector.querySelector('.size-btn.active');
+                    if (activeBtn) activeSize = activeBtn.getAttribute('data-size');
+                }
+                updateCardPriceDisplay(beerId, activeSize);
+
+                // Obriši stare admin kontrole i dodaj nove ako je admin mod
+                const oldControls = card.querySelector('.admin-controls');
+                if (oldControls) oldControls.remove();
+                if (isAdminMode) {
+                    renderAdminControls(card, beerId);
+                }
+            });
+        }
+
+        function updateCardPriceDisplay(beerId, vel) {
+            const priceElement = document.getElementById('display-price-' + beerId);
+            if (!priceElement) return;
+
+            let bazaCijena = '';
+            if (vel === 'malog') bazaCijena = beerData[beerId].cijena_malog;
+            else if (vel === 'velikog') bazaCijena = beerData[beerId].cijena_velikog;
+            else bazaCijena = beerData[beerId].cijena_flasica;
+
+            if (!bazaCijena) bazaCijena = '0.00';
+
+            const promoPrice = beerData[beerId].ponuda_dana_cijena;
+            if (beerId === currentPromo && promoPrice && promoPrice.trim() !== "") {
+                priceElement.innerHTML = `<span class="old-price">${bazaCijena} KM</span> <span style="color:var(--red-light); font-weight:bold;">${promoPrice} KM</span>`;
+            } else {
+                priceElement.innerHTML = `${bazaCijena} KM`;
+            }
+        }
+
+        // Admin mod
+        function handleAdminClick() {
+            adminClickCount++;
+            if (adminClickCount >= 5) {
+                adminClickCount = 0;
+                let pass = prompt("Unesite administratorsku šifru:");
+                if (pass === "kelt2026") enterAdminMode();
+                else alert("Pogrešna šifra!");
+            }
+        }
+
+        function enterAdminMode() {
+            if (isAdminMode) return;
+            isAdminMode = true;
+            document.body.classList.add('admin-mode');
+            document.getElementById('adminTopBar').style.display = 'flex';
+            document.getElementById('adminFooterSave').style.display = 'block';
+            refreshMenuDisplay();
+            window.scrollTo(0, 0);
+        }
+
+        async function exitAdminMode() {
+            // Pitaj da li želi sačuvati prije izlaska
+            const saveChanges = confirm("Izmjene nisu sačuvane. Želite li sačuvati prije izlaska iz admin moda?");
+            if (saveChanges) {
+                saveAllAdminChanges(); // ova funkcija poziva exitAdminModeInternal na kraju
+            } else {
+                // Vrati podatke iz localStorage (odbaci nepotvrđene promjene)
+                loadFromStorage();
+                isAdminMode = false;
+                document.body.classList.remove('admin-mode');
+                document.getElementById('adminTopBar').style.display = 'none';
+                document.getElementById('adminFooterSave').style.display = 'none';
+                refreshMenuDisplay();
+            }
+        }
+
+        function exitAdminModeInternal() {
+            isAdminMode = false;
+            document.body.classList.remove('admin-mode');
+            document.getElementById('adminTopBar').style.display = 'none';
+            document.getElementById('adminFooterSave').style.display = 'none';
+            refreshMenuDisplay();
+        }
+
+        function renderAdminControls(card, beerId) {
+            let isTočeno = beerData[beerId].cijena_malog !== undefined;
+            let htmlInputs = '';
+
+            if (isTočeno) {
+                htmlInputs += `
+                    <div class="admin-input-group">
+                        <label>Cijena Mali (0.3l/0.25l):</label>
+                        <input type="text" class="admin-txt-input" id="input-mali-${beerId}" value="${escapeHtml(beerData[beerId].cijena_malog)}">
+                    </div>
+                    <div class="admin-input-group">
+                        <label>Cijena Veliki (0.50l):</label>
+                        <input type="text" class="admin-txt-input" id="input-veliki-${beerId}" value="${escapeHtml(beerData[beerId].cijena_velikog)}">
+                    </div>
+                `;
+            } else {
+                htmlInputs += `
+                    <div class="admin-input-group">
+                        <label>Cijena Flašica:</label>
+                        <input type="text" class="admin-txt-input" id="input-flasa-${beerId}" value="${escapeHtml(beerData[beerId].cijena_flasica)}">
+                    </div>
+                `;
+            }
+
+            htmlInputs += `
+                <div class="admin-input-group">
+                    <label style="color:var(--red-light);">Promotivna Cijena:</label>
+                    <input type="text" class="admin-txt-input" id="input-promo-${beerId}" value="${escapeHtml(beerData[beerId].ponuda_dana_cijena || '')}" placeholder="Akcija...">
+                </div>
+            `;
+
+            let recClass = (beerId === currentFeatured) ? 'active-rec' : '';
+            let promoClass = (beerId === currentPromo) ? 'active-promo' : '';
+
+            let controlsHtml = `
+                <div class="admin-controls">
+                    ${htmlInputs}
+                    <div class="admin-actions-btns">
+                        <button class="admin-btn-toggle ${recClass}" data-admin-beer="${beerId}" data-admin-type="rec">⭐ Preporuka</button>
+                        <button class="admin-btn-toggle ${promoClass}" data-admin-beer="${beerId}" data-admin-type="promo">🔥 Ponuda Dana</button>
+                    </div>
+                </div>
+            `;
+            card.insertAdjacentHTML('beforeend', controlsHtml);
+
+            // Dodaj event listenere za ove dinamičke dugmiće
+            card.querySelectorAll('.admin-btn-toggle').forEach(btn => {
+                btn.removeEventListener('click', adminToggleHandler);
+                btn.addEventListener('click', adminToggleHandler);
+            });
+        }
+
+        function adminToggleHandler(e) {
+            const btn = e.currentTarget;
+            const beerId = btn.getAttribute('data-admin-beer');
+            const type = btn.getAttribute('data-admin-type');
+            setFeaturedOrPromo(beerId, type);
+        }
+
+        function setFeaturedOrPromo(beerId, type) {
+            if (type === 'rec') {
+                currentFeatured = (currentFeatured === beerId) ? "" : beerId;
+                if (currentFeatured === currentPromo) currentPromo = "";
+            } else {
+                currentPromo = (currentPromo === beerId) ? "" : beerId;
+                if (currentPromo === currentFeatured) currentFeatured = "";
+            }
+            refreshMenuDisplay();
+        }
+
+        function saveAllAdminChanges() {
+            // Prvo prikupi sve vrijednosti iz admin polja i validiraj
+            document.querySelectorAll('.beer-card').forEach(card => {
+                const beerId = card.getAttribute('data-beer');
+                if (!beerId || !beerData[beerId]) return;
+
+                if (beerData[beerId].cijena_malog !== undefined) {
+                    const maliInput = document.getElementById(`input-mali-${beerId}`);
+                    const velikiInput = document.getElementById(`input-veliki-${beerId}`);
+                    if (maliInput) {
+                        let newMali = sanitizePrice(maliInput.value, beerData[beerId].cijena_malog);
+                        beerData[beerId].cijena_malog = newMali;
+                    }
+                    if (velikiInput) {
+                        let newVeliki = sanitizePrice(velikiInput.value, beerData[beerId].cijena_velikog);
+                        beerData[beerId].cijena_velikog = newVeliki;
+                    }
+                } else {
+                    const flasaInput = document.getElementById(`input-flasa-${beerId}`);
+                    if (flasaInput) {
+                        let newFlasa = sanitizePrice(flasaInput.value, beerData[beerId].cijena_flasica);
+                        beerData[beerId].cijena_flasica = newFlasa;
+                    }
+                }
+                const promoInput = document.getElementById(`input-promo-${beerId}`);
+                if (promoInput) {
+                    let promoVal = promoInput.value.trim();
+                    if (promoVal !== "") {
+                        promoVal = sanitizePrice(promoVal, "");
+                        if (promoVal === "") promoVal = "";
+                    }
+                    beerData[beerId].ponuda_dana_cijena = promoVal;
+                }
+            });
+
+            localStorage.setItem('kelt_beer_data', JSON.stringify(beerData));
+            localStorage.setItem('kelt_featured_beer', currentFeatured);
+            localStorage.setItem('kelt_promo_beer', currentPromo);
+
+            alert("Sve izmjene na cjenovniku su sačuvane! 💾");
+            exitAdminModeInternal();
+        }
+
+        // Personalizacija
+        const pZone = document.getElementById('personalizationZone');
+
+        function initPersonalization() {
+            const savedName = localStorage.getItem('kelt_guest_name');
+            const skipStatus = sessionStorage.getItem('kelt_skip_name');
+
+            if (savedName) {
+                const safeName = escapeHtml(savedName);
+                pZone.innerHTML = `<div class="welcome-msg">🍻 ${safeName}, živjeli! Šta pijemo danas? <button class="change-name-btn" onclick="resetName()">Promijeni ime</button></div>`;
+            } else if (!skipStatus) {
+                pZone.innerHTML = `
+                    <div class="name-panel" id="namePanel">
+                        <p>Dobrodošli! Unesite ime za personalizovan meni:</p>
+                        <div class="name-input-group">
+                            <input type="text" id="guestNameInput" class="name-input" placeholder="Tvoje ime..." maxlength="20">
+                            <button onclick="saveGuestName()" class="name-submit-btn">Sačuvaj</button>
+                        </div>
+                        <button onclick="skipNameInput()" class="name-skip-btn">Preskoči</button>
+                    </div>
+                `;
+            } else {
+                pZone.style.display = 'none';
+            }
+        }
+
+        function saveGuestName() {
+            const nameInput = document.getElementById('guestNameInput');
+            let rawName = nameInput.value.trim();
+            if (rawName !== "") {
+                const safeName = escapeHtml(rawName);
+                localStorage.setItem('kelt_guest_name', safeName);
+                pZone.innerHTML = `<div class="welcome-msg">🍻 ${safeName}, živjeli! Šta pijemo danas? <button class="change-name-btn" onclick="resetName()">Promijeni ime</button></div>`;
+            } else {
+                alert("Molimo unesite ime.");
+            }
+        }
+
+        function skipNameInput() {
+            sessionStorage.setItem('kelt_skip_name', 'true');
+            pZone.style.display = 'none';
+        }
+
+        function resetName() {
+            localStorage.removeItem('kelt_guest_name');
+            sessionStorage.removeItem('kelt_skip_name');
+            pZone.style.display = 'block';
+            initPersonalization();
+        }
+    </script>
+</body>
+</html>
