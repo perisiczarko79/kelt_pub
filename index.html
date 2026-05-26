@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelt Pub - Digitalni Meni</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Ubuntu', sans-serif; background-color: #0b130e; }
+        .beer-card { background: linear-gradient(145deg, #111d16, #0d1712); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); border: 1px solid rgba(255, 255, 255, 0.03); }
+        .tab-active { background-color: #059669; color: white; border-color: #10b981; }
+    </style>
+</head>
+<body class="text-gray-200 min-h-screen pb-24">
+
+    <div class="bg-[#070c09] text-center py-2 px-4 text-xs text-emerald-400 border-b border-emerald-950 flex justify-between items-center">
+        <span id="welcome-text"><i class="fas fa-user-circle mr-1"></i> Gost na šanku</span>
+        <button onclick="document.getElementById('guest-modal').style.display='flex'" class="text-[10px] bg-emerald-950 px-2 py-0.5 rounded-md">Prijavi se</button>
+    </div>
+
+    <header class="text-center py-8 px-4 border-b border-[#1b3324]">
+        <img src="logo.png" alt="Kelt Pub" class="h-24 mx-auto mb-3" onerror="this.style.display='none'">
+        <h1 class="text-4xl font-bold text-[#d4af37] uppercase">Kelt Pub</h1>
+        <p class="text-xs text-emerald-500 uppercase bg-[#112217] inline-block px-3 py-1 rounded-full mt-2">✨ Živjeli / Cheers ✨</p>
+    </header>
+
+    <div class="max-w-md mx-auto px-4 mt-6">
+        <div class="grid grid-cols-3 gap-2 bg-[#070c09] p-1 rounded-xl border border-emerald-950">
+            <button onclick="setFilter('all')" id="btn-all" class="tab-active py-2 text-xs font-bold rounded-lg">Sve</button>
+            <button onclick="setFilter('toceno')" id="btn-toceno" class="text-gray-400 py-2 text-xs font-bold rounded-lg">Točeno</button>
+            <button onclick="setFilter('flasica')" id="btn-flasica" class="text-gray-400 py-2 text-xs font-bold rounded-lg">Flašice</button>
+        </div>
+    </div>
+
+    <main id="container" class="max-w-md mx-auto px-4 mt-6 space-y-4"></main>
+
+    <div id="guest-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50">
+        <div class="bg-[#111d16] p-6 rounded-2xl w-full max-w-xs text-center border border-emerald-900">
+            <h3 class="text-lg font-bold text-[#d4af37] mb-4">Kako se zoveš?</h3>
+            <input type="text" id="nameInput" class="w-full bg-[#0b130e] border border-emerald-950 rounded-xl px-4 py-3 text-center text-white mb-4">
+            <button onclick="saveName()" class="w-full bg-emerald-600 py-2.5 rounded-xl font-bold">Potvrdi</button>
+        </div>
+    </div>
+
+    <script>
+        const menu = {
+            "madri": { name: "Madrí Excepcional", type: "toceno", priceM: 2.20, priceV: 3.00, volM: "0.33l", volV: "0.5l" },
+            "stella": { name: "Stella Artois", type: "flasica", price: 2.40, vol: "0.33l" },
+            "niksicko": { name: "Nikšićko Svijetlo", type: "toceno", priceM: 1.80, priceV: 2.50, volM: "0.33l", volV: "0.5l" },
+            "jelen": { name: "Jelen Pivo", type: "flasica", price: 2.30, vol: "0.5l" }
+        };
+
+        let filter = 'all', activeSizes = { madri: 'malo', niksicko: 'malo' };
+
+        function render() {
+            const cont = document.getElementById('container');
+            cont.innerHTML = '';
+            Object.keys(menu).forEach(key => {
+                const item = menu[key];
+                if(filter !== 'all' && item.type !== filter) return;
+
+                let html = `<div class="beer-card p-5 rounded-2xl flex justify-between items-center border border-emerald-950/20">`;
+                if(item.type === 'toceno') {
+                    const isMalo = activeSizes[key] === 'malo';
+                    html += `<div><h3 class="font-bold text-white">${item.name}</h3>
+                        <div class="flex gap-2 mt-2">
+                            <button onclick="activeSizes['${key}']='malo';render()" class="text-[10px] px-2 py-1 rounded ${isMalo?'bg-emerald-600':'bg-black'}">Malo ${item.volM}</button>
+                            <button onclick="activeSizes['${key}']='veliko';render()" class="text-[10px] px-2 py-1 rounded ${!isMalo?'bg-emerald-600':'bg-black'}">Veliko ${item.volV}</button>
+                        </div></div>
+                        <span class="text-[#d4af37] font-bold">${(isMalo?item.priceM:item.priceV).toFixed(2)} KM</span>`;
+                } else {
+                    html += `<div><h3 class="font-bold text-white">${item.name}</h3><p class="text-xs text-gray-400">${item.vol}</p></div>
+                        <span class="text-[#d4af37] font-bold">${item.price.toFixed(2)} KM</span>`;
+                }
+                html += `</div>`;
+                cont.innerHTML += html;
+            });
+        }
+
+        function setFilter(f) {
+            filter = f;
+            document.querySelectorAll('.grid button').forEach(b => b.classList.remove('tab-active'));
+            document.getElementById('btn-'+f).classList.add('tab-active');
+            render();
+        }
+
+        function saveName() {
+            const name = document.getElementById('nameInput').value;
+            if(name) { document.getElementById('welcome-text').innerHTML = `Živjeli, ${name}! 🍻`; localStorage.setItem('name', name); }
+            document.getElementById('guest-modal').style.display = 'none';
+        }
+        
+        window.onload = () => {
+            const name = localStorage.getItem('name');
+            if(name) document.getElementById('welcome-text').innerHTML = `Živjeli, ${name}! 🍻`;
+            render();
+        }
+    </script>
+</body>
+</html>
