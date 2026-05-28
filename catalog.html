@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Katalog mušica</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-dark: #1a2a1f;
+            --bg-card: rgba(30, 42, 28, 0.9);
+            --gold-primary: #ffd966;
+            --gold-light: #ffe6b3;
+            --red-light: #ff6666;
+            --text-cream: #e8f0e8;
+            --text-muted: #a8c0a8;
+            --border-gold: rgba(255, 217, 102, 0.35);
+            --font-sans: 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-cream);
+            font-family: var(--font-sans);
+            margin: 0;
+            min-height: 100vh;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 20%, rgba(30,42,28,0.8) 0%, #1a2a1f 90%);
+            z-index: -2;
+        }
+        .menu-container { max-width: 1200px; margin: 0 auto; padding: 20px 16px 100px; }
+        header { text-align: center; margin-bottom: 20px; }
+        .pub-logo {
+            max-width: 180px;
+            max-height: 100px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .pub-name { font-size: 28px; font-family: 'Times New Roman', serif; letter-spacing: 2px; color: var(--gold-primary); margin: 8px 0; }
+        .category-nav {
+            position: sticky;
+            top: 0;
+            background: rgba(26,42,31,0.95);
+            backdrop-filter: blur(12px);
+            padding: 10px 0;
+            margin-bottom: 20px;
+            z-index: 100;
+            text-align: center;
+            border-bottom: none;
+        }
+        .category-nav button {
+            display: inline-block;
+            margin: 5px 8px;
+            padding: 8px 16px;
+            background: transparent;
+            border: none;
+            color: var(--gold-primary);
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .category-nav button:hover {
+            background: var(--gold-primary);
+            color: #1a2a1f;
+        }
+        .admin-bar {
+            background: #cc3333; color: white; position: fixed; top: 0; left: 0;
+            width: 100%; display: flex; justify-content: space-between;
+            padding: 6px 16px; font-size: 12px; z-index: 9999;
+        }
+        .admin-bar button { background: white; border: none; color: #cc3333; padding: 2px 12px; border-radius: 4px; cursor: pointer; }
+        .admin-footer {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(0,0,0,0.9); border-top: 2px solid var(--gold-primary);
+            padding: 12px; text-align: center; z-index: 9998; display: flex;
+            justify-content: center; gap: 12px; flex-wrap: wrap;
+        }
+        .admin-footer button {
+            background: var(--gold-primary); border: none; padding: 8px 16px;
+            border-radius: 30px; font-weight: bold; cursor: pointer;
+            color: #1a2a1f;
+        }
+        .category-section { margin-bottom: 40px; scroll-margin-top: 80px; }
+        .category-title {
+            font-size: 24px; font-family: 'Times New Roman', serif;
+            color: var(--gold-primary); border-bottom: 1px solid var(--border-gold);
+            margin-bottom: 16px; padding-bottom: 4px;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border-gold);
+            border-radius: 16px; overflow: hidden;
+            backdrop-filter: blur(8px);
+            transition: transform 0.2s;
+            position: relative;
+        }
+        .card:hover { transform: translateY(-4px); }
+        .card.featured { border-color: var(--gold-primary); background: rgba(30,42,28,0.9); }
+        .card.promo { border-color: var(--red-light); background: rgba(60,30,30,0.8); }
+        .badge {
+            position: absolute; top: 0; right: 0;
+            background: var(--gold-primary); color: #1a2a1f; font-size: 10px;
+            padding: 2px 10px; border-bottom-left-radius: 12px;
+            z-index: 1;
+        }
+        .badge.promo { background: var(--red-light); color: white; }
+        .card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #2a3a28;
+        }
+        .card-info { padding: 12px; }
+        .item-name { font-size: 18px; font-weight: bold; margin-bottom: 6px; color: var(--gold-primary); }
+        .price { font-size: 18px; font-weight: bold; color: var(--gold-primary); margin-bottom: 8px; }
+        .description { font-size: 12px; color: var(--text-muted); }
+        .admin-controls { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.2); display: flex; gap: 8px; flex-wrap: wrap; }
+        .admin-btn { background: #222; border: 1px solid #555; color: white; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        .admin-btn.danger { background: #a00; }
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: flex; align-items: center;
+            justify-content: center; z-index: 10000;
+        }
+        .modal-content {
+            background: #1a1e1a; max-width: 500px; width: 90%; max-height: 80%;
+            overflow-y: auto; padding: 20px; border-radius: 16px;
+            border: 1px solid var(--gold-primary);
+        }
+        .modal-content input, .modal-content select, .modal-content textarea {
+            width: 100%; padding: 8px; margin: 8px 0; background: #2a2e2a;
+            border: 1px solid #555; color: white; border-radius: 8px;
+        }
+        .footer-motto { text-align: center; margin-top: 40px; font-size: 12px; color: var(--gold-primary); cursor: pointer; }
+        .toast {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: #ffd966; padding: 8px 20px;
+            border-radius: 40px; font-size: 14px; z-index: 10001;
+            animation: fadeOut 2s forwards;
+        }
+        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        button { cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div id="adminBar" class="admin-bar" style="display: none;">
+    <span>🔐 ADMIN MOD AKTIVAN (Katalog mušica)</span>
+    <button id="exitAdminBtn">Izađi</button>
+</div>
+
+<div class="menu-container">
+    <header>
+        <img id="pubLogo" class="pub-logo" src="" alt="Logo" style="display: none;">
+        <div id="pubName" class="pub-name">Katalog mušica</div>
+        <p>Ručno rađene mušice za ribolov</p>
+    </header>
+    <div id="categoryNav" class="category-nav"></div>
+    <div id="catalogContainer"></div>
+    <div class="footer-motto" onclick="handleAdminClick()">❖ ❖ ❖</div>
+</div>
+
+<div id="adminFooter" class="admin-footer" style="display: none;">
+    <button id="addCategoryBtn">➕ Nova kategorija</button>
+    <button id="addItemBtn">➕ Dodaj mušicu</button>
+    <button id="manageCategoriesBtn">📂 Uredi kategorije</button>
+    <button id="customizeBtn">🎨 Prilagodi izgled</button>
+    <button id="changePasswordBtn">🔐 Promijeni šifru</button>
+</div>
+
+<script type="importmap">
+    {
+        "imports": {
+            "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+            "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js",
+            "firebase/storage": "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"
+        }
+    }
+</script>
+
+<script type="module">
+    import { initializeApp } from 'firebase/app';
+    import { getDatabase, ref, onValue, push, set, remove, update, get } from 'firebase/database';
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+
+    // 🔥 VAŠ FIREBASE CONFIG (ISTI KAO ZA KAFIĆE)
+    const firebaseConfig = {
+        apiKey: "AIzaSyALY3oKvPW_mDZiaBl0EdFCkTjd6fqwisQ",
+        authDomain: "kelt-pub-menu-2df61.firebaseapp.com",
+        databaseURL: "https://kelt-pub-menu-2df61-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "kelt-pub-menu-2df61",
+        storageBucket: "kelt-pub-menu-2df61.firebasestorage.app",
+        messagingSenderId: "1026702086011",
+        appId: "1:1026702086011:web:8162de6bad4f18b731b7de",
+        measurementId: "G-3095YK50QM"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
+
+    // Putanje za katalog (jedna instanca)
+    const categoriesRef = ref(db, 'fishingCatalog/categories');
+    const itemsRef = ref(db, 'fishingCatalog/items');
+    const settingsRef = ref(db, 'fishingCatalog/settings');
+
+    let categories = [];
+    let items = [];
+    let settings = { primaryColor: '#ffd966', backgroundColor: '#1a2a1f', pubName: 'Katalog mušica', logoBase64: '', adminPassword: 'fishing2026' };
+    let isAdminMode = false;
+    let adminClickCount = 0;
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => (m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'));
+    }
+
+    function showToast(msg, duration = 2000) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), duration);
+    }
+
+    // Upload slike na Firebase Storage
+    async function uploadImageToFirebase(file, itemId) {
+        const ext = file.name.split('.').pop();
+        const storagePath = `fishingCatalog/items/${itemId}.${ext}`;
+        const imageRef = storageRef(storage, storagePath);
+        await uploadBytes(imageRef, file);
+        return await getDownloadURL(imageRef);
+    }
+
+    // Brisanje slike iz Storage-a
+    async function deleteImageFromFirebase(imageUrl) {
+        if (!imageUrl) return;
+        try {
+            const imageRef = storageRef(storage, imageUrl);
+            await deleteObject(imageRef);
+        } catch(e) { console.warn('Brisanje slike nije uspjelo:', e); }
+    }
+
+    // Postavke
+    function loadSettings() {
+        onValue(settingsRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) settings = { ...settings, ...data };
+            else set(settingsRef, settings);
+            applySettings();
+        });
+    }
+
+    function applySettings() {
+        document.documentElement.style.setProperty('--bg-dark', settings.backgroundColor);
+        document.documentElement.style.setProperty('--gold-primary', settings.primaryColor);
+        document.documentElement.style.setProperty('--border-gold', `${settings.primaryColor}59`);
+        document.getElementById('pubName').textContent = settings.pubName;
+        document.title = `${settings.pubName} - Katalog mušica`;
+        const logoImg = document.getElementById('pubLogo');
+        if (settings.logoBase64 && settings.logoBase64 !== '') {
+            logoImg.src = settings.logoBase64;
+            logoImg.style.display = 'block';
+        } else logoImg.style.display = 'none';
+    }
+
+    // Inicijalne kategorije (podvodne i površinske)
+    async function initDefaultCategories() {
+        const snapshot = await get(categoriesRef);
+        if (!snapshot.exists()) {
+            const defaultCats = ["Podvodne mušice", "Površinske mušice"];
+            for (let i = 0; i < defaultCats.length; i++) {
+                const newCatRef = push(categoriesRef);
+                await set(newCatRef, { name: defaultCats[i], order: i });
+            }
+            showToast("Kreirane podrazumijevane kategorije", 2000);
+        }
+    }
+
+    function loadData() {
+        onValue(categoriesRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                categories = Object.entries(data).map(([id, val]) => ({ id, ...val }));
+                categories.sort((a,b) => (a.order || 0) - (b.order || 0));
+            } else categories = [];
+            renderNav();
+            renderCatalog();
+        });
+        onValue(itemsRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                items = Object.entries(data).map(([id, val]) => ({ id, ...val }));
+            } else items = [];
+            renderCatalog();
+        });
+    }
+
+    function renderNav() {
+        const navDiv = document.getElementById('categoryNav');
+        navDiv.innerHTML = '';
+        for (let cat of categories) {
+            const btn = document.createElement('button');
+            btn.textContent = cat.name;
+            btn.onclick = () => {
+                const section = document.getElementById(`cat-${cat.id}`);
+                if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+            navDiv.appendChild(btn);
+        }
+    }
+
+    function renderCatalog() {
+        const container = document.getElementById('catalogContainer');
+        container.innerHTML = '';
+        for (let cat of categories) {
+            const catItems = items.filter(item => item.categoryId === cat.id);
+            if (catItems.length === 0 && !isAdminMode) continue;
+            const section = document.createElement('div');
+            section.className = 'category-section';
+            section.id = `cat-${cat.id}`;
+            section.innerHTML = `<h2 class="category-title">${escapeHtml(cat.name)}</h2><div class="cards-grid" id="grid-${cat.id}"></div>`;
+            const grid = section.querySelector(`.cards-grid`);
+            catItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                if (item.featured) card.classList.add('featured');
+                if (item.promo) card.classList.add('promo');
+                let badgeHtml = '';
+                if (item.featured) badgeHtml = '<div class="badge">⭐ Preporuka</div>';
+                else if (item.promo) badgeHtml = '<div class="badge promo">🔥 Akcija</div>';
+                card.innerHTML = `
+                    ${badgeHtml}
+                    <img src="${escapeHtml(item.imageUrl || '')}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%23333%22%2F%3E%3Ctext%20x%3D%2250%22%20y%3D%2255%22%20text-anchor%3D%22middle%22%20fill%3D%22%23aaa%22%3ENo%20image%3C%2Ftext%3E%3C%2Fsvg%3E'">
+                    <div class="card-info">
+                        <div class="item-name">${escapeHtml(item.name)}</div>
+                        <div class="price">${escapeHtml(item.price)} KM</div>
+                        <div class="description">${escapeHtml(item.description || '')}</div>
+                        ${isAdminMode ? `
+                            <div class="admin-controls">
+                                <button class="admin-btn" onclick="window.editItem('${item.id}')">✏️ Uredi</button>
+                                <button class="admin-btn danger" onclick="window.deleteItem('${item.id}')">🗑️ Obriši</button>
+                                <button class="admin-btn" onclick="window.toggleFeatured('${item.id}')">${item.featured ? '⭐ Ukloni preporuku' : '⭐ Preporuka'}</button>
+                                <button class="admin-btn" onclick="window.togglePromo('${item.id}')">${item.promo ? '🔥 Ukloni akciju' : '🔥 Akcija'}</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            container.appendChild(section);
+        }
+    }
+
+    // Admin radnje
+    window.deleteItem = async function(id) {
+        if (confirm('Obrisati mušicu?')) {
+            const item = items.find(i => i.id === id);
+            if (item && item.imageUrl) await deleteImageFromFirebase(item.imageUrl);
+            await remove(ref(db, `fishingCatalog/items/${id}`));
+            showToast('Obrisano', 1500);
+        }
+    };
+    window.toggleFeatured = async function(id) {
+        const item = items.find(i => i.id === id);
+        if (item) {
+            await update(ref(db, `fishingCatalog/items/${id}`), { featured: !item.featured, promo: false });
+            showToast(item.featured ? 'Uklonjena preporuka' : 'Postavljena preporuka', 1500);
+        }
+    };
+    window.togglePromo = async function(id) {
+        const item = items.find(i => i.id === id);
+        if (item) {
+            let promoPrice = '';
+            if (!item.promo) {
+                promoPrice = prompt('Unesite promotivnu cijenu (KM):', '');
+                if (promoPrice === null) return;
+            }
+            await update(ref(db, `fishingCatalog/items/${id}`), { promo: !item.promo, featured: false, promoPrice });
+            showToast(item.promo ? 'Uklonjena akcija' : 'Akcija postavljena', 1500);
+        }
+    };
+    window.editItem = function(id) {
+        const item = items.find(i => i.id === id);
+        if (item) showItemModal(item);
+    };
+
+    async function showCategoryManager() {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>Upravljanje kategorijama</h3>
+                <div id="catList"></div>
+                <div style="margin-top:16px;">
+                    <button id="newCatBtn">+ Nova kategorija</button>
+                    <button id="closeCatBtn">Zatvori</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        const refresh = () => {
+            const listDiv = modal.querySelector('#catList');
+            listDiv.innerHTML = '';
+            for (let cat of categories) {
+                const div = document.createElement('div');
+                div.style.display = 'flex';
+                div.style.justifyContent = 'space-between';
+                div.style.marginBottom = '8px';
+                div.style.alignItems = 'center';
+                div.innerHTML = `
+                    <span>${escapeHtml(cat.name)}</span>
+                    <div>
+                        <button class="editCatBtn" data-id="${cat.id}">✏️</button>
+                        <button class="deleteCatBtn" data-id="${cat.id}">🗑️</button>
+                    </div>
+                `;
+                listDiv.appendChild(div);
+            }
+            document.querySelectorAll('.editCatBtn').forEach(btn => {
+                btn.onclick = async () => {
+                    const id = btn.getAttribute('data-id');
+                    const newName = prompt('Novi naziv kategorije:', categories.find(c => c.id === id)?.name);
+                    if (newName && newName.trim()) {
+                        await update(ref(db, `fishingCatalog/categories/${id}`), { name: newName.trim() });
+                        showToast('Kategorija izmijenjena', 1500);
+                    }
+                };
+            });
+            document.querySelectorAll('.deleteCatBtn').forEach(btn => {
+                btn.onclick = async () => {
+                    const id = btn.getAttribute('data-id');
+                    const hasItems = items.some(i => i.categoryId === id);
+                    if (hasItems) { alert('Kategorija nije prazna (obrišite prvo mušice)'); return; }
+                    if (confirm('Obrisati kategoriju?')) {
+                        await remove(ref(db, `fishingCatalog/categories/${id}`));
+                        showToast('Kategorija obrisana', 1500);
+                    }
+                };
+            });
+        };
+        refresh();
+        modal.querySelector('#newCatBtn').onclick = async () => {
+            const name = prompt('Naziv nove kategorije:');
+            if (name && name.trim()) {
+                const newRef = push(categoriesRef);
+                await set(newRef, { name: name.trim(), order: categories.length });
+                showToast('Kategorija dodata', 1500);
+            }
+        };
+        modal.querySelector('#closeCatBtn').onclick = () => modal.remove();
+    }
+
+    let currentEditId = null;
+    let currentImageFile = null;
+
+    function showItemModal(item = null) {
+        currentEditId = item ? item.id : null;
+        currentImageFile = null;
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        let catOptions = categories.map(c => `<option value="${c.id}" ${item && item.categoryId === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('');
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>${item ? 'Uredi mušicu' : 'Dodaj mušicu'}</h3>
+                <label>Kategorija:</label>
+                <select id="modalCategory">${catOptions}</select>
+                <label>Naziv:</label>
+                <input type="text" id="modalName" value="${item ? escapeHtml(item.name) : ''}">
+                <label>Cijena (KM):</label>
+                <input type="text" id="modalPrice" value="${item ? escapeHtml(item.price) : ''}">
+                <label>Opis (opciono):</label>
+                <textarea id="modalDesc">${item ? escapeHtml(item.description || '') : ''}</textarea>
+                <label>Slika (upload):</label>
+                <input type="file" id="modalImage" accept="image/*">
+                <div id="imagePreview">
+                    ${item && item.imageUrl ? `<img src="${escapeHtml(item.imageUrl)}" style="max-width:100px; max-height:100px;">` : ''}
+                </div>
+                <div style="margin-top:16px;">
+                    <button id="saveModalBtn">Sačuvaj</button>
+                    <button id="closeModalBtn">Odustani</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        const fileInput = modal.querySelector('#modalImage');
+        const previewDiv = modal.querySelector('#imagePreview');
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                currentImageFile = file;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    previewDiv.innerHTML = `<img src="${ev.target.result}" style="max-width:100px; max-height:100px;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        modal.querySelector('#closeModalBtn').onclick = () => modal.remove();
+        modal.querySelector('#saveModalBtn').onclick = async () => {
+            const categoryId = modal.querySelector('#modalCategory').value;
+            const name = modal.querySelector('#modalName').value.trim();
+            const price = modal.querySelector('#modalPrice').value.trim().replace(',', '.');
+            const description = modal.querySelector('#modalDesc').value.trim();
+            if (!name) { alert('Unesite naziv'); return; }
+            if (!price || isNaN(parseFloat(price))) { alert('Unesite ispravnu cijenu'); return; }
+            let imageUrl = item ? item.imageUrl : '';
+            if (currentImageFile) {
+                if (item && item.imageUrl) await deleteImageFromFirebase(item.imageUrl);
+                const tempId = currentEditId || Date.now().toString();
+                imageUrl = await uploadImageToFirebase(currentImageFile, tempId);
+            } else if (!imageUrl && !item) {
+                alert('Odaberite sliku');
+                return;
+            }
+            const data = { categoryId, name, price: parseFloat(price).toFixed(2), description, imageUrl, featured: false, promo: false, promoPrice: '' };
+            if (currentEditId) {
+                await update(ref(db, `fishingCatalog/items/${currentEditId}`), data);
+                showToast('Mušica izmijenjena', 1500);
+            } else {
+                const newRef = push(itemsRef);
+                await set(newRef, data);
+                showToast('Mušica dodata', 1500);
+            }
+            modal.remove();
+        };
+    }
+
+    function showChangePasswordModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>Promjena administratorske šifre</h3>
+                <label>Nova šifra:</label>
+                <input type="password" id="newPass" placeholder="Unesite novu šifru">
+                <label>Potvrdite novu šifru:</label>
+                <input type="password" id="confirmPass" placeholder="Ponovite novu šifru">
+                <div style="margin-top:20px;">
+                    <button id="savePassBtn">Sačuvaj</button>
+                    <button id="closePassBtn">Odustani</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.querySelector('#savePassBtn').onclick = async () => {
+            const newPass = modal.querySelector('#newPass').value.trim();
+            const confirmPass = modal.querySelector('#confirmPass').value.trim();
+            if (!newPass) { alert('Šifra ne može biti prazna'); return; }
+            if (newPass !== confirmPass) { alert('Šifre se ne poklapaju'); return; }
+            await update(settingsRef, { adminPassword: newPass });
+            showToast('Šifra promijenjena', 2000);
+            modal.remove();
+        };
+        modal.querySelector('#closePassBtn').onclick = () => modal.remove();
+    }
+
+    function showBrandingModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>Prilagođavanje izgleda</h3>
+                <label>Naziv kataloga:</label>
+                <input type="text" id="brandPubName" value="${escapeHtml(settings.pubName)}">
+                <label>Logo (PNG, JPG):</label>
+                <input type="file" id="logoUpload" accept="image/*">
+                <div id="logoPreview" style="margin: 10px 0;"><img src="${settings.logoBase64}" style="max-width: 100px; max-height: 60px;" onerror="this.style.display='none'"></div>
+                <label>Primarna boja (zlatna):</label>
+                <input type="color" id="primaryColor" value="${settings.primaryColor}">
+                <label>Pozadinska boja:</label>
+                <input type="color" id="bgColor" value="${settings.backgroundColor}">
+                <div style="margin-top:20px;">
+                    <button id="saveBrandingBtn">Sačuvaj</button>
+                    <button id="resetBrandingBtn">Resetuj na default</button>
+                    <button id="closeBrandingBtn">Zatvori</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        const logoInput = modal.querySelector('#logoUpload');
+        const previewDiv = modal.querySelector('#logoPreview');
+        logoInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    previewDiv.innerHTML = `<img src="${ev.target.result}" style="max-width: 100px; max-height: 60px;">`;
+                    modal.setAttribute('data-logoBase64', ev.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        modal.querySelector('#saveBrandingBtn').onclick = async () => {
+            const newPubName = modal.querySelector('#brandPubName').value.trim();
+            const newPrimary = modal.querySelector('#primaryColor').value;
+            const newBg = modal.querySelector('#bgColor').value;
+            let newLogo = modal.getAttribute('data-logoBase64') || settings.logoBase64;
+            if (newLogo === 'undefined') newLogo = settings.logoBase64;
+            await update(settingsRef, { pubName: newPubName, primaryColor: newPrimary, backgroundColor: newBg, logoBase64: newLogo });
+            showToast('Postavke sačuvane', 1500);
+            modal.remove();
+        };
+        modal.querySelector('#resetBrandingBtn').onclick = async () => {
+            const defaultSettings = { pubName: 'Katalog mušica', primaryColor: '#ffd966', backgroundColor: '#1a2a1f', logoBase64: '', adminPassword: settings.adminPassword };
+            await set(settingsRef, defaultSettings);
+            showToast('Resetovano na default', 1500);
+            modal.remove();
+        };
+        modal.querySelector('#closeBrandingBtn').onclick = () => modal.remove();
+    }
+
+    async function handleAdminClick() {
+        adminClickCount++;
+        if (adminClickCount >= 5) {
+            adminClickCount = 0;
+            let currentAdminPassword = 'fishing2026';
+            try {
+                const snapshot = await get(settingsRef);
+                if (snapshot.exists() && snapshot.val().adminPassword) {
+                    currentAdminPassword = snapshot.val().adminPassword;
+                }
+            } catch(e) {}
+            let pass = prompt('Unesite administratorsku šifru:');
+            if (pass === currentAdminPassword) enterAdminMode();
+            else alert('Pogrešna šifra!');
+        }
+    }
+
+    function enterAdminMode() {
+        isAdminMode = true;
+        document.getElementById('adminBar').style.display = 'flex';
+        document.getElementById('adminFooter').style.display = 'flex';
+        document.body.classList.add('admin-mode');
+        renderCatalog();
+    }
+
+    function exitAdminMode() {
+        isAdminMode = false;
+        document.getElementById('adminBar').style.display = 'none';
+        document.getElementById('adminFooter').style.display = 'none';
+        document.body.classList.remove('admin-mode');
+        renderCatalog();
+    }
+
+    window.handleAdminClick = handleAdminClick;
+    window.exitAdminMode = exitAdminMode;
+    window.editItem = editItem;
+    window.deleteItem = deleteItem;
+    window.toggleFeatured = toggleFeatured;
+    window.togglePromo = togglePromo;
+
+    document.getElementById('exitAdminBtn').onclick = () => exitAdminMode();
+    document.getElementById('addItemBtn').onclick = () => showItemModal(null);
+    document.getElementById('addCategoryBtn').onclick = () => showCategoryManager();
+    document.getElementById('manageCategoriesBtn').onclick = () => showCategoryManager();
+    document.getElementById('customizeBtn').onclick = () => showBrandingModal();
+    document.getElementById('changePasswordBtn').onclick = () => showChangePasswordModal();
+
+    (async () => {
+        await initDefaultCategories();
+        loadSettings();
+        loadData();
+    })();
+</script>
+</body>
+</html>
