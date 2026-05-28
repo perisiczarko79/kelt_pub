@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/catalog.html", "destination": "/catalog.html" },
+    { "source": "/:cafeId", "destination": "/index.html?cafe=:cafeId" }
+  ]
+}
