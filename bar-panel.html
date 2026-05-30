@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Šank panel - test</title>
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+                "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Šank panel - test prikaz</h1>
+    <div id="output">Učitavanje...</div>
+
+    <script type="module">
+        import { initializeApp } from 'firebase/app';
+        import { getDatabase, ref, onValue } from 'firebase/database';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyALY3oKvPW_mDZiaBl0EdFCkTjd6fqwisQ",
+            authDomain: "kelt-pub-menu-2df61.firebaseapp.com",
+            databaseURL: "https://kelt-pub-menu-2df61-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "kelt-pub-menu-2df61",
+            storageBucket: "kelt-pub-menu-2df61.firebasestorage.app",
+            messagingSenderId: "1026702086011",
+            appId: "1:1026702086011:web:8162de6bad4f18b731b7de"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const params = new URLSearchParams(location.search);
+        let cafeId = params.get('cafe');
+        if (!cafeId) cafeId = 'kelt2026';
+
+        const pendingRef = ref(db, `${cafeId}/orders/pending`);
+
+        onValue(pendingRef, (snapshot) => {
+            const data = snapshot.val();
+            const output = document.getElementById('output');
+            if (data) {
+                output.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } else {
+                output.innerHTML = 'Nema podataka za cafeId: ' + cafeId;
+            }
+        });
+    </script>
+</body>
+</html>
