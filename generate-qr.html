@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator QR kodova za stolove</title>
+    <style>
+        body { font-family: sans-serif; background: #0a0e0b; color: #f4ebd0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: #1a1e1a; padding: 20px; border-radius: 16px; }
+        .qr-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 20px; }
+        .qr-item { background: white; padding: 10px; border-radius: 8px; text-align: center; width: 150px; }
+        .qr-item img { width: 100%; height: auto; }
+        .qr-item span { display: block; margin-top: 8px; font-weight: bold; color: #333; }
+        button { background: #d4af37; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; margin: 10px 5px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Generisanje QR kodova za stolove</h2>
+    <label>ID kafića: <input type="text" id="cafeId" value="gradski_pub" placeholder="npr. gradski_pub"></label>
+    <label>Od stola: <input type="number" id="fromTable" value="1" style="width:60px"></label>
+    <label>Do stola: <input type="number" id="toTable" value="20" style="width:60px"></label>
+    <button id="generateBtn">Generiši QR kodove</button>
+    <div id="qrContainer" class="qr-grid"></div>
+</div>
+<script>
+    function generateQR() {
+        const cafeId = document.getElementById('cafeId').value.trim();
+        if (!cafeId) return;
+        const from = parseInt(document.getElementById('fromTable').value);
+        const to = parseInt(document.getElementById('toTable').value);
+        const container = document.getElementById('qrContainer');
+        container.innerHTML = '';
+        for (let i = from; i <= to; i++) {
+            const url = `https://kelt-pub.vercel.app/index.html?cafe=${encodeURIComponent(cafeId)}&table=${i}`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(url)}`;
+            const div = document.createElement('div');
+            div.className = 'qr-item';
+            div.innerHTML = `<img src="${qrUrl}" alt="QR za sto ${i}"><span>Sto ${i}</span><br><a href="${url}" target="_blank">Link</a>`;
+            container.appendChild(div);
+        }
+    }
+    document.getElementById('generateBtn').onclick = generateQR;
+    generateQR(); // inicijalno generiši za default
+</script>
+</body>
+</html>
