@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Šank panel - lista</title>
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+                "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+            }
+        }
+    </script>
+    <style>
+        body { font-family: sans-serif; background: #1a1a1a; color: #eee; padding: 20px; }
+        .order-item { background: #2c2c2c; margin-bottom: 12px; padding: 12px; border-radius: 8px; }
+        button { margin-right: 8px; padding: 4px 8px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-accept { background: #4caf50; color: white; }
+        .btn-complete { background: #ff9800; color: white; }
+        .btn-delete { background: #a00; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🍺 Šank panel - liste narudžbi</h1>
+    <div id="output">Učitavanje...</div>
+
+    <script type="module">
+        import { initializeApp } from 'firebase/app';
+        import { getDatabase, ref, onValue, update, remove } from 'firebase/database';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyALY3oKvPW_mDZiaBl0EdFCkTjd6fqwisQ",
+            authDomain: "kelt-pub-menu-2df61.firebaseapp.com",
+            databaseURL: "https://kelt-pub-menu-2df61-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "kelt-pub-menu-2df61",
+            storageBucket: "kelt-pub-menu-2df61.firebasestorage.app",
+            messagingSenderId: "1026702086011",
+            appId: "1:1026702086011:web:8162de6bad4f18b731b7de"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const params = new URLSearchParams(location.search);
+        let cafeId = params.get('cafe');
+        if (!cafeId) cafeId = prompt('Unesite ID kafića (npr. kelt2026):');
+        if (!cafeId) { document.body.innerHTML = '<div>Nedostaje ID kafića.</div>'; throw new Error(); }
+
+        const pendingRef = ref(db, `${cafeId}/orders/pending`);
+        const output = document.getElementById('output');
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+        }
+
+        async function acceptOrder(id) {
+            await update(ref(db, `${cafeId}/orders/pending/${id}`), { status: 'accepted' });
+        }
+
+        async function completeOrder(id) {
+            await update(ref(db, `${cafeId}/orders/pending/${id}`), { status: 'completed' });
+        }
+
+        async function deleteOrder(id) {
+            if (confirm('Obrisati?')) {
+                await remove(ref(db, `${cafeId}/orders/pending/${id}`));
+            }
+        }
+
+        onValue(pendingRef, (snapshot) => {
+            const data = snapshot.val();
+            if (!data) {
+                output.innerHTML = 'Nema narudžbi.';
+                return;
+            }
+
+            let html = '';
+            for (const [id, order] of Object.entries(data)) {
+                // konverzija items iz objekta u niz
+                let itemsArray = order.items;
+                if (itemsArray && typeof itemsArray === 'object' && !Array.isArray(itemsArray)) {
+                    itemsArray = Object.values(itemsArray);
+                }
+                html += `<div class="order-item" data-id="${id}">`;
+                html += `<div><strong>${escapeHtml(order.guestName || 'Gost')}</strong> (sto ${order.tableNumber || '?'}) - status: ${order.status}</div>`;
+                if (itemsArray && itemsArray.length) {
+                    itemsArray.forEach(it => {
+                        html += `<div>• ${escapeHtml(it.itemName)} ${it.size ? `(${it.size})` : ''} - ${it.price} KM`;
+                        if (it.note) html += ` <em>(${escapeHtml(it.note)})</em>`;
+                        html += `</div>`;
+                    });
+                } else if (order.type === 'waiter') {
+                    html += `<div>📞 Poziv konobara</div>`;
+                } else if (order.type === 'bill_request') {
+                    html += `<div>🧾 Zahtjev za računom</div>`;
+                }
+                html += `<div>`;
+                if (order.status === 'pending' && order.type !== 'bill_request') {
+                    html += `<button class="btn-accept" data-id="${id}">📥 Primljeno</button>`;
+                }
+                if (order.status === 'accepted') {
+                    html += `<button class="btn-complete" data-id="${id}">✅ Realizovano</button>`;
+                }
+                if (order.status === 'completed') {
+                    html += `<button class="btn-delete" data-id="${id}">🗑️ Obriši</button>`;
+                }
+                html += `</div></div>`;
+            }
+            output.innerHTML = html;
+
+            // attach event listeners
+            document.querySelectorAll('.btn-accept').forEach(btn => {
+                btn.onclick = () => acceptOrder(btn.getAttribute('data-id'));
+            });
+            document.querySelectorAll('.btn-complete').forEach(btn => {
+                btn.onclick = () => completeOrder(btn.getAttribute('data-id'));
+            });
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.onclick = () => deleteOrder(btn.getAttribute('data-id'));
+            });
+        });
+    </script>
+</body>
+</html>
