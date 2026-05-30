@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Šank panel - prikaz</title>
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+                "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+            }
+        }
+    </script>
+    <style>
+        body { font-family: sans-serif; background: #1a1a1a; color: #eee; padding: 20px; }
+        .table-card { background: #2c2c2c; margin-bottom: 20px; padding: 12px; border-left: 5px solid #ffd966; border-radius: 8px; }
+        .table-number { font-size: 1.3rem; font-weight: bold; color: #ffd966; }
+        .order-item { background: #3a3a3a; margin-top: 8px; padding: 8px; border-radius: 8px; }
+        .guest-name { font-weight: bold; color: #ffd966; }
+        .items-list { margin-left: 16px; }
+    </style>
+</head>
+<body>
+    <h1>🍺 Šank panel - test prikaz</h1>
+    <div id="output">Učitavanje...</div>
+
+    <script type="module">
+        import { initializeApp } from 'firebase/app';
+        import { getDatabase, ref, onValue } from 'firebase/database';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyALY3oKvPW_mDZiaBl0EdFCkTjd6fqwisQ",
+            authDomain: "kelt-pub-menu-2df61.firebaseapp.com",
+            databaseURL: "https://kelt-pub-menu-2df61-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "kelt-pub-menu-2df61",
+            storageBucket: "kelt-pub-menu-2df61.firebasestorage.app",
+            messagingSenderId: "1026702086011",
+            appId: "1:1026702086011:web:8162de6bad4f18b731b7de"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const params = new URLSearchParams(location.search);
+        let cafeId = params.get('cafe');
+        if (!cafeId) cafeId = 'kelt2026';
+
+        const pendingRef = ref(db, `${cafeId}/orders/pending`);
+        const output = document.getElementById('output');
+
+        onValue(pendingRef, (snapshot) => {
+            const data = snapshot.val();
+            if (!data) {
+                output.innerHTML = 'Nema narudžbi.';
+                return;
+            }
+
+            // Grupisanje po stolovima
+            const tables = new Map();
+            for (const [id, order] of Object.entries(data)) {
+                const table = order.tableNumber || '?';
+                if (!tables.has(table)) tables.set(table, []);
+                tables.get(table).push({ id, ...order });
+            }
+
+            let html = '';
+            for (let [table, orders] of tables.entries()) {
+                html += `<div class="table-card"><div class="table-number">🍻 Sto ${table}</div>`;
+                for (let order of orders) {
+                    // Konverzija items (objekat -> niz)
+                    let itemsArray = order.items;
+                    if (itemsArray && typeof itemsArray === 'object' && !Array.isArray(itemsArray)) {
+                        itemsArray = Object.values(itemsArray);
+                    }
+                    html += `<div class="order-item">`;
+                    html += `<div class="guest-name">${escapeHtml(order.guestName || 'Gost')} - status: ${order.status}</div>`;
+                    if (itemsArray && itemsArray.length) {
+                        html += `<div class="items-list">`;
+                        itemsArray.forEach(it => {
+                            html += `<div>🍺 ${escapeHtml(it.itemName)} ${it.size ? `(${it.size})` : ''} - ${it.price} KM`;
+                            if (it.note) html += ` <em>(${escapeHtml(it.note)})</em>`;
+                            html += `</div>`;
+                        });
+                        html += `</div>`;
+                    } else if (order.type === 'waiter') {
+                        html += `<div>📞 Poziv konobara</div>`;
+                    } else if (order.type === 'bill_request') {
+                        html += `<div>🧾 Zahtjev za računom</div>`;
+                    }
+                    html += `</div>`;
+                }
+                html += `</div>`;
+            }
+            output.innerHTML = html;
+        });
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+        }
+    </script>
+</body>
+</html>
