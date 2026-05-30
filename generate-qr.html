@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator QR kodova za stolove</title>
+    <style>
+        body { font-family: sans-serif; background: #0a0e0b; color: #f4ebd0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: #1a1e1a; padding: 20px; border-radius: 16px; }
+        .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 20px; }
+        label { display: inline-flex; align-items: center; gap: 6px; }
+        input, button { padding: 8px 12px; border-radius: 8px; border: none; }
+        button { background: #d4af37; color: black; cursor: pointer; font-weight: bold; }
+        .qr-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 20px; }
+        .qr-item { background: white; padding: 10px; border-radius: 8px; text-align: center; width: 150px; break-inside: avoid; }
+        .qr-item img { width: 100%; height: auto; }
+        .qr-item span { display: block; margin-top: 8px; font-weight: bold; color: #333; }
+        .print-only { display: none; }
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            .container { background: white; padding: 0; margin: 0; max-width: 100%; }
+            .controls, .print-hide { display: none; }
+            .qr-grid { margin: 0; gap: 15px; }
+            .qr-item { page-break-inside: avoid; break-inside: avoid; }
+            .print-only { display: block; text-align: center; margin-bottom: 20px; font-size: 20px; font-weight: bold; color: #333; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Generisanje QR kodova za stolove</h2>
+    <div class="controls">
+        <label>ID kafića: <input type="text" id="cafeId" value="gradski_pub" placeholder="npr. gradski_pub"></label>
+        <label>Od stola: <input type="number" id="fromTable" value="1" style="width:70px"></label>
+        <label>Do stola: <input type="number" id="toTable" value="20" style="width:70px"></label>
+        <button id="generateBtn">🔄 Generiši QR kodove</button>
+        <button id="pdfBtn" class="print-hide">📄 Sačuvaj kao PDF</button>
+    </div>
+    <div id="qrContainer" class="qr-grid"></div>
+</div>
+<script>
+    function generateQR() {
+        const cafeId = document.getElementById('cafeId').value.trim();
+        if (!cafeId) return;
+        const from = parseInt(document.getElementById('fromTable').value);
+        const to = parseInt(document.getElementById('toTable').value);
+        const container = document.getElementById('qrContainer');
+        container.innerHTML = '';
+        for (let i = from; i <= to; i++) {
+            const url = `https://kelt-pub.vercel.app/index.html?cafe=${encodeURIComponent(cafeId)}&table=${i}`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(url)}`;
+            const div = document.createElement('div');
+            div.className = 'qr-item';
+            div.innerHTML = `<img src="${qrUrl}" alt="QR za sto ${i}"><span>Sto ${i}</span><br><a href="${url}" target="_blank" style="font-size:10px;">Link</a>`;
+            container.appendChild(div);
+        }
+    }
+
+    document.getElementById('generateBtn').onclick = generateQR;
+    document.getElementById('pdfBtn').onclick = () => {
+        // Priprema za štampanje
+        const originalTitle = document.title;
+        document.title = 'QR kodovi za stolove';
+        // Dodajemo naslov za štampu
+        let printTitle = document.querySelector('.print-title');
+        if (!printTitle) {
+            printTitle = document.createElement('div');
+            printTitle.className = 'print-title print-only';
+            printTitle.style.textAlign = 'center';
+            printTitle.style.fontSize = '20px';
+            printTitle.style.fontWeight = 'bold';
+            printTitle.style.marginBottom = '20px';
+            document.querySelector('.container').insertBefore(printTitle, document.getElementById('qrContainer'));
+        }
+        const cafeId = document.getElementById('cafeId').value.trim();
+        printTitle.innerText = `QR kodovi za kafić "${cafeId}" (stolovi ${document.getElementById('fromTable').value} - ${document.getElementById('toTable').value})`;
+        window.print();
+        document.title = originalTitle;
+    };
+    generateQR(); // inicijalno generiši
+</script>
+</body>
+</html>
