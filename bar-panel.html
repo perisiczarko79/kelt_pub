@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Šank panel - KELT PUB</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #1a1a1a; font-family: 'Segoe UI', Roboto, sans-serif; padding: 16px; color: #f4ebd0; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { text-align: center; color: #d4af37; font-size: 1.6rem; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+        .sound-toggle { background: #2a2e2a; border: 1px solid #d4af37; color: #d4af37; padding: 6px 12px; border-radius: 40px; font-size: 0.8rem; cursor: pointer; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; margin-top: 20px; }
+        .table-card { background: rgba(16,28,20,0.85); border-radius: 20px; border: 1px solid rgba(212,175,55,0.4); overflow: hidden; }
+        .table-header { background: rgba(0,0,0,0.6); padding: 12px 16px; border-bottom: 1px solid rgba(212,175,55,0.5); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .table-number { font-size: 1.4rem; font-weight: bold; color: #d4af37; }
+        .table-total { font-size: 1.2rem; font-weight: bold; color: #ffaa66; background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 40px; }
+        .close-table-btn { background: rgba(0,0,0,0.6); border: 1px solid #d4af37; color: #d4af37; padding: 4px 10px; border-radius: 40px; font-size: 0.7rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+        .order-item { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .order-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+        .guest-name { font-weight: bold; color: #d4af37; }
+        .order-status { font-size: 0.7rem; padding: 4px 10px; border-radius: 40px; font-weight: bold; text-transform: uppercase; }
+        .status-pending { background: #ff9800; color: #1a2a1f; }
+        .status-accepted { background: #2196f3; color: white; }
+        .status-completed { background: #4caf50; color: white; }
+        .items-list { margin: 8px 0 8px 12px; font-size: 0.85rem; color: #ddd; border-left: 2px solid #d4af37; padding-left: 12px; }
+        .item-note { font-style: italic; color: #aaa; font-size: 0.75rem; margin-left: 8px; }
+        .order-buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; justify-content: flex-end; }
+        button { background: rgba(0,0,0,0.6); border: none; padding: 6px 12px; border-radius: 40px; font-weight: bold; cursor: pointer; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-accept { background: #4caf50; color: white; }
+        .btn-complete { background: #ff9800; color: white; }
+        .btn-pay { background: #2e7d32; color: white; }
+        .btn-set-table { background: #2196f3; color: white; }
+        .empty { text-align: center; padding: 40px; color: #aaa; font-style: italic; background: rgba(0,0,0,0.3); border-radius: 20px; }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1a1e1a; color: #d4af37; padding: 10px 20px; border-radius: 40px; font-size: 0.85rem; z-index: 1000; border: 1px solid #d4af37; animation: fadeOut 2s forwards; }
+        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        @media (max-width: 600px) { .grid { gap: 12px; } .table-header { padding: 8px 12px; } .table-number { font-size: 1.2rem; } .order-item { padding: 10px 12px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🍺 Šank panel <button id="soundToggleBtn" class="sound-toggle">🔊 Zvuk uključen</button></h1>
+    <div id="output"><div class="empty">Učitavanje...</div></div>
+</div>
+
+<script type="importmap">
+    {
+        "imports": {
+            "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+            "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+        }
+    }
+</script>
+<script type="module">
+    import { initializeApp } from 'firebase/app';
+    import { getDatabase, ref, onValue, update, remove, push, set, onChildAdded } from 'firebase/database';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyALY3oKvPW_mDZiaBl0EdFCkTjd6fqwisQ",
+        authDomain: "kelt-pub-menu-2df61.firebaseapp.com",
+        databaseURL: "https://kelt-pub-menu-2df61-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "kelt-pub-menu-2df61",
+        storageBucket: "kelt-pub-menu-2df61.firebasestorage.app",
+        messagingSenderId: "1026702086011",
+        appId: "1:1026702086011:web:8162de6bad4f18b731b7de"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const params = new URLSearchParams(location.search);
+    let cafeId = params.get('cafe');
+    if (!cafeId) cafeId = prompt('Unesite ID kafića (npr. kelt2026):');
+    if (!cafeId) { document.body.innerHTML = '<div class="empty">Nedostaje ID kafića.</div>'; throw new Error(); }
+
+    const pendingRef = ref(db, `${cafeId}/orders/pending`);
+    const historyRef = ref(db, `${cafeId}/orders/history`);
+    let soundEnabled = true;
+    let audio = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
+    audio.load();
+    // Pomoćna funkcija za reprodukciju (otporna na autoplay)
+    function playSound() {
+        if (!soundEnabled) return;
+        audio.play().catch(e => {
+            console.log('Autoplay blokiran:', e);
+            // Pokaži obavijest da korisnik klikne bilo gdje da omogući zvuk
+            showToast('Kliknite "Zvuk uključen" ili bilo gdje na stranicu da omogućite zvuk za nove narudžbe.', 3000);
+            // Jednom kada korisnik klikne bilo gdje, pokušaj reprodukciju
+            const unlock = () => {
+                audio.play().catch(() => {});
+                document.removeEventListener('click', unlock);
+            };
+            document.addEventListener('click', unlock);
+        });
+    }
+
+    function escapeHtml(str) { if (str === undefined || str === null) return ''; str = String(str); return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+    function showToast(msg) { const toast = document.createElement('div'); toast.className = 'toast'; toast.innerText = msg; document.body.appendChild(toast); setTimeout(() => toast.remove(), 2000); }
+
+    let orders = [];
+
+    async function closeTable(tableNumber, paid = false) {
+        const toArchive = orders.filter(o => o.tableNumber == tableNumber);
+        if (toArchive.length === 0) { showToast(`Nema narudžbi za sto ${tableNumber}.`); return; }
+        if (confirm(`Zatvoriti račun za sto ${tableNumber}? Sve narudžbe će biti arhivirane i obrisane.`)) {
+            try {
+                let allItems = [], totalAmount = 0;
+                for (let order of toArchive) {
+                    if (order.items && Array.isArray(order.items)) {
+                        order.items.forEach(it => { allItems.push(it); totalAmount += parseFloat(it.price); });
+                    } else if (order.type === 'waiter') { allItems.push({ type: 'waiter', note: 'Poziv konobara' }); }
+                    else if (order.type === 'bill_request') { allItems.push({ type: 'bill_request', note: 'Zahtjev za računom' }); }
+                }
+                const newHistoryRef = push(historyRef);
+                await set(newHistoryRef, { tableNumber, closedAt: Date.now(), totalAmount, items: allItems, ordersCount: toArchive.length, paid: paid });
+                for (let order of toArchive) { await remove(ref(db, `${cafeId}/orders/pending/${order.id}`)); }
+                orders = orders.filter(o => o.tableNumber != tableNumber);
+                renderTables();
+                showToast(`✅ Račun za sto ${tableNumber} zatvoren ${paid ? 'i naplaćen' : ''}.`);
+            } catch(e) { showToast('Greška: ' + e.message); }
+        }
+    }
+
+    async function setTableNumber(orderId, currentTable) {
+        let newTable = prompt('Unesite broj stola za ovu narudžbu:', currentTable === '?' ? '' : currentTable);
+        if (newTable && !isNaN(parseInt(newTable))) {
+            await update(ref(db, `${cafeId}/orders/pending/${orderId}`), { tableNumber: parseInt(newTable) });
+            showToast(`Sto postavljen na ${newTable}`);
+        } else if (newTable !== null) { showToast('Unesite ispravan broj'); }
+    }
+
+    async function acceptOrder(orderId) {
+        try { await update(ref(db, `${cafeId}/orders/pending/${orderId}`), { status: 'accepted' }); showToast('Primljeno'); }
+        catch(e) { showToast('Greška: ' + e.message); }
+    }
+
+    async function completeOrder(orderId) {
+        try { await update(ref(db, `${cafeId}/orders/pending/${orderId}`), { status: 'completed' }); showToast('Realizovano'); }
+        catch(e) { showToast('Greška: ' + e.message); }
+    }
+
+    function renderTables() {
+        const container = document.getElementById('output');
+        const tablesMap = new Map();
+
+        for (let order of orders) {
+            let table = order.tableNumber;
+            if (table === undefined || table === null) table = '?';
+            if (!tablesMap.has(table)) tablesMap.set(table, { orders: [], total: 0 });
+            const data = tablesMap.get(table);
+            data.orders.push(order);
+            let orderTotal = 0;
+            if (order.items && Array.isArray(order.items)) order.items.forEach(it => orderTotal += parseFloat(it.price));
+            data.total += orderTotal;
+        }
+
+        if (tablesMap.size === 0) { container.innerHTML = '<div class="empty">🍺 Nema aktivnih stolova</div>'; return; }
+
+        let html = '<div class="grid">';
+        for (let [table, data] of tablesMap.entries()) {
+            const isUnknown = (table === '?');
+            html += `<div class="table-card">`;
+            html += `<div class="table-header">`;
+            html += `<div class="table-number">🍻 ${isUnknown ? '❓ Nepoznat sto' : `Sto ${escapeHtml(table)}`}</div>`;
+            html += `<div style="display: flex; align-items: center; gap: 12px;">`;
+            html += `<div class="table-total">💰 ${data.total.toFixed(2)} KM</div>`;
+            html += `<button class="close-table-btn" data-table="${table}">🧾 Zatvori račun</button>`;
+            html += `</div></div>`;
+
+            for (let order of data.orders) {
+                let itemsArray = order.items;
+                if (itemsArray && typeof itemsArray === 'object' && !Array.isArray(itemsArray)) itemsArray = Object.values(itemsArray);
+                const statusClass = order.status === 'pending' ? 'status-pending' : (order.status === 'accepted' ? 'status-accepted' : 'status-completed');
+                let statusIcon = order.status === 'pending' ? '⏳' : (order.status === 'accepted' ? '✅' : '✔️');
+                const statusText = order.status === 'pending' ? 'Na čekanju' : (order.status === 'accepted' ? 'Primljeno' : 'Realizovano');
+                html += `<div class="order-item">`;
+                html += `<div class="order-header"><span class="guest-name">${escapeHtml(order.guestName || 'Gost')}</span><span class="order-status ${statusClass}">${statusIcon} ${statusText}</span></div>`;
+                if (itemsArray && itemsArray.length) {
+                    html += `<div class="items-list">`;
+                    itemsArray.forEach(it => {
+                        html += `<div>🍺 ${escapeHtml(it.itemName)} ${it.size ? `(${escapeHtml(it.size)})` : ''} - ${parseFloat(it.price).toFixed(2)} KM`;
+                        if (it.note) html += `<span class="item-note">📝 ${escapeHtml(it.note)}</span>`;
+                        html += `</div>`;
+                    });
+                    html += `</div>`;
+                } else if (order.type === 'waiter') { html += `<div class="items-list">📞 Poziv konobara</div>`; }
+                else if (order.type === 'bill_request') { html += `<div class="items-list">🧾 Zahtjev za računom</div>`; }
+                html += `<div class="order-buttons">`;
+                if (order.status === 'pending' && order.type !== 'bill_request') {
+                    html += `<button class="btn-accept" data-id="${order.id}">📥 Primljeno</button>`;
+                }
+                if (order.status === 'accepted') {
+                    html += `<button class="btn-complete" data-id="${order.id}">✅ Realizovano</button>`;
+                }
+                if (isUnknown) {
+                    html += `<button class="btn-set-table" data-id="${order.id}" data-table="${table}">🔄 Dodaj sto</button>`;
+                }
+                if (order.type === 'bill_request' && order.status === 'pending') {
+                    html += `<button class="btn-pay" data-table="${table}">💵 Naplaćeno</button>`;
+                }
+                html += `</div></div>`;
+            }
+            html += `</div>`;
+        }
+        html += `</div>`;
+        container.innerHTML = html;
+        attachEvents();
+    }
+
+    function attachEvents() {
+        document.querySelectorAll('.close-table-btn').forEach(btn => {
+            btn.onclick = async () => {
+                const table = btn.getAttribute('data-table');
+                await closeTable(table === '?' ? null : table, false);
+            };
+        });
+        document.querySelectorAll('.btn-set-table').forEach(btn => {
+            btn.onclick = async () => {
+                const orderId = btn.getAttribute('data-id');
+                const currentTable = btn.getAttribute('data-table');
+                await setTableNumber(orderId, currentTable);
+            };
+        });
+        document.querySelectorAll('.btn-accept').forEach(btn => {
+            btn.onclick = () => acceptOrder(btn.getAttribute('data-id'));
+        });
+        document.querySelectorAll('.btn-complete').forEach(btn => {
+            btn.onclick = () => completeOrder(btn.getAttribute('data-id'));
+        });
+        document.querySelectorAll('.btn-pay').forEach(btn => {
+            btn.onclick = async () => {
+                const table = btn.getAttribute('data-table');
+                await closeTable(table === '?' ? null : table, true);
+            };
+        });
+    }
+
+    // Učitavanje svih narudžbi (za prikaz)
+    onValue(pendingRef, (snapshot) => {
+        const data = snapshot.val();
+        orders = [];
+        if (data) {
+            for (const [id, order] of Object.entries(data)) {
+                let itemsArray = order.items;
+                if (itemsArray && typeof itemsArray === 'object' && !Array.isArray(itemsArray)) itemsArray = Object.values(itemsArray);
+                orders.push({ id, ...order, items: itemsArray });
+            }
+        }
+        renderTables();
+        // Ne puštamo zvuk na svakoj promjeni, samo na novim narudžbama (onChildAdded)
+    });
+
+    // Zasebno osluškujemo samo dodavanje novih narudžbi (ne i promjenu statusa)
+    onChildAdded(pendingRef, (snapshot) => {
+        const newOrder = snapshot.val();
+        if (newOrder) {
+            playSound(); // samo kada stigne nova narudžba
+            showToast('Nova narudžba!');
+        }
+    });
+
+    // Toggle zvuka
+    const soundBtn = document.getElementById('soundToggleBtn');
+    soundBtn.onclick = () => {
+        soundEnabled = !soundEnabled;
+        soundBtn.innerHTML = soundEnabled ? '🔊 Zvuk uključen' : '🔇 Zvuk isključen';
+        if (soundEnabled) {
+            // Pokušaj reprodukovati test zvuk kako bi se "otključao" autoplay
+            audio.play().catch(e => console.log('Test zvuk blokiran, klikni bilo gdje'));
+        }
+    };
+</script>
+</body>
+</html>
