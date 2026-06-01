@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/hair-salon.html", "destination": "/hair-salon.html" },
+    { "source": "/catalog.html", "destination": "/catalog.html" },
+    { "source": "/:cafeId", "destination": "/index.html?cafe=:cafeId" }
+  ]
+}
