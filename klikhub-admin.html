@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KlikHub - Admin panel</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0F172A; color: white; padding: 2rem; }
+        .container { max-width: 600px; margin: 0 auto; background: #1e293b; padding: 2rem; border-radius: 1rem; }
+        label { display: block; margin-top: 1rem; font-weight: bold; }
+        input, textarea { width: 100%; padding: 0.5rem; margin-top: 0.25rem; border-radius: 0.5rem; border: none; }
+        button { margin-top: 1.5rem; background: #F97316; color: white; border: none; padding: 0.75rem; border-radius: 0.5rem; cursor: pointer; }
+        .status { margin-top: 1rem; color: #a5f3fc; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>KlikHub Postavke</h2>
+    <form id="settingsForm">
+        <label>Broj telefona (samo brojevi, npr. 38765803484)</label>
+        <input type="text" id="phone" required>
+
+        <label>Prikaz broja (npr. +387 65 803 484)</label>
+        <input type="text" id="phoneDisplay" required>
+
+        <label>Email adresa</label>
+        <input type="email" id="email" required>
+
+        <label>WhatsApp poruka (tekst koji ide u poruku)</label>
+        <textarea id="whatsappMessage" rows="3"></textarea>
+
+        <label>Naslov (Hero title)</label>
+        <input type="text" id="heroTitle">
+
+        <label>Podnaslov (tagline)</label>
+        <input type="text" id="tagline">
+
+        <label>Opis (hero description)</label>
+        <textarea id="heroDescription" rows="3"></textarea>
+
+        <button type="submit">Sačuvaj postavke</button>
+        <div id="status" class="status"></div>
+    </form>
+</div>
+
+<script type="importmap">
+    {
+        "imports": {
+            "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+            "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+        }
+    }
+</script>
+<script type="module">
+    import { initializeApp } from 'firebase/app';
+    import { getDatabase, ref, get, set, update } from 'firebase/database';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyALY3oKvPW_mDZiaBl0EdFCkTjd6fqwisQ",
+        authDomain: "kelt-pub-menu-2df61.firebaseapp.com",
+        databaseURL: "https://kelt-pub-menu-2df61-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "kelt-pub-menu-2df61",
+        storageBucket: "kelt-pub-menu-2df61.firebasestorage.app"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const settingsRef = ref(db, 'klikhub/settings');
+
+    // Provjera lozinke (jednostavna, možeš promijeniti)
+    const adminPass = prompt('Unesite admin šifru:');
+    if (adminPass !== 'klikhub2026') {
+        document.body.innerHTML = '<h2 style="color:red;">Neovlašten pristup</h2>';
+        throw new Error('Unauthorized');
+    }
+
+    async function loadSettings() {
+        const snapshot = await get(settingsRef);
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            document.getElementById('phone').value = data.phone || '';
+            document.getElementById('phoneDisplay').value = data.phoneDisplay || '';
+            document.getElementById('email').value = data.email || '';
+            document.getElementById('whatsappMessage').value = data.whatsappMessage || '';
+            document.getElementById('heroTitle').value = data.heroTitle || '';
+            document.getElementById('tagline').value = data.tagline || '';
+            document.getElementById('heroDescription').value = data.heroDescription || '';
+        }
+    }
+
+    document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const updated = {
+            phone: document.getElementById('phone').value.trim(),
+            phoneDisplay: document.getElementById('phoneDisplay').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            whatsappMessage: document.getElementById('whatsappMessage').value.trim(),
+            heroTitle: document.getElementById('heroTitle').value.trim(),
+            tagline: document.getElementById('tagline').value.trim(),
+            heroDescription: document.getElementById('heroDescription').value.trim()
+        };
+        try {
+            await set(settingsRef, updated);
+            document.getElementById('status').innerText = '✅ Postavke sačuvane!';
+        } catch (err) {
+            document.getElementById('status').innerText = '❌ Greška: ' + err.message;
+        }
+    });
+
+    loadSettings();
+</script>
+</body>
+</html>
