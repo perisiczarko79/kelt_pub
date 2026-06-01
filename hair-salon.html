@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Frizerski salon - Rezervacije termina</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: #f5efe7;
+            color: #2c2c2c;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: #8b5a2b;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.8rem; margin-bottom: 5px; }
+        .mode-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 16px 20px 0;
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            background: #e0d6cc;
+            border: none;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .mode-btn.active {
+            background: #8b5a2b;
+            color: white;
+        }
+        .panel {
+            padding: 24px;
+            display: none;
+        }
+        .panel.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+        }
+        button {
+            background: #8b5a2b;
+            color: white;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover { background: #6b4420; }
+        .time-slots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .time-btn {
+            background: #e9e9e9;
+            color: #333;
+            width: auto;
+            padding: 8px 16px;
+            border-radius: 40px;
+        }
+        .time-btn.free {
+            background: #c8e6d9;
+            color: #1e4a2f;
+        }
+        .time-btn.booked {
+            background: #ffcdd2;
+            color: #b71c1c;
+            text-decoration: line-through;
+            cursor: not-allowed;
+        }
+        .time-btn.selected {
+            background: #8b5a2b;
+            color: white;
+        }
+        .reservation-card {
+            background: #f9f3ec;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 6px solid #8b5a2b;
+        }
+        .reservation-card.canceled { border-left-color: #999; opacity: 0.7; }
+        .reservation-card.confirmed { border-left-color: #2e7d32; }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status-pending { background: #ffb74d; color: #5d2e00; }
+        .status-confirmed { background: #81c784; color: #1b5e20; }
+        .status-canceled { background: #ccc; color: #333; }
+        .admin-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        .admin-actions button {
+            width: auto;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c2c2c;
+            color: #ffd966;
+            padding: 12px 24px;
+            border-radius: 40px;
+            z-index: 1000;
+            animation: fadeOut 3s forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 24px;
+            max-width: 300px;
+            width: 90%;
+            text-align: center;
+        }
+        .footer-motto {
+            text-align: center;
+            padding: 12px;
+            font-size: 12px;
+            color: #aaa;
+            cursor: pointer;
+            border-top: 1px solid #eee;
+        }
+        @media (max-width: 600px) {
+            .container { margin: 0; border-radius: 0; }
+            .time-btn { padding: 6px 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <div class="header">
+        <h1>✂️ Frizerski salon</h1>
+        <p>Rezervišite termin online</p>
+    </div>
+    <div class="mode-buttons">
+        <button id="clientModeBtn" class="mode-btn active">📅 Rezerviši termin</button>
+        <button id="adminModeBtn" class="mode-btn">🔐 Admin panel</button>
+    </div>
+
+    <!-- KLIJENT PANEL -->
+    <div id="clientPanel" class="panel active">
+        <form id="reservationForm">
+            <div class="form-group">
+                <label>📅 Datum</label>
+                <input type="date" id="datePicker" required>
+            </div>
+            <div class="form-group">
+                <label>✂️ Usluga</label>
+                <select id="serviceSelect" required>
+                    <option value="Muško šišanje">Muško šišanje (30 min)</option>
+                    <option value="Žensko šišanje">Žensko šišanje (30 min)</option>
+                    <option value="Šišanje + brada">Šišanje + brada (30 min)</option>
+                    <option value="Feniranje">Feniranje (30 min)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>⏰ Odaberi termin</label>
+                <div id="timeSlots" class="time-slots">Učitavanje...</div>
+            </div>
+            <div class="form-group">
+                <label>👤 Ime i prezime</label>
+                <input type="text" id="clientName" required placeholder="npr. Marko Marković">
+            </div>
+            <div class="form-group">
+                <label>📞 Broj telefona</label>
+                <input type="tel" id="clientPhone" required placeholder="061 123 456">
+            </div>
+            <button type="submit">✅ Rezerviši termin</button>
+        </form>
+    </div>
+
+    <!-- ADMIN PANEL (sakriven na početku) -->
+    <div id="adminPanel" class="panel">
+        <div class="form-group">
+            <label>📅 Datum za pregled</label>
+            <input type="date" id="adminDatePicker">
+            <button id="refreshAdminBtn" style="margin-top: 8px;">🔄 Prikaži rezervacije</button>
+        </div>
+        <div id="adminReservationsList"></div>
+        <div class="footer-motto" id="adminMotto">❖ ❖ ❖ (klik za admin postavke)</div>
+    </div>
+</div>
+
+<script type="importmap">
+    {
+        "imports": {
+            "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+            "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+        }
+    }
+</script>
+<script type="module">
+    import { initializeApp } from 'firebase/app';
+    import { getDatabase, ref, onValue, push, set, update, get } from 'firebase/database';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyALY3oKvPW_mDZiaBl0EdFCkTjd6fqwisQ",
+        authDomain: "kelt-pub-menu-2df61.firebaseapp.com",
+        databaseURL: "https://kelt-pub-menu-2df61-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "kelt-pub-menu-2df61",
+        storageBucket: "kelt-pub-menu-2df61.firebasestorage.app",
+        messagingSenderId: "1026702086011",
+        appId: "1:1026702086011:web:8162de6bad4f18b731b7de"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const reservationsRef = ref(db, 'hairSalon/reservations');
+    const settingsRef = ref(db, 'hairSalon/settings');
+
+    // Radno vrijeme: 09:00 - 20:00, slotovi 30 min
+    const WORK_START = 9;
+    const WORK_END = 20;
+    const SLOT_MINUTES = 30;
+    function generateTimeSlots() {
+        const slots = [];
+        for (let hour = WORK_START; hour < WORK_END; hour++) {
+            for (let min = 0; min < 60; min += SLOT_MINUTES) {
+                const time = `${hour.toString().padStart(2,'0')}:${min.toString().padStart(2,'0')}`;
+                slots.push(time);
+            }
+        }
+        return slots;
+    }
+    const ALL_SLOTS = generateTimeSlots();
+
+    let isAdminLoggedIn = false;
+    let currentAdminPassword = 'salon123'; // default, može se promijeniti
+
+    // Učitaj admin šifru iz Firebase
+    async function loadAdminPassword() {
+        const snap = await get(settingsRef);
+        if (snap.exists() && snap.val().adminPassword) {
+            currentAdminPassword = snap.val().adminPassword;
+        } else {
+            await set(settingsRef, { adminPassword: currentAdminPassword });
+        }
+    }
+    loadAdminPassword();
+
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // ---------- KLIJENT ----------
+    let selectedTime = null;
+    let currentBookedTimes = []; // list of times that are already reserved (status pending or confirmed) for selected date
+
+    async function loadReservationsForDate(date) {
+        const snapshot = await get(reservationsRef);
+        const all = snapshot.val();
+        const reservations = [];
+        if (all) {
+            for (let [id, res] of Object.entries(all)) {
+                if (res.date === date && (res.status === 'pending' || res.status === 'confirmed')) {
+                    reservations.push(res.time);
+                }
+            }
+        }
+        return reservations;
+    }
+
+    async function renderTimeSlots() {
+        const date = document.getElementById('datePicker').value;
+        if (!date) {
+            document.getElementById('timeSlots').innerHTML = '<span>Odaberite datum</span>';
+            return;
+        }
+        const booked = await loadReservationsForDate(date);
+        currentBookedTimes = booked;
+        const container = document.getElementById('timeSlots');
+        container.innerHTML = '';
+        ALL_SLOTS.forEach(time => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'time-btn';
+            btn.textContent = time;
+            if (booked.includes(time)) {
+                btn.classList.add('booked');
+                btn.disabled = true;
+            } else {
+                btn.classList.add('free');
+                btn.onclick = () => {
+                    // ukloni prethodni selected
+                    document.querySelectorAll('.time-btn.selected').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedTime = time;
+                };
+            }
+            container.appendChild(btn);
+        });
+    }
+
+    document.getElementById('datePicker').addEventListener('change', renderTimeSlots);
+    document.getElementById('serviceSelect').addEventListener('change', () => {});
+    // inicijalno postavi danasnji datum
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('datePicker').value = today;
+    renderTimeSlots();
+
+    document.getElementById('reservationForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const date = document.getElementById('datePicker').value;
+        const service = document.getElementById('serviceSelect').value;
+        const name = document.getElementById('clientName').value.trim();
+        const phone = document.getElementById('clientPhone').value.trim();
+        if (!selectedTime) { showToast('Odaberite termin.'); return; }
+        if (!name || !phone) { showToast('Unesite ime i broj telefona.'); return; }
+        // provjera da li je termin i dalje slobodan (double-check)
+        const bookedNow = await loadReservationsForDate(date);
+        if (bookedNow.includes(selectedTime)) {
+            showToast('Termin je upravo rezervisan. Molimo odaberite drugi.');
+            renderTimeSlots();
+            return;
+        }
+        const newResRef = push(reservationsRef);
+        await set(newResRef, {
+            date,
+            time: selectedTime,
+            service,
+            clientName: name,
+            clientPhone: phone,
+            status: 'pending',
+            createdAt: Date.now()
+        });
+        showToast(`Rezervacija poslana! Termin: ${date} u ${selectedTime}. Čekamo potvrdu salona.`);
+        document.getElementById('reservationForm').reset();
+        document.getElementById('datePicker').value = today;
+        selectedTime = null;
+        renderTimeSlots();
+        document.getElementById('clientName').value = '';
+        document.getElementById('clientPhone').value = '';
+    });
+
+    // ---------- ADMIN ----------
+    let adminModeActive = false;
+    function showAdminLogin() {
+        const overlay = document.createElement('div');
+        overlay.className = 'login-overlay';
+        overlay.innerHTML = `
+            <div class="login-box">
+                <h3>Admin prijava</h3>
+                <input type="password" id="adminPassInput" placeholder="Šifra" style="margin: 15px 0; width:100%;">
+                <button id="adminLoginBtn">Prijavi se</button>
+                <button id="adminLoginClose" style="background:#aaa; margin-top:8px;">Otkaži</button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        document.getElementById('adminLoginBtn').onclick = async () => {
+            const pass = document.getElementById('adminPassInput').value;
+            if (pass === currentAdminPassword) {
+                isAdminLoggedIn = true;
+                overlay.remove();
+                adminModeActive = true;
+                document.getElementById('adminPanel').classList.add('active');
+                document.getElementById('clientPanel').classList.remove('active');
+                document.getElementById('adminModeBtn').classList.add('active');
+                document.getElementById('clientModeBtn').classList.remove('active');
+                document.getElementById('adminDatePicker').value = today;
+                await loadAdminReservations();
+            } else {
+                alert('Pogrešna šifra');
+            }
+        };
+        document.getElementById('adminLoginClose').onclick = () => overlay.remove();
+    }
+
+    async function loadAdminReservations() {
+        const date = document.getElementById('adminDatePicker').value;
+        if (!date) return;
+        const snapshot = await get(reservationsRef);
+        const all = snapshot.val();
+        const list = [];
+        if (all) {
+            for (let [id, res] of Object.entries(all)) {
+                if (res.date === date) {
+                    list.push({ id, ...res });
+                }
+            }
+        }
+        list.sort((a,b) => a.time.localeCompare(b.time));
+        const container = document.getElementById('adminReservationsList');
+        if (list.length === 0) {
+            container.innerHTML = '<p>Nema rezervacija za ovaj datum.</p>';
+            return;
+        }
+        container.innerHTML = '';
+        for (let res of list) {
+            const statusClass = res.status === 'pending' ? 'status-pending' : (res.status === 'confirmed' ? 'status-confirmed' : 'status-canceled');
+            const statusText = res.status === 'pending' ? 'Na čekanju' : (res.status === 'confirmed' ? 'Potvrđeno' : 'Otkazano');
+            const div = document.createElement('div');
+            div.className = `reservation-card ${res.status === 'canceled' ? 'canceled' : (res.status === 'confirmed' ? 'confirmed' : '')}`;
+            div.innerHTML = `
+                <div><strong>${res.time}</strong> - ${res.service} <span class="status-badge ${statusClass}">${statusText}</span></div>
+                <div>👤 ${escapeHtml(res.clientName)}</div>
+                <div>📞 ${escapeHtml(res.clientPhone)}</div>
+                <div class="admin-actions">
+                    ${res.status !== 'confirmed' ? `<button class="confirm-btn" data-id="${res.id}">✅ Potvrdi</button>` : ''}
+                    ${res.status !== 'canceled' ? `<button class="cancel-btn" data-id="${res.id}">❌ Otkaži</button>` : ''}
+                </div>
+            `;
+            container.appendChild(div);
+        }
+        document.querySelectorAll('.confirm-btn').forEach(btn => {
+            btn.onclick = async () => {
+                const id = btn.getAttribute('data-id');
+                await update(ref(db, `hairSalon/reservations/${id}`), { status: 'confirmed' });
+                showToast('Termin potvrđen.');
+                loadAdminReservations();
+            };
+        });
+        document.querySelectorAll('.cancel-btn').forEach(btn => {
+            btn.onclick = async () => {
+                const id = btn.getAttribute('data-id');
+                await update(ref(db, `hairSalon/reservations/${id}`), { status: 'canceled' });
+                showToast('Termin otkazan.');
+                loadAdminReservations();
+            };
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+    }
+
+    // Admin postavke (promjena šifre)
+    async function showAdminSettings() {
+        const newPass = prompt('Unesite novu admin šifru:', currentAdminPassword);
+        if (newPass && newPass.trim()) {
+            await update(settingsRef, { adminPassword: newPass.trim() });
+            currentAdminPassword = newPass.trim();
+            showToast('Šifra promijenjena.');
+        }
+    }
+
+    document.getElementById('adminModeBtn').onclick = () => {
+        if (!isAdminLoggedIn) {
+            showAdminLogin();
+        } else {
+            adminModeActive = true;
+            document.getElementById('adminPanel').classList.add('active');
+            document.getElementById('clientPanel').classList.remove('active');
+            document.getElementById('adminModeBtn').classList.add('active');
+            document.getElementById('clientModeBtn').classList.remove('active');
+            loadAdminReservations();
+        }
+    };
+    document.getElementById('clientModeBtn').onclick = () => {
+        adminModeActive = false;
+        document.getElementById('clientPanel').classList.add('active');
+        document.getElementById('adminPanel').classList.remove('active');
+        document.getElementById('clientModeBtn').classList.add('active');
+        document.getElementById('adminModeBtn').classList.remove('active');
+    };
+    document.getElementById('refreshAdminBtn').onclick = () => loadAdminReservations();
+    document.getElementById('adminDatePicker').addEventListener('change', loadAdminReservations);
+    document.getElementById('adminMotto').onclick = () => {
+        if (isAdminLoggedIn) showAdminSettings();
+        else showToast('Prvo se prijavite kao admin.');
+    };
+    // Ako je admin već logovan (npr. nakon refresha stranice) - ne čuvamo stanje, pa će ponovo tražiti. Može se dodati sessionStorage, ali za osnovnu verziju nije potrebno.
+</script>
+</body>
+</html>
