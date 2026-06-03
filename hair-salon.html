@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>KlikHub - Frizerski salon | Online rezervacije</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0F172A;
+            color: #F1F5F9;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #1E293B;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .header {
+            background: #8b5a2b;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.8rem; margin-bottom: 5px; }
+        .mode-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 16px 20px 0;
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            background: #334155;
+            border: none;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: 0.2s;
+        }
+        .mode-btn.active {
+            background: #F97316;
+            color: white;
+        }
+        .panel {
+            padding: 24px;
+            display: none;
+        }
+        .panel.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #475569;
+            font-size: 1rem;
+            background: #0F172A;
+            color: white;
+        }
+        button {
+            background: #F97316;
+            color: white;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover { background: #FB923C; transform: translateY(-2px); }
+        button:disabled {
+            background: #6B7280;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .time-slots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .time-btn {
+            background: #334155;
+            color: white;
+            width: auto;
+            padding: 8px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .time-btn.free { background: #2E7D32; }
+        .time-btn.pending { background: #F59E0B; color: #1a2a1f; cursor: not-allowed; }
+        .time-btn.confirmed { background: #B91C1C; cursor: not-allowed; opacity: 0.8; text-decoration: line-through; }
+        .time-btn.blocked { background: #6B7280; cursor: not-allowed; opacity: 0.6; }
+        .time-btn.selected { background: #F97316; color: white; }
+        .reservation-card {
+            background: #0F172A;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 6px solid #F97316;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status-pending { background: #F59E0B; color: #1a2a1f; }
+        .status-confirmed { background: #2E7D32; color: white; }
+        .admin-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .admin-actions button {
+            width: auto;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1E293B;
+            color: #F97316;
+            padding: 12px 24px;
+            border-radius: 40px;
+            z-index: 1000;
+            animation: fadeOut 3s forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .login-box {
+            background: #1E293B;
+            padding: 30px;
+            border-radius: 24px;
+            max-width: 300px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid #F97316;
+        }
+        .section-title {
+            font-size: 1.2rem;
+            margin: 20px 0 10px;
+            color: #F97316;
+        }
+        .pending-section {
+            background: rgba(249,115,22,0.15);
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 600px) {
+            .container { border-radius: 0; }
+            .time-btn { padding: 6px 12px; }
+        }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+                "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="container" id="app">
+    <div class="header">
+        <h1>✂️ Frizerski salon</h1>
+        <p>Online rezervacije termina</p>
+    </div>
+    <div class="mode-buttons">
+        <button id="clientModeBtn" class="mode-btn active">📅 Rezerviši termin</button>
+        <button id="adminModeBtn" class="mode-btn">🔐 Admin panel</button>
+    </div>
+
+    <!-- KLIJENT PANEL -->
+    <div id="clientPanel" class="panel active">
+        <form id="reservationForm">
+            <div class="form-group">
+                <label>📅 Datum</label>
+                <input type="date" id="datePicker" required>
+            </div>
+            <div class="form-group">
+                <label>✂️ Usluga</label>
+                <select id="serviceSelect" required></select>
+            </div>
+            <div class="form-group">
+                <label>⏰ Odaberi termin</label>
+                <div id="timeSlots" class="time-slots">Učitavanje...</div>
+            </div>
+            <div class="form-group">
+                <label>👤 Ime i prezime</label>
+                <input type="text" id="clientName" required placeholder="npr. Marko Marković">
+            </div>
+            <div class="form-group">
+                <label>📞 Broj telefona</label>
+                <input type="tel" id="clientPhone" required placeholder="061 123 456">
+            </div>
+            <button type="submit">✅ Rezerviši termin</button>
+        </form>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="adminPanel" class="panel">
+        <div class="form-group">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+                <button id="changePasswordBtnAdmin" style="background:#555;">🔐 Promijeni šifru</button>
+            </div>
+            <div class="section-title">🔒 Blokiraj termin (odaberi datum i klikni na slobodan termin)</div>
+            <label>📅 Datum za blokiranje</label>
+            <input type="date" id="adminBlockDatePicker" required>
+            <div id="adminTimeSlots" class="time-slots">Odaberite datum</div>
+        </div>
+
+        <div id="pendingReservationsSection" class="pending-section">
+            <div class="section-title" style="margin-top:0;">🆕 Nove rezervacije (na čekanju)</div>
+            <div id="pendingReservationsList"></div>
+        </div>
+
+        <div class="section-title">📋 Sve rezervacije (potvrđene, buduće)</div>
+        <div id="allReservationsList"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from 'firebase/app';
+    import { getDatabase, ref, get, set, push, update, remove } from 'firebase/database';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyALY3oKvPW_mDZiaBl0EdFCkTjd6fqwisQ",
+        authDomain: "kelt-pub-menu-2df61.firebaseapp.com",
+        databaseURL: "https://kelt-pub-menu-2df61-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "kelt-pub-menu-2df61",
+        storageBucket: "kelt-pub-menu-2df61.firebasestorage.app"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let salonId = null;
+    function getSalonIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        let id = params.get('salon');
+        if (!id) {
+            id = prompt('Unesite ID salona (npr. gradski_salon):');
+            if (id) window.history.replaceState({}, '', `?salon=${encodeURIComponent(id)}`);
+            else throw new Error('Missing salon ID');
+        }
+        return id;
+    }
+    try { salonId = getSalonIdFromUrl(); }
+    catch(e) { document.body.innerHTML = '<div style="text-align:center;margin-top:50px;">Greška: nedostaje ID salona.</div>'; throw e; }
+
+    const reservationsRef = ref(db, `hairSalons/${salonId}/reservations`);
+    const settingsRef = ref(db, `hairSalons/${salonId}/settings`);
+    const blockedSlotsRef = ref(db, `hairSalons/${salonId}/blockedSlots`);
+    const servicesRef = ref(db, `hairSalons/${salonId}/services`);
+    const workingHoursRef = ref(db, `hairSalons/${salonId}/settings/workingHours`);
+
+    let servicesList = [];
+    let workingHours = {};
+    let slotInterval = 30;
+
+    async function loadServices() {
+        const snap = await get(servicesRef);
+        if (snap.exists() && Array.isArray(snap.val())) {
+            servicesList = snap.val();
+        } else {
+            servicesList = [
+                { name: "Muško šišanje", duration: 30 },
+                { name: "Žensko šišanje", duration: 30 },
+                { name: "Šišanje + brada", duration: 45 },
+                { name: "Feniranje", duration: 30 }
+            ];
+            await set(servicesRef, servicesList);
+        }
+        const select = document.getElementById('serviceSelect');
+        select.innerHTML = '';
+        servicesList.forEach(service => {
+            const option = document.createElement('option');
+            option.value = service.name;
+            option.textContent = `${service.name} (${service.duration} min)`;
+            option.setAttribute('data-duration', service.duration);
+            select.appendChild(option);
+        });
+    }
+
+    async function loadWorkingHours() {
+        const snap = await get(workingHoursRef);
+        if (snap.exists()) {
+            workingHours = snap.val();
+        } else {
+            workingHours = {
+                monday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                tuesday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                wednesday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                thursday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                friday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                saturday: { enabled: true, intervals: [{ start: "09:00", end: "15:00" }] },
+                sunday: { enabled: false, intervals: [] }
+            };
+            await set(workingHoursRef, workingHours);
+        }
+    }
+
+    async function loadSlotInterval() {
+        const snap = await get(settingsRef);
+        if (snap.exists() && snap.val().slotInterval) {
+            slotInterval = snap.val().slotInterval;
+        } else {
+            slotInterval = 30;
+            await update(settingsRef, { slotInterval });
+        }
+    }
+
+    function getTimeSlotsForDate(date) {
+        const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        const dateObj = new Date(date);
+        const dayOfWeek = dayNames[dateObj.getDay()];
+        const dayData = workingHours[dayOfWeek];
+        if (!dayData || !dayData.enabled) return [];
+        const slots = [];
+        for (let interval of dayData.intervals) {
+            let [startHour, startMin] = interval.start.split(':').map(Number);
+            let [endHour, endMin] = interval.end.split(':').map(Number);
+            let startTotal = startHour * 60 + startMin;
+            let endTotal = endHour * 60 + endMin;
+            for (let time = startTotal; time < endTotal; time += slotInterval) {
+                let hour = Math.floor(time / 60);
+                let minute = time % 60;
+                slots.push(`${hour.toString().padStart(2,'0')}:${minute.toString().padStart(2,'0')}`);
+            }
+        }
+        return slots;
+    }
+
+    function getSlotsToBlock(startTime, durationMinutes) {
+        const slots = [];
+        let current = startTime;
+        let remaining = durationMinutes;
+        while (remaining > 0) {
+            slots.push(current);
+            let [hour, minute] = current.split(':').map(Number);
+            let totalMinutes = hour * 60 + minute + slotInterval;
+            let newHour = Math.floor(totalMinutes / 60);
+            let newMinute = totalMinutes % 60;
+            current = `${newHour.toString().padStart(2,'0')}:${newMinute.toString().padStart(2,'0')}`;
+            remaining -= slotInterval;
+        }
+        return slots;
+    }
+
+    let isAdminLoggedIn = false;
+    let currentAdminPassword = 'salon123';
+
+    async function loadAdminPassword() {
+        const snap = await get(settingsRef);
+        if (snap.exists() && snap.val().adminPassword) {
+            currentAdminPassword = snap.val().adminPassword;
+        } else {
+            await set(settingsRef, { adminPassword: currentAdminPassword });
+        }
+    }
+    loadAdminPassword();
+
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const [year, month, day] = dateStr.split('-');
+        return `${day}.${month}.${year}.`;
+    }
+
+    async function deleteExpiredReservations() {
+        const now = new Date();
+        const snapshot = await get(reservationsRef);
+        const all = snapshot.val() || {};
+        let deleted = false;
+        for (const [id, res] of Object.entries(all)) {
+            if (res.status === 'canceled') {
+                await remove(ref(db, `hairSalons/${salonId}/reservations/${id}`));
+                deleted = true;
+                continue;
+            }
+            const [year, month, day] = res.date.split('-');
+            const [hour, minute] = res.time.split(':');
+            const resDateTime = new Date(year, month-1, day, hour, minute);
+            if (resDateTime < now) {
+                await remove(ref(db, `hairSalons/${salonId}/reservations/${id}`));
+                deleted = true;
+            }
+        }
+        if (deleted && isAdminLoggedIn) {
+            loadAllReservations();
+            if (document.getElementById('adminBlockDatePicker').value) {
+                renderAdminTimeSlots();
+            }
+        }
+    }
+    setInterval(deleteExpiredReservations, 3600000);
+    deleteExpiredReservations();
+
+    let selectedTime = null;
+
+    async function loadBlockedSlotsForDate(date) {
+        const blockedRef = ref(db, `hairSalons/${salonId}/blockedSlots/${date}`);
+        const snap = await get(blockedRef);
+        if (snap.exists()) return Object.keys(snap.val());
+        return [];
+    }
+
+    // Return object with pendingSlots and confirmedSlots for a given date
+    async function loadReservationsForDate(date) {
+        const snapshot = await get(reservationsRef);
+        const all = snapshot.val() || {};
+        const pending = [];
+        const confirmed = [];
+        for (const [id, res] of Object.entries(all)) {
+            if (res.date === date) {
+                const duration = res.duration || servicesList.find(s => s.name === res.service)?.duration || 30;
+                const slots = getSlotsToBlock(res.time, duration);
+                if (res.status === 'pending') {
+                    pending.push(...slots);
+                } else if (res.status === 'confirmed') {
+                    confirmed.push(...slots);
+                }
+            }
+        }
+        return { pending: [...new Set(pending)], confirmed: [...new Set(confirmed)] };
+    }
+
+    async function renderTimeSlots() {
+        const date = document.getElementById('datePicker').value;
+        if (!date) {
+            document.getElementById('timeSlots').innerHTML = '<span>Odaberite datum</span>';
+            return;
+        }
+        const { pending, confirmed } = await loadReservationsForDate(date);
+        const blocked = await loadBlockedSlotsForDate(date);
+        const availableSlots = getTimeSlotsForDate(date);
+        const container = document.getElementById('timeSlots');
+        container.innerHTML = '';
+        availableSlots.forEach(time => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'time-btn';
+            btn.textContent = time;
+            if (blocked.includes(time)) {
+                btn.classList.add('blocked');
+                btn.disabled = true;
+            } else if (confirmed.includes(time)) {
+                btn.classList.add('confirmed');
+                btn.disabled = true;
+            } else if (pending.includes(time)) {
+                btn.classList.add('pending');
+                btn.disabled = true;
+            } else {
+                btn.classList.add('free');
+                btn.onclick = () => {
+                    document.querySelectorAll('.time-btn.selected').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedTime = time;
+                };
+            }
+            container.appendChild(btn);
+        });
+        if (availableSlots.length === 0) {
+            container.innerHTML = '<span>Nema slobodnih termina za odabrani datum (neradni dan ili van radnog vremena).</span>';
+        }
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('datePicker').value = today;
+    document.getElementById('datePicker').min = today;
+    await loadServices();
+    await loadWorkingHours();
+    await loadSlotInterval();
+    renderTimeSlots();
+
+    document.getElementById('datePicker').addEventListener('change', renderTimeSlots);
+    document.getElementById('serviceSelect').addEventListener('change', () => {
+        if (selectedTime) {
+            selectedTime = null;
+            renderTimeSlots();
+        }
+    });
+
+    document.getElementById('reservationForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const date = document.getElementById('datePicker').value;
+        const serviceSelect = document.getElementById('serviceSelect');
+        const serviceName = serviceSelect.value;
+        const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+        const duration = parseInt(selectedOption.getAttribute('data-duration'));
+        const name = document.getElementById('clientName').value.trim();
+        const phone = document.getElementById('clientPhone').value.trim();
+        if (!selectedTime) { showToast('Odaberite termin.'); return; }
+        if (!name || !phone) { showToast('Unesite ime i broj telefona.'); return; }
+
+        const slotsToOccupy = getSlotsToBlock(selectedTime, duration);
+        const { pending, confirmed } = await loadReservationsForDate(date);
+        const blocked = await loadBlockedSlotsForDate(date);
+        const isFree = slotsToOccupy.every(slot => !pending.includes(slot) && !confirmed.includes(slot) && !blocked.includes(slot));
+        if (!isFree) {
+            showToast('Termin nije slobodan za odabranu uslugu (trajanje).');
+            renderTimeSlots();
+            return;
+        }
+
+        const newRef = push(reservationsRef);
+        await set(newRef, {
+            date, time: selectedTime, service: serviceName, duration,
+            clientName: name, clientPhone: phone,
+            status: 'pending', createdAt: Date.now()
+        });
+        showToast(`Rezervacija poslana! Termin: ${formatDate(date)} u ${selectedTime} (trajanje ${duration} min).`);
+        document.getElementById('reservationForm').reset();
+        document.getElementById('datePicker').value = today;
+        selectedTime = null;
+        renderTimeSlots();
+        if (isAdminLoggedIn) {
+            loadAllReservations();
+            if (document.getElementById('adminBlockDatePicker').value === date) {
+                renderAdminTimeSlots();
+            }
+        }
+    });
+
+    function showAdminLogin() {
+        const overlay = document.createElement('div');
+        overlay.className = 'login-overlay';
+        overlay.innerHTML = `
+            <div class="login-box">
+                <h3>Admin prijava</h3>
+                <input type="password" id="adminPassInput" placeholder="Šifra" style="margin: 15px 0; width:100%;">
+                <button id="adminLoginBtn">Prijavi se</button>
+                <button id="adminLoginClose" style="background:#aaa; margin-top:8px;">Otkaži</button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        document.getElementById('adminLoginBtn').onclick = async () => {
+            const pass = document.getElementById('adminPassInput').value;
+            if (pass === currentAdminPassword) {
+                isAdminLoggedIn = true;
+                overlay.remove();
+                document.getElementById('adminPanel').classList.add('active');
+                document.getElementById('clientPanel').classList.remove('active');
+                document.getElementById('adminModeBtn').classList.add('active');
+                document.getElementById('clientModeBtn').classList.remove('active');
+                document.getElementById('adminBlockDatePicker').value = today;
+                await renderAdminTimeSlots();
+                await loadAllReservations();
+            } else {
+                alert('Pogrešna šifra');
+            }
+        };
+        document.getElementById('adminLoginClose').onclick = () => overlay.remove();
+    }
+
+    async function renderAdminTimeSlots() {
+        const date = document.getElementById('adminBlockDatePicker').value;
+        if (!date) {
+            document.getElementById('adminTimeSlots').innerHTML = '<span>Odaberite datum</span>';
+            return;
+        }
+        const { pending, confirmed } = await loadReservationsForDate(date);
+        const blocked = await loadBlockedSlotsForDate(date);
+        const availableSlots = getTimeSlotsForDate(date);
+        const container = document.getElementById('adminTimeSlots');
+        container.innerHTML = '';
+        availableSlots.forEach(time => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'time-btn';
+            btn.textContent = time;
+            if (blocked.includes(time)) {
+                btn.classList.add('blocked');
+                btn.disabled = true;
+            } else if (confirmed.includes(time)) {
+                btn.classList.add('confirmed');
+                btn.disabled = true;
+            } else if (pending.includes(time)) {
+                btn.classList.add('pending');
+                btn.disabled = true;
+            } else {
+                btn.classList.add('free');
+                btn.onclick = async () => {
+                    if (confirm(`Blokirati termin ${formatDate(date)} u ${time}?`)) {
+                        await set(ref(db, `hairSalons/${salonId}/blockedSlots/${date}/${time}`), true);
+                        showToast(`Termin ${formatDate(date)} ${time} blokiran.`);
+                        renderAdminTimeSlots();
+                        loadAllReservations();
+                        if (document.getElementById('datePicker').value === date) renderTimeSlots();
+                    }
+                };
+            }
+            container.appendChild(btn);
+        });
+        if (availableSlots.length === 0) {
+            container.innerHTML = '<span>Nema radnih termina za ovaj datum.</span>';
+        }
+    }
+
+    document.getElementById('adminBlockDatePicker').addEventListener('change', () => {
+        if (isAdminLoggedIn) renderAdminTimeSlots();
+    });
+
+    function disableButton(btn, duration = 2000) {
+        if (!btn) return;
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = '⏳ Molimo sačekajte...';
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerText = originalText;
+        }, duration);
+    }
+
+    async function loadAllReservations() {
+        const snapshot = await get(reservationsRef);
+        const all = snapshot.val() || {};
+        const pendingList = [];
+        const otherList = [];
+        for (const [id, res] of Object.entries(all)) {
+            if (res.status === 'pending') {
+                pendingList.push({ id, ...res });
+            } else if (res.status === 'confirmed') {
+                otherList.push({ id, ...res });
+            }
+        }
+        pendingList.sort((a,b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
+        otherList.sort((a,b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
+
+        const pendingContainer = document.getElementById('pendingReservationsList');
+        if (pendingList.length === 0) {
+            pendingContainer.innerHTML = '<p>Nema novih rezervacija.</p>';
+        } else {
+            pendingContainer.innerHTML = '';
+            for (const res of pendingList) {
+                const dur = res.duration || 30;
+                const slots = getSlotsToBlock(res.time, dur);
+                const slotRange = slots.length === 1 ? res.time : `${res.time} - ${slots[slots.length-1]}`;
+                const div = document.createElement('div');
+                div.className = 'reservation-card';
+                div.innerHTML = `
+                    <div><strong>${formatDate(res.date)} ${slotRange}</strong> - ${res.service} (${dur} min) <span class="status-badge status-pending">Na čekanju</span></div>
+                    <div>👤 ${escapeHtml(res.clientName)}</div>
+                    <div>📞 ${escapeHtml(res.clientPhone)}</div>
+                    <div class="admin-actions">
+                        <button class="confirm-pending-btn" data-id="${res.id}">✅ Potvrdi</button>
+                        <button class="cancel-pending-btn" data-id="${res.id}">❌ Otkaži</button>
+                        <button class="block-pending-btn" data-id="${res.id}" data-date="${res.date}" data-time="${res.time}" data-duration="${dur}" style="background:#6B7280;">🔒 Blokiraj ovaj termin</button>
+                    </div>
+                `;
+                pendingContainer.appendChild(div);
+            }
+        }
+
+        const otherContainer = document.getElementById('allReservationsList');
+        if (otherList.length === 0) {
+            otherContainer.innerHTML = '<p>Nema potvrđenih rezervacija.</p>';
+        } else {
+            otherContainer.innerHTML = '';
+            for (const res of otherList) {
+                const dur = res.duration || 30;
+                const slots = getSlotsToBlock(res.time, dur);
+                const slotRange = slots.length === 1 ? res.time : `${res.time} - ${slots[slots.length-1]}`;
+                const div = document.createElement('div');
+                div.className = 'reservation-card';
+                div.innerHTML = `
+                    <div><strong>${formatDate(res.date)} ${slotRange}</strong> - ${res.service} (${dur} min) <span class="status-badge status-confirmed">Potvrđeno</span></div>
+                    <div>👤 ${escapeHtml(res.clientName)}</div>
+                    <div>📞 ${escapeHtml(res.clientPhone)}</div>
+                    <div class="admin-actions">
+                        <button class="cancel-other-btn" data-id="${res.id}">❌ Otkaži</button>
+                        <button class="block-other-btn" data-id="${res.id}" data-date="${res.date}" data-time="${res.time}" data-duration="${dur}" style="background:#6B7280;">🔒 Blokiraj ovaj termin</button>
+                    </div>
+                `;
+                otherContainer.appendChild(div);
+            }
+        }
+        attachAdminEvents();
+    }
+
+    function attachAdminEvents() {
+        document.querySelectorAll('.confirm-pending-btn').forEach(btn => {
+            btn.onclick = async (event) => {
+                const button = event.currentTarget;
+                disableButton(button, 2000);
+                const id = button.getAttribute('data-id');
+                await update(ref(db, `hairSalons/${salonId}/reservations/${id}`), { status: 'confirmed' });
+                showToast('Rezervacija potvrđena.');
+                loadAllReservations();
+                renderTimeSlots();
+                if (document.getElementById('adminBlockDatePicker').value) renderAdminTimeSlots();
+            };
+        });
+        document.querySelectorAll('.cancel-pending-btn, .cancel-other-btn').forEach(btn => {
+            btn.onclick = async (event) => {
+                const button = event.currentTarget;
+                disableButton(button, 2000);
+                const id = button.getAttribute('data-id');
+                await remove(ref(db, `hairSalons/${salonId}/reservations/${id}`));
+                showToast('Rezervacija otkazana i obrisana.');
+                loadAllReservations();
+                renderTimeSlots();
+                if (document.getElementById('adminBlockDatePicker').value) renderAdminTimeSlots();
+            };
+        });
+        document.querySelectorAll('.block-pending-btn, .block-other-btn').forEach(btn => {
+            btn.onclick = async (event) => {
+                const button = event.currentTarget;
+                disableButton(button, 2000);
+                const date = button.getAttribute('data-date');
+                const time = button.getAttribute('data-time');
+                const duration = parseInt(button.getAttribute('data-duration')) || 30;
+                const slots = getSlotsToBlock(time, duration);
+                if (confirm(`Blokirati termin ${formatDate(date)} (od ${time} u trajanju od ${duration} min)?`)) {
+                    for (let slot of slots) {
+                        await set(ref(db, `hairSalons/${salonId}/blockedSlots/${date}/${slot}`), true);
+                    }
+                    showToast(`Termin ${formatDate(date)} od ${time} blokiran.`);
+                    const id = button.getAttribute('data-id');
+                    if (id) await remove(ref(db, `hairSalons/${salonId}/reservations/${id}`));
+                    loadAllReservations();
+                    renderTimeSlots();
+                    if (document.getElementById('adminBlockDatePicker').value) renderAdminTimeSlots();
+                }
+            };
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+    }
+
+    async function changeAdminPassword() {
+        const oldPass = prompt('Unesite trenutnu admin šifru:');
+        if (!oldPass) return;
+        if (oldPass !== currentAdminPassword) { showToast('Pogrešna stara šifra.'); return; }
+        const newPass = prompt('Unesite novu admin šifru (minimum 4 znaka):');
+        if (newPass && newPass.trim().length >= 4) {
+            await update(settingsRef, { adminPassword: newPass.trim() });
+            currentAdminPassword = newPass.trim();
+            showToast('Šifra promijenjena.');
+        } else {
+            showToast('Šifra nije promijenjena (mora imati bar 4 znaka).');
+        }
+    }
+
+    document.getElementById('adminModeBtn').onclick = () => {
+        if (!isAdminLoggedIn) showAdminLogin();
+        else {
+            document.getElementById('adminPanel').classList.add('active');
+            document.getElementById('clientPanel').classList.remove('active');
+            document.getElementById('adminModeBtn').classList.add('active');
+            document.getElementById('clientModeBtn').classList.remove('active');
+            document.getElementById('adminBlockDatePicker').value = today;
+            renderAdminTimeSlots();
+            loadAllReservations();
+        }
+    };
+    document.getElementById('clientModeBtn').onclick = () => {
+        document.getElementById('clientPanel').classList.add('active');
+        document.getElementById('adminPanel').classList.remove('active');
+        document.getElementById('clientModeBtn').classList.add('active');
+        document.getElementById('adminModeBtn').classList.remove('active');
+        renderTimeSlots();
+    };
+    document.getElementById('changePasswordBtnAdmin').onclick = () => {
+        if (!isAdminLoggedIn) { showToast('Niste prijavljeni.'); return; }
+        changeAdminPassword();
+    };
+</script>
+</body>
+</html>
