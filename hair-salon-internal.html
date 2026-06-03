@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>KlikHub - Frizerski salon (Interni organizator)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0F172A;
+            color: #F1F5F9;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #1E293B;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .header {
+            background: #8b5a2b;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.8rem; margin-bottom: 5px; }
+        .sub {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .panel {
+            padding: 24px;
+        }
+        .section-title {
+            font-size: 1.3rem;
+            margin: 20px 0 15px;
+            color: #F97316;
+            border-left: 4px solid #F97316;
+            padding-left: 12px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #475569;
+            font-size: 1rem;
+            background: #0F172A;
+            color: white;
+        }
+        button {
+            background: #F97316;
+            color: white;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover { background: #FB923C; transform: translateY(-2px); }
+        button:disabled {
+            background: #6B7280;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .time-slots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .time-btn {
+            background: #334155;
+            color: white;
+            width: auto;
+            padding: 8px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .time-btn.free { background: #2E7D32; }
+        .time-btn.pending { background: #F59E0B; cursor: not-allowed; }
+        .time-btn.confirmed { background: #B91C1C; cursor: not-allowed; opacity: 0.8; text-decoration: line-through; }
+        .time-btn.blocked { background: #6B7280; cursor: not-allowed; opacity: 0.6; }
+        .time-btn.selected { background: #F97316; color: white; }
+        .reservation-card {
+            background: #0F172A;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 6px solid #F97316;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status-pending { background: #F59E0B; color: #1a2a1f; }
+        .status-confirmed { background: #2E7D32; color: white; }
+        .status-completed { background: #3B82F6; color: white; }
+        .admin-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .admin-actions button {
+            width: auto;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1E293B;
+            color: #F97316;
+            padding: 12px 24px;
+            border-radius: 40px;
+            z-index: 1000;
+            animation: fadeOut 3s forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .login-box {
+            background: #1E293B;
+            padding: 30px;
+            border-radius: 24px;
+            max-width: 300px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid #F97316;
+        }
+        .flex-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .modal-content {
+            background: #1E293B;
+            max-width: 800px;
+            width: 100%;
+            padding: 24px;
+            border-radius: 24px;
+            border: 1px solid #F97316;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-content input, .modal-content select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 16px;
+            background: #0F172A;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            color: white;
+        }
+        .service-item, .interval-item {
+            background: #0F172A;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .service-item input {
+            flex: 1;
+            margin: 0;
+            min-width: 150px;
+        }
+        .service-item .remove-service {
+            background: #DC2626;
+            padding: 8px 12px;
+            border-radius: 40px;
+        }
+        .day-row {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 12px;
+        }
+        .day-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .day-header label { font-weight: bold; width: 100px; }
+        .intervals-container {
+            margin-left: 30px;
+        }
+        @media (max-width: 700px) {
+            .service-item { flex-direction: column; align-items: stretch; }
+            .service-item input { width: 100%; }
+        }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+                "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="container" id="app">
+    <div class="header">
+        <h1>✂️ Frizerski salon - Interni organizator</h1>
+        <div class="sub">Upravljanje terminima, rezervacijama i kalendarom</div>
+    </div>
+    <div class="panel">
+        <div class="flex-row" style="justify-content: space-between;">
+            <div>
+                <button id="changePasswordBtn" style="background:#555;">🔐 Promijeni šifru</button>
+                <button id="refreshBtn" style="background:#3B82F6;">🔄 Osvježi sve</button>
+            </div>
+        </div>
+
+        <div class="section-title">🔒 Blokiraj termin</div>
+        <div class="flex-row">
+            <input type="date" id="blockDatePicker" style="flex:1;">
+            <div style="flex:2;" id="blockTimeSelectContainer">
+                <select id="blockTimeSelect"></select>
+            </div>
+            <button id="blockSlotBtn">🚫 Blokiraj odabrani termin</button>
+        </div>
+        <div id="adminTimeSlots" class="time-slots" style="margin-top: 16px;"></div>
+
+        <div class="section-title">➕ Ručno dodaj rezervaciju</div>
+        <div class="grid-2">
+            <div>
+                <div class="form-group">
+                    <label>📅 Datum</label>
+                    <input type="date" id="manualDatePicker">
+                </div>
+                <div class="form-group">
+                    <label>⏰ Termin (odaberi iz liste)</label>
+                    <select id="manualTimeSelect"></select>
+                </div>
+            </div>
+            <div>
+                <div class="form-group">
+                    <label>✂️ Usluga</label>
+                    <select id="manualServiceSelect"></select>
+                </div>
+                <div class="form-group">
+                    <label>👤 Ime klijenta</label>
+                    <input type="text" id="manualClientName" placeholder="Ime i prezime">
+                </div>
+                <div class="form-group">
+                    <label>📞 Telefon</label>
+                    <input type="text" id="manualClientPhone" placeholder="Broj telefona">
+                </div>
+                <button id="manualAddBtn">✅ Dodaj rezervaciju (odmah potvrđena)</button>
+            </div>
+        </div>
+
+        <div class="section-title">🕒 Rezervacije na čekanju (pending)</div>
+        <div id="pendingReservationsList"></div>
+
+        <div class="section-title">✅ Potvrđene rezervacije</div>
+        <div id="confirmedReservationsList"></div>
+
+        <div class="section-title">📋 Završene rezervacije</div>
+        <div id="completedReservationsList"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from 'firebase/app';
+    import { getDatabase, ref, get, set, push, update, remove } from 'firebase/database';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyALY3oKvPW_mDZiaBl0EdFCkTjd6fqwisQ",
+        authDomain: "kelt-pub-menu-2df61.firebaseapp.com",
+        databaseURL: "https://kelt-pub-menu-2df61-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "kelt-pub-menu-2df61",
+        storageBucket: "kelt-pub-menu-2df61.firebasestorage.app"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let salonId = null;
+    function getSalonIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        let id = params.get('salon');
+        if (!id) {
+            id = prompt('Unesite ID salona (npr. gradski_salon):');
+            if (id) window.history.replaceState({}, '', `?salon=${encodeURIComponent(id)}`);
+            else throw new Error('Missing salon ID');
+        }
+        return id;
+    }
+    try { salonId = getSalonIdFromUrl(); }
+    catch(e) { document.body.innerHTML = '<div style="text-align:center;margin-top:50px;">Greška: nedostaje ID salona.</div>'; throw e; }
+
+    const reservationsRef = ref(db, `hairSalons/${salonId}/reservations`);
+    const settingsRef = ref(db, `hairSalons/${salonId}/settings`);
+    const blockedSlotsRef = ref(db, `hairSalons/${salonId}/blockedSlots`);
+    const servicesRef = ref(db, `hairSalons/${salonId}/services`);
+    const workingHoursRef = ref(db, `hairSalons/${salonId}/settings/workingHours`);
+
+    let servicesList = [];
+    let workingHours = {};
+    let slotInterval = 30;
+    let isLoggedIn = false;
+    let isMasterAdmin = false;
+    let currentAdminPassword = 'salon123';
+
+    async function loadServices() {
+        const snap = await get(servicesRef);
+        if (snap.exists() && Array.isArray(snap.val())) {
+            servicesList = snap.val();
+        } else {
+            servicesList = [
+                { name: "Muško šišanje", duration: 30 },
+                { name: "Žensko šišanje", duration: 30 },
+                { name: "Šišanje + brada", duration: 45 },
+                { name: "Feniranje", duration: 30 }
+            ];
+            await set(servicesRef, servicesList);
+        }
+        const manualSelect = document.getElementById('manualServiceSelect');
+        manualSelect.innerHTML = '';
+        servicesList.forEach(service => {
+            const option = document.createElement('option');
+            option.value = service.name;
+            option.textContent = `${service.name} (${service.duration} min)`;
+            option.setAttribute('data-duration', service.duration);
+            manualSelect.appendChild(option);
+        });
+    }
+
+    async function loadWorkingHours() {
+        const snap = await get(workingHoursRef);
+        if (snap.exists()) {
+            workingHours = snap.val();
+        } else {
+            workingHours = {
+                monday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                tuesday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                wednesday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                thursday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                friday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                saturday: { enabled: true, intervals: [{ start: "09:00", end: "15:00" }] },
+                sunday: { enabled: false, intervals: [] }
+            };
+            await set(workingHoursRef, workingHours);
+        }
+    }
+
+    async function loadSlotInterval() {
+        const snap = await get(settingsRef);
+        if (snap.exists() && snap.val().slotInterval) {
+            slotInterval = snap.val().slotInterval;
+        } else {
+            slotInterval = 30;
+            await update(settingsRef, { slotInterval });
+        }
+    }
+
+    function getTimeSlotsForDate(date) {
+        const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        const dateObj = new Date(date);
+        const dayOfWeek = dayNames[dateObj.getDay()];
+        const dayData = workingHours[dayOfWeek];
+        if (!dayData || !dayData.enabled) return [];
+        const slots = [];
+        for (let interval of dayData.intervals) {
+            let [startHour, startMin] = interval.start.split(':').map(Number);
+            let [endHour, endMin] = interval.end.split(':').map(Number);
+            let startTotal = startHour * 60 + startMin;
+            let endTotal = endHour * 60 + endMin;
+            for (let time = startTotal; time < endTotal; time += slotInterval) {
+                let hour = Math.floor(time / 60);
+                let minute = time % 60;
+                slots.push(`${hour.toString().padStart(2,'0')}:${minute.toString().padStart(2,'0')}`);
+            }
+        }
+        return slots;
+    }
+
+    function getSlotsToBlock(startTime, durationMinutes) {
+        const slots = [];
+        let current = startTime;
+        let remaining = durationMinutes;
+        while (remaining > 0) {
+            slots.push(current);
+            let [hour, minute] = current.split(':').map(Number);
+            let totalMinutes = hour * 60 + minute + slotInterval;
+            let newHour = Math.floor(totalMinutes / 60);
+            let newMinute = totalMinutes % 60;
+            current = `${newHour.toString().padStart(2,'0')}:${newMinute.toString().padStart(2,'0')}`;
+            remaining -= slotInterval;
+        }
+        return slots;
+    }
+
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const [year, month, day] = dateStr.split('-');
+        return `${day}.${month}.${year}.`;
+    }
+
+    async function loadReservationsByStatus() {
+        const snapshot = await get(reservationsRef);
+        const all = snapshot.val() || {};
+        const pending = [];
+        const confirmed = [];
+        const completed = [];
+        const now = new Date();
+        for (const [id, res] of Object.entries(all)) {
+            const [year, month, day] = res.date.split('-');
+            const [hour, minute] = res.time.split(':');
+            const resDateTime = new Date(year, month-1, day, hour, minute);
+            if (res.status === 'pending') {
+                pending.push({ id, ...res, dateTime: resDateTime });
+            } else if (res.status === 'confirmed') {
+                if (resDateTime < now) {
+                    await update(ref(db, `hairSalons/${salonId}/reservations/${id}`), { status: 'completed' });
+                    completed.push({ id, ...res, dateTime: resDateTime });
+                } else {
+                    confirmed.push({ id, ...res, dateTime: resDateTime });
+                }
+            } else if (res.status === 'completed') {
+                completed.push({ id, ...res, dateTime: resDateTime });
+            }
+        }
+        pending.sort((a,b) => a.dateTime - b.dateTime);
+        confirmed.sort((a,b) => a.dateTime - b.dateTime);
+        completed.sort((a,b) => b.dateTime - a.dateTime);
+        return { pending, confirmed, completed };
+    }
+
+    async function renderAllLists() {
+        const { pending, confirmed, completed } = await loadReservationsByStatus();
+
+        const pendingContainer = document.getElementById('pendingReservationsList');
+        if (pending.length === 0) pendingContainer.innerHTML = '<p>Nema rezervacija na čekanju.</p>';
+        else {
+            pendingContainer.innerHTML = '';
+            for (const res of pending) {
+                const dur = res.duration || servicesList.find(s => s.name === res.service)?.duration || 30;
+                const slots = getSlotsToBlock(res.time, dur);
+                const slotRange = slots.length === 1 ? res.time : `${res.time} - ${slots[slots.length-1]}`;
+                const div = document.createElement('div');
+                div.className = 'reservation-card';
+                div.innerHTML = `
+                    <div><strong>${formatDate(res.date)} ${slotRange}</strong> - ${res.service} (${dur} min) <span class="status-badge status-pending">Na čekanju</span></div>
+                    <div>👤 ${escapeHtml(res.clientName)}</div>
+                    <div>📞 ${escapeHtml(res.clientPhone)}</div>
+                    <div class="admin-actions">
+                        <button class="confirm-btn" data-id="${res.id}">✅ Potvrdi</button>
+                        <button class="cancel-btn" data-id="${res.id}">❌ Otkaži</button>
+                        <button class="block-btn" data-id="${res.id}" data-date="${res.date}" data-time="${res.time}" data-duration="${dur}">🔒 Blokiraj termin</button>
+                    </div>
+                `;
+                pendingContainer.appendChild(div);
+            }
+        }
+
+        const confirmedContainer = document.getElementById('confirmedReservationsList');
+        if (confirmed.length === 0) confirmedContainer.innerHTML = '<p>Nema potvrđenih budućih rezervacija.</p>';
+        else {
+            confirmedContainer.innerHTML = '';
+            for (const res of confirmed) {
+                const dur = res.duration || servicesList.find(s => s.name === res.service)?.duration || 30;
+                const slots = getSlotsToBlock(res.time, dur);
+                const slotRange = slots.length === 1 ? res.time : `${res.time} - ${slots[slots.length-1]}`;
+                const div = document.createElement('div');
+                div.className = 'reservation-card';
+                div.innerHTML = `
+                    <div><strong>${formatDate(res.date)} ${slotRange}</strong> - ${res.service} (${dur} min) <span class="status-badge status-confirmed">Potvrđeno</span></div>
+                    <div>👤 ${escapeHtml(res.clientName)}</div>
+                    <div>📞 ${escapeHtml(res.clientPhone)}</div>
+                    <div class="admin-actions">
+                        <button class="complete-btn" data-id="${res.id}">✔️ Označi kao završeno</button>
+                        <button class="cancel-btn" data-id="${res.id}">❌ Otkaži</button>
+                        <button class="block-btn" data-id="${res.id}" data-date="${res.date}" data-time="${res.time}" data-duration="${dur}">🔒 Blokiraj termin</button>
+                    </div>
+                `;
+                confirmedContainer.appendChild(div);
+            }
+        }
+
+        const completedContainer = document.getElementById('completedReservationsList');
+        if (completed.length === 0) completedContainer.innerHTML = '<p>Nema završenih rezervacija.</p>';
+        else {
+            completedContainer.innerHTML = '';
+            for (const res of completed) {
+                const dur = res.duration || 30;
+                const slots = getSlotsToBlock(res.time, dur);
+                const slotRange = slots.length === 1 ? res.time : `${res.time} - ${slots[slots.length-1]}`;
+                const div = document.createElement('div');
+                div.className = 'reservation-card';
+                div.innerHTML = `
+                    <div><strong>${formatDate(res.date)} ${slotRange}</strong> - ${res.service} (${dur} min) <span class="status-badge status-completed">Završeno</span></div>
+                    <div>👤 ${escapeHtml(res.clientName)}</div>
+                    <div>📞 ${escapeHtml(res.clientPhone)}</div>
+                    <div class="admin-actions">
+                        <button class="delete-completed" data-id="${res.id}">🗑️ Obriši</button>
+                    </div>
+                `;
+                completedContainer.appendChild(div);
+            }
+        }
+        attachEvents();
+    }
+
+    function attachEvents() {
+        document.querySelectorAll('.confirm-btn').forEach(btn => {
+            btn.onclick = async () => {
+                const id = btn.getAttribute('data-id');
+                await update(ref(db, `hairSalons/${salonId}/reservations/${id}`), { status: 'confirmed' });
+                showToast('Rezervacija potvrđena');
+                renderAllLists();
+                renderBlockingUI();
+                populateManualTimeSelect();
+            };
+        });
+        document.querySelectorAll('.cancel-btn').forEach(btn => {
+            btn.onclick = async () => {
+                const id = btn.getAttribute('data-id');
+                await remove(ref(db, `hairSalons/${salonId}/reservations/${id}`));
+                showToast('Rezervacija otkazana');
+                renderAllLists();
+                renderBlockingUI();
+                populateManualTimeSelect();
+            };
+        });
+        document.querySelectorAll('.complete-btn').forEach(btn => {
+            btn.onclick = async () => {
+                const id = btn.getAttribute('data-id');
+                await update(ref(db, `hairSalons/${salonId}/reservations/${id}`), { status: 'completed' });
+                showToast('Označeno kao završeno');
+                renderAllLists();
+                renderBlockingUI();
+                populateManualTimeSelect();
+            };
+        });
+        document.querySelectorAll('.block-btn').forEach(btn => {
+            btn.onclick = async () => {
+                const date = btn.getAttribute('data-date');
+                const time = btn.getAttribute('data-time');
+                const duration = parseInt(btn.getAttribute('data-duration')) || 30;
+                const slots = getSlotsToBlock(time, duration);
+                if (confirm(`Blokirati termin ${formatDate(date)} od ${time} (trajanje ${duration} min)?`)) {
+                    for (let slot of slots) {
+                        await set(ref(db, `hairSalons/${salonId}/blockedSlots/${date}/${slot}`), true);
+                    }
+                    showToast(`Termin ${formatDate(date)} od ${time} blokiran.`);
+                    const id = btn.getAttribute('data-id');
+                    if (id) await remove(ref(db, `hairSalons/${salonId}/reservations/${id}`));
+                    renderAllLists();
+                    renderBlockingUI();
+                    populateManualTimeSelect();
+                }
+            };
+        });
+        document.querySelectorAll('.delete-completed').forEach(btn => {
+            btn.onclick = async () => {
+                const id = btn.getAttribute('data-id');
+                if (confirm('Trajno obrisati ovu završenu rezervaciju?')) {
+                    await remove(ref(db, `hairSalons/${salonId}/reservations/${id}`));
+                    showToast('Obrisano');
+                    renderAllLists();
+                }
+            };
+        });
+    }
+
+    async function renderBlockingUI() {
+        const date = document.getElementById('blockDatePicker').value;
+        if (!date) return;
+        const blocked = await loadBlockedSlotsForDate(date);
+        const { pending, confirmed } = await loadReservationsByStatus();
+        const pendingForDate = pending.filter(r => r.date === date).flatMap(r => getSlotsToBlock(r.time, r.duration || 30));
+        const confirmedForDate = confirmed.filter(r => r.date === date).flatMap(r => getSlotsToBlock(r.time, r.duration || 30));
+        const allTaken = [...new Set([...blocked, ...pendingForDate, ...confirmedForDate])];
+        const availableSlots = getTimeSlotsForDate(date);
+        const container = document.getElementById('adminTimeSlots');
+        container.innerHTML = '';
+        availableSlots.forEach(time => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'time-btn';
+            btn.textContent = time;
+            if (allTaken.includes(time)) {
+                btn.classList.add('confirmed');
+                btn.disabled = true;
+            } else {
+                btn.classList.add('free');
+                btn.onclick = async () => {
+                    if (confirm(`Blokirati termin ${formatDate(date)} u ${time}?`)) {
+                        await set(ref(db, `hairSalons/${salonId}/blockedSlots/${date}/${time}`), true);
+                        showToast(`Termin ${formatDate(date)} ${time} blokiran.`);
+                        renderBlockingUI();
+                        renderAllLists();
+                        populateManualTimeSelect();
+                    }
+                };
+            }
+            container.appendChild(btn);
+        });
+        if (availableSlots.length === 0) container.innerHTML = '<span>Nema radnih termina za ovaj datum.</span>';
+
+        const select = document.getElementById('blockTimeSelect');
+        select.innerHTML = '';
+        for (let time of availableSlots) {
+            if (!allTaken.includes(time)) {
+                const option = document.createElement('option');
+                option.value = time;
+                option.textContent = time;
+                select.appendChild(option);
+            }
+        }
+        if (select.options.length === 0) {
+            select.innerHTML = '<option>Nema slobodnih termina</option>';
+            select.disabled = true;
+        } else {
+            select.disabled = false;
+        }
+    }
+
+    async function loadBlockedSlotsForDate(date) {
+        const blockedRef = ref(db, `hairSalons/${salonId}/blockedSlots/${date}`);
+        const snap = await get(blockedRef);
+        if (snap.exists()) return Object.keys(snap.val());
+        return [];
+    }
+
+    async function populateManualTimeSelect() {
+        const date = document.getElementById('manualDatePicker').value;
+        if (!date) {
+            document.getElementById('manualTimeSelect').innerHTML = '<option>Odaberite datum</option>';
+            return;
+        }
+        const blocked = await loadBlockedSlotsForDate(date);
+        const { pending, confirmed } = await loadReservationsByStatus();
+        const pendingForDate = pending.filter(r => r.date === date).flatMap(r => getSlotsToBlock(r.time, r.duration || 30));
+        const confirmedForDate = confirmed.filter(r => r.date === date).flatMap(r => getSlotsToBlock(r.time, r.duration || 30));
+        const allTaken = [...new Set([...blocked, ...pendingForDate, ...confirmedForDate])];
+        const availableSlots = getTimeSlotsForDate(date);
+        const select = document.getElementById('manualTimeSelect');
+        select.innerHTML = '';
+        for (let time of availableSlots) {
+            if (!allTaken.includes(time)) {
+                const option = document.createElement('option');
+                option.value = time;
+                option.textContent = time;
+                select.appendChild(option);
+            }
+        }
+        if (select.options.length === 0) {
+            select.innerHTML = '<option>Nema slobodnih termina</option>';
+            select.disabled = true;
+        } else {
+            select.disabled = false;
+        }
+    }
+
+    document.getElementById('blockDatePicker').addEventListener('change', renderBlockingUI);
+    document.getElementById('manualDatePicker').addEventListener('change', populateManualTimeSelect);
+
+    document.getElementById('blockSlotBtn').onclick = async () => {
+        const date = document.getElementById('blockDatePicker').value;
+        const select = document.getElementById('blockTimeSelect');
+        if (!date || select.disabled || !select.value) { showToast('Odaberite datum i termin.'); return; }
+        const time = select.value;
+        await set(ref(db, `hairSalons/${salonId}/blockedSlots/${date}/${time}`), true);
+        showToast(`Termin ${formatDate(date)} ${time} blokiran.`);
+        renderBlockingUI();
+        renderAllLists();
+        populateManualTimeSelect();
+    };
+
+    document.getElementById('manualAddBtn').onclick = async () => {
+        const date = document.getElementById('manualDatePicker').value;
+        const time = document.getElementById('manualTimeSelect').value;
+        const serviceSelect = document.getElementById('manualServiceSelect');
+        const serviceName = serviceSelect.value;
+        const duration = parseInt(serviceSelect.options[serviceSelect.selectedIndex]?.getAttribute('data-duration')) || 30;
+        const name = document.getElementById('manualClientName').value.trim();
+        const phone = document.getElementById('manualClientPhone').value.trim();
+        if (!date || !time || !serviceName || !name || !phone) {
+            showToast('Popunite sva polja.');
+            return;
+        }
+        const slotsToOccupy = getSlotsToBlock(time, duration);
+        const blocked = await loadBlockedSlotsForDate(date);
+        const { pending, confirmed } = await loadReservationsByStatus();
+        const pendingForDate = pending.filter(r => r.date === date).flatMap(r => getSlotsToBlock(r.time, r.duration || 30));
+        const confirmedForDate = confirmed.filter(r => r.date === date).flatMap(r => getSlotsToBlock(r.time, r.duration || 30));
+        const allTaken = [...new Set([...blocked, ...pendingForDate, ...confirmedForDate])];
+        const isFree = slotsToOccupy.every(slot => !allTaken.includes(slot));
+        if (!isFree) {
+            showToast('Termin nije slobodan ili je već zauzet.');
+            return;
+        }
+        const newRef = push(reservationsRef);
+        await set(newRef, {
+            date, time, service: serviceName, duration,
+            clientName: name, clientPhone: phone,
+            status: 'confirmed', createdAt: Date.now()
+        });
+        showToast('Rezervacija dodana (odmah potvrđena).');
+        document.getElementById('manualClientName').value = '';
+        document.getElementById('manualClientPhone').value = '';
+        renderAllLists();
+        renderBlockingUI();
+        populateManualTimeSelect();
+    };
+
+    document.getElementById('refreshBtn').onclick = () => {
+        renderAllLists();
+        renderBlockingUI();
+        populateManualTimeSelect();
+        showToast('Osvježeno');
+    };
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+    }
+
+    async function changeAdminPassword() {
+        const oldPass = prompt('Unesite trenutnu admin šifru:');
+        if (!oldPass) return;
+        if (oldPass !== currentAdminPassword) { showToast('Pogrešna stara šifra.'); return; }
+        const newPass = prompt('Unesite novu admin šifru (minimum 4 znaka):');
+        if (newPass && newPass.trim().length >= 4) {
+            await update(settingsRef, { adminPassword: newPass.trim() });
+            currentAdminPassword = newPass.trim();
+            showToast('Šifra promijenjena.');
+        } else {
+            showToast('Šifra nije promijenjena (mora imati bar 4 znaka).');
+        }
+    }
+
+    // Master admin postavke (samo ako je prijavljen master admin)
+    async function showMasterAdminModal() {
+        if (!isMasterAdmin) {
+            showToast('Nemate ovlaštenje za ove postavke.');
+            return;
+        }
+        let currentServices = servicesList;
+        let currentWorkingHours = workingHours;
+        let currentSlotInterval = slotInterval;
+        
+        const modalDiv = document.createElement('div');
+        modalDiv.className = 'modal';
+        modalDiv.innerHTML = `
+            <div class="modal-content">
+                <h3>👑 Master admin - Postavke salona</h3>
+                <h4>✂️ Usluge</h4>
+                <div id="masterServicesContainer"></div>
+                <button type="button" id="masterAddServiceBtn" class="secondary" style="margin-top: 8px;">+ Dodaj uslugu</button>
+                <hr style="margin: 16px 0;">
+                <h4>⏰ Radno vrijeme</h4>
+                <div id="masterWorkingHoursContainer"></div>
+                <hr style="margin: 16px 0;">
+                <h4>⏱️ Interval termina (minute)</h4>
+                <select id="masterSlotIntervalSelect">
+                    <option value="15" ${currentSlotInterval === 15 ? 'selected' : ''}>15 minuta</option>
+                    <option value="30" ${currentSlotInterval === 30 ? 'selected' : ''}>30 minuta</option>
+                    <option value="45" ${currentSlotInterval === 45 ? 'selected' : ''}>45 minuta</option>
+                    <option value="60" ${currentSlotInterval === 60 ? 'selected' : ''}>60 minuta</option>
+                </select>
+                <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:20px;">
+                    <button id="closeMasterModal">Odustani</button>
+                    <button id="saveMasterBtn">Sačuvaj promjene</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+        
+        const servicesContainer = modalDiv.querySelector('#masterServicesContainer');
+        const whContainer = modalDiv.querySelector('#masterWorkingHoursContainer');
+        
+        let tempServices = JSON.parse(JSON.stringify(currentServices));
+        let tempWH = JSON.parse(JSON.stringify(currentWorkingHours));
+        
+        function renderServices() {
+            servicesContainer.innerHTML = '';
+            tempServices.forEach((s, idx) => {
+                const div = document.createElement('div');
+                div.className = 'service-item';
+                div.innerHTML = `
+                    <input type="text" placeholder="Naziv usluge" value="${escapeHtml(s.name)}" data-idx="${idx}" class="master-service-name" style="flex:2;">
+                    <input type="number" placeholder="Trajanje (min)" value="${s.duration}" data-idx="${idx}" class="master-service-duration" style="width:130px;">
+                    <button type="button" class="small danger remove-master-service" data-idx="${idx}">🗑️</button>
+                `;
+                servicesContainer.appendChild(div);
+            });
+            document.querySelectorAll('.remove-master-service').forEach(btn => {
+                btn.onclick = () => {
+                    const idx = parseInt(btn.dataset.idx);
+                    tempServices.splice(idx, 1);
+                    renderServices();
+                };
+            });
+            document.querySelectorAll('.master-service-name, .master-service-duration').forEach(inp => {
+                inp.onchange = (e) => {
+                    const idx = parseInt(inp.dataset.idx);
+                    if (inp.classList.contains('master-service-name')) tempServices[idx].name = inp.value;
+                    if (inp.classList.contains('master-service-duration')) tempServices[idx].duration = parseInt(inp.value);
+                };
+            });
+        }
+        renderServices();
+        modalDiv.querySelector('#masterAddServiceBtn').onclick = () => {
+            tempServices.push({ name: "Nova usluga", duration: 30 });
+            renderServices();
+        };
+        
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        const dayNames = ['Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota', 'Nedjelja'];
+        
+        function renderWorkingHours() {
+            whContainer.innerHTML = '';
+            days.forEach((day, idx) => {
+                const dayData = tempWH[day] || { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] };
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day-row';
+                dayDiv.innerHTML = `
+                    <div class="day-header">
+                        <label style="width:100px;">${dayNames[idx]}</label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" class="master-day-enabled" ${dayData.enabled ? 'checked' : ''}> Radni dan
+                        </label>
+                    </div>
+                    <div class="intervals-container" id="master-intervals-${day}"></div>
+                    <button type="button" class="small secondary master-add-interval" data-day="${day}" style="margin-top: 8px;">+ Dodaj interval</button>
+                `;
+                whContainer.appendChild(dayDiv);
+                const intervalsContainer = dayDiv.querySelector(`.intervals-container`);
+                const intervals = dayData.intervals || [];
+                function renderIntervals() {
+                    intervalsContainer.innerHTML = '';
+                    intervals.forEach((interval, iidx) => {
+                        const intDiv = document.createElement('div');
+                        intDiv.className = 'interval-item';
+                        intDiv.innerHTML = `
+                            <input type="time" value="${interval.start}" data-day="${day}" data-idx="${iidx}" class="master-interval-start">
+                            <span>-</span>
+                            <input type="time" value="${interval.end}" data-day="${day}" data-idx="${iidx}" class="master-interval-end">
+                            <button type="button" class="small danger master-remove-interval" data-day="${day}" data-idx="${iidx}">🗑️</button>
+                        `;
+                        intervalsContainer.appendChild(intDiv);
+                    });
+                    intervalsContainer.querySelectorAll('.master-interval-start, .master-interval-end').forEach(inp => {
+                        inp.onchange = (e) => {
+                            const d = inp.dataset.day;
+                            const iidx = parseInt(inp.dataset.idx);
+                            if (!tempWH[d]) tempWH[d] = { enabled: true, intervals: [] };
+                            if (!tempWH[d].intervals) tempWH[d].intervals = [];
+                            if (inp.classList.contains('master-interval-start')) tempWH[d].intervals[iidx].start = inp.value;
+                            else tempWH[d].intervals[iidx].end = inp.value;
+                        };
+                    });
+                    intervalsContainer.querySelectorAll('.master-remove-interval').forEach(btn => {
+                        btn.onclick = () => {
+                            const d = btn.dataset.day;
+                            const iidx = parseInt(btn.dataset.idx);
+                            tempWH[d].intervals.splice(iidx, 1);
+                            renderWorkingHours();
+                        };
+                    });
+                }
+                renderIntervals();
+                const addBtn = dayDiv.querySelector('.master-add-interval');
+                addBtn.onclick = () => {
+                    if (!tempWH[day]) tempWH[day] = { enabled: true, intervals: [] };
+                    if (!tempWH[day].intervals) tempWH[day].intervals = [];
+                    tempWH[day].intervals.push({ start: "09:00", end: "17:00" });
+                    renderWorkingHours();
+                };
+                const enabledChk = dayDiv.querySelector('.master-day-enabled');
+                enabledChk.onchange = (e) => {
+                    tempWH[day].enabled = e.target.checked;
+                    renderWorkingHours();
+                };
+            });
+        }
+        renderWorkingHours();
+        
+        modalDiv.querySelector('#closeMasterModal').onclick = () => modalDiv.remove();
+        modalDiv.querySelector('#saveMasterBtn').onclick = async () => {
+            const newInterval = parseInt(modalDiv.querySelector('#masterSlotIntervalSelect').value);
+            try {
+                await set(ref(db, `hairSalons/${salonId}/services`), tempServices);
+                await set(ref(db, `hairSalons/${salonId}/settings/workingHours`), tempWH);
+                await update(ref(db, `hairSalons/${salonId}/settings`), { slotInterval: newInterval });
+                showToast('Postavke salona su sačuvane.');
+                modalDiv.remove();
+                await loadServices();
+                await loadWorkingHours();
+                await loadSlotInterval();
+                renderAllLists();
+                renderBlockingUI();
+                populateManualTimeSelect();
+            } catch(e) {
+                showToast('Greška: ' + e.message);
+            }
+        };
+    }
+
+    function showLogin() {
+        const overlay = document.createElement('div');
+        overlay.className = 'login-overlay';
+        overlay.innerHTML = `
+            <div class="login-box">
+                <h3>Prijava za frizera</h3>
+                <input type="password" id="adminPassInput" placeholder="Šifra" style="margin: 15px 0; width:100%;">
+                <button id="adminLoginBtn">Prijavi se</button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        document.getElementById('adminLoginBtn').onclick = async () => {
+            const pass = document.getElementById('adminPassInput').value;
+            if (pass === currentAdminPassword) {
+                isLoggedIn = true;
+                isMasterAdmin = false;
+                overlay.remove();
+                await loadServices();
+                await loadWorkingHours();
+                await loadSlotInterval();
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('blockDatePicker').value = today;
+                document.getElementById('manualDatePicker').value = today;
+                await renderAllLists();
+                await renderBlockingUI();
+                await populateManualTimeSelect();
+                // Ukloni master admin dugme ako postoji
+                const existingMasterBtn = document.getElementById('masterAdminBtn');
+                if (existingMasterBtn) existingMasterBtn.remove();
+            } else if (pass === 'master2026') {
+                isLoggedIn = true;
+                isMasterAdmin = true;
+                overlay.remove();
+                await loadServices();
+                await loadWorkingHours();
+                await loadSlotInterval();
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('blockDatePicker').value = today;
+                document.getElementById('manualDatePicker').value = today;
+                await renderAllLists();
+                await renderBlockingUI();
+                await populateManualTimeSelect();
+                // Dodaj master admin dugme
+                if (!document.getElementById('masterAdminBtn')) {
+                    const btnContainer = document.querySelector('.flex-row');
+                    const newBtn = document.createElement('button');
+                    newBtn.id = 'masterAdminBtn';
+                    newBtn.style.background = '#8B5CF6';
+                    newBtn.textContent = '👑 Master admin (postavke salona)';
+                    newBtn.onclick = () => showMasterAdminModal();
+                    btnContainer.insertBefore(newBtn, document.getElementById('refreshBtn'));
+                }
+                showToast('Prijavljeni ste kao Master admin.');
+            } else {
+                alert('Pogrešna šifra');
+            }
+        };
+    }
+
+    showLogin();
+    document.getElementById('changePasswordBtn').onclick = () => changeAdminPassword();
+</script>
+</body>
+</html>
