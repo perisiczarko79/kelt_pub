@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>KlikPub - Šank panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-dark: #0F172A;
+            --bg-card: #1E293B;
+            --bg-elevated: #22252E;
+            --primary: #F97316;
+            --primary-light: #FB923C;
+            --success: #2E7D32;
+            --warning: #F59E0B;
+            --info: #3B82F6;
+            --danger: #DC2626;
+            --text-light: #F1F5F9;
+            --text-muted: #94A3B8;
+            --text-tertiary: #6B7280;
+            --border-light: rgba(255,255,255,0.08);
+            --border-medium: rgba(255,255,255,0.12);
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --shadow-glow: 0 0 20px rgba(249,115,22,0.3);
+            --transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        body.light-theme {
+            --bg-dark: #F8F9FA;
+            --bg-card: #FFFFFF;
+            --bg-elevated: #E9ECEF;
+            --primary: #E85D04;
+            --primary-light: #F48C06;
+            --text-light: #212529;
+            --text-muted: #6C757D;
+            --text-tertiary: #ADB5BD;
+            --border-light: rgba(0,0,0,0.1);
+            --border-medium: rgba(0,0,0,0.15);
+            --shadow-glow: 0 0 20px rgba(232,93,4,0.2);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            padding: 24px;
+            transition: background 0.3s, color 0.2s;
+            background-image: radial-gradient(circle at 25% 0%, rgba(249,115,22,0.05) 0%, transparent 50%);
+        }
+        body.light-theme {
+            background-image: none;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 28px; position: relative; }
+        .logo-icon { font-size: 2.5rem; margin-bottom: 8px; }
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFFFFF 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+        body.light-theme h1 {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .theme-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 40px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-light);
+            transition: var(--transition-base);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .theme-toggle:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .sound-toggle {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            color: var(--text-light);
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition-base);
+            margin-left: 16px;
+        }
+        .sound-toggle:hover { border-color: var(--primary); color: var(--primary); }
+        .klikhub-contact-bar {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-dark) 100%);
+            border-radius: var(--radius-lg);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 28px;
+            border: 1px solid var(--border-light);
+        }
+        .contact-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
+        .contact-item i { color: var(--primary); }
+        .contact-item a { color: var(--text-light); text-decoration: none; transition: var(--transition-base); }
+        .contact-item a:hover { color: var(--primary); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 24px; margin-top: 20px; }
+        .table-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+            transition: var(--transition-base);
+        }
+        .table-card:hover { border-color: var(--primary); box-shadow: var(--shadow-glow); }
+        .table-header {
+            background: rgba(0,0,0,0.2);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .table-number { font-size: 1.3rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .table-total { font-size: 1.2rem; font-weight: 700; color: var(--primary-light); background: rgba(0,0,0,0.3); padding: 6px 14px; border-radius: 40px; }
+        .close-table-btn {
+            background: rgba(220,38,38,0.15);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition-base);
+        }
+        .close-table-btn:hover { background: var(--danger); color: white; }
+        .order-item { padding: 16px 20px; border-bottom: 1px solid var(--border-light); }
+        .order-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+        .guest-name { font-weight: 700; color: var(--primary); font-size: 1rem; }
+        .order-status { font-size: 0.7rem; padding: 4px 12px; border-radius: 40px; font-weight: 600; text-transform: uppercase; }
+        .status-pending { background: rgba(245,158,11,0.2); color: var(--warning); border: 1px solid rgba(245,158,11,0.3); }
+        .status-accepted { background: rgba(59,130,246,0.2); color: var(--info); border: 1px solid rgba(59,130,246,0.3); }
+        .status-completed { background: rgba(46,125,50,0.2); color: #4CAF50; border: 1px solid rgba(76,175,80,0.3); }
+        .items-list { margin: 10px 0 10px 12px; font-size: 0.85rem; color: var(--text-muted); border-left: 2px solid var(--primary); padding-left: 14px; }
+        .items-list div { margin: 5px 0; }
+        .item-note { font-style: italic; color: var(--text-tertiary); font-size: 0.7rem; margin-left: 8px; }
+        .order-buttons { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; justify-content: flex-end; }
+        button { font-family: 'Inter', sans-serif; font-weight: 500; transition: var(--transition-base); cursor: pointer; }
+        .btn-accept { background: linear-gradient(135deg, var(--success) 0%, #1B5E20 100%); border: none; padding: 8px 16px; border-radius: 40px; font-size: 0.75rem; color: white; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-complete { background: linear-gradient(135deg, var(--warning) 0%, #B45309 100%); border: none; padding: 8px 16px; border-radius: 40px; font-size: 0.75rem; color: white; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-pay { background: linear-gradient(135deg, var(--primary) 0%, #E85D04 100%); border: none; padding: 8px 16px; border-radius: 40px; font-size: 0.75rem; color: white; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-set-table { background: var(--bg-elevated); border: 1px solid var(--border-light); padding: 8px 16px; border-radius: 40px; font-size: 0.75rem; color: var(--text-light); display: inline-flex; align-items: center; gap: 6px; }
+        .btn-set-table:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-accept:hover, .btn-complete:hover, .btn-pay:hover { transform: translateY(-2px); filter: brightness(1.05); }
+        .bill-request-item { background: rgba(249,115,22,0.05); }
+        .empty { text-align: center; padding: 60px 24px; color: var(--text-tertiary); background: var(--bg-card); border-radius: var(--radius-xl); border: 1px solid var(--border-light); }
+        .empty i { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-elevated);
+            color: var(--primary);
+            padding: 12px 24px;
+            border-radius: 50px;
+            z-index: 1000;
+            font-weight: 500;
+            border: 1px solid var(--primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideUp 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+        .klikhub-footer {
+            margin-top: 40px;
+            padding: 20px 24px;
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-dark) 100%);
+            border-top: 1px solid var(--border-light);
+            text-align: center;
+            border-radius: var(--radius-lg);
+        }
+        .footer-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .copyright { font-size: 0.7rem; color: var(--text-tertiary); }
+        .footer-links { display: flex; gap: 20px; }
+        .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.75rem; transition: var(--transition-base); }
+        .footer-links a:hover { color: var(--primary); }
+        @media (max-width: 768px) {
+            body { padding: 16px; }
+            .grid { grid-template-columns: 1fr; gap: 16px; }
+            .klikhub-contact-bar { flex-direction: column; gap: 10px; }
+            .table-header { flex-direction: column; align-items: flex-start; }
+            .footer-content { flex-direction: column; text-align: center; }
+            .theme-toggle { position: static; margin-bottom: 16px; display: inline-flex; }
+            .header { display: flex; flex-direction: column; align-items: center; }
+        }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+                "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo-icon">🍺</div>
+        <h1>Šank panel <button id="soundToggleBtn" class="sound-toggle"><i class="fas fa-volume-up"></i> Zvuk uključen</button></h1>
+        <button id="themeToggle" class="theme-toggle"><i class="fas fa-sun"></i> <span id="themeText">Svijetla tema</span></button>
+    </div>
+    <div class="klikhub-contact-bar">
+        <div class="contact-item"><i class="fas fa-phone-alt"></i> <a href="tel:+38765387281">+387 65 387 281</a></div>
+        <div class="contact-item"><i class="fas fa-envelope"></i> <a href="mailto:klikhub.app@gmail.com">klikhub.app@gmail.com</a></div>
+        <div class="contact-item"><i class="fas fa-clock"></i> Pon - Sub: 09-23h</div>
+    </div>
+    <div id="output"><div class="empty"><i class="fas fa-spinner fa-pulse"></i><br>Učitavanje...</div></div>
+    <div class="klikhub-footer">
+        <div class="footer-content">
+            <div class="copyright"><i class="far fa-copyright"></i> 2024 KlikHub. Sva prava zadržana.</div>
+            <div class="footer-links">
+                <a href="mailto:klikhub.app@gmail.com"><i class="fas fa-envelope"></i> klikhub.app@gmail.com</a>
+                <a href="tel:+38765387281"><i class="fas fa-phone"></i> +387 65 387 281</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="module">
+    import { initializeApp } from 'firebase/app';
+    import { getDatabase, ref, onValue, update, remove, push, set, onChildAdded } from 'firebase/database';
+
+    // Tema
+    const themeToggle = document.getElementById('themeToggle');
+    const themeText = document.getElementById('themeText');
+    const currentTheme = localStorage.getItem('theme') || 'dark';
+    if (currentTheme === 'light') {
+        document.body.classList.add('light-theme');
+        themeText.innerHTML = 'Tamna tema';
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i> Tamna tema';
+    }
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('light-theme');
+        const isLight = document.body.classList.contains('light-theme');
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        if (isLight) {
+            themeText.innerHTML = 'Tamna tema';
+            themeToggle.innerHTML = '<i class="fas fa-moon"></i> Tamna tema';
+        } else {
+            themeText.innerHTML = 'Svijetla tema';
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i> Svijetla tema';
+        }
+    });
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyALY3oKvPW_mDZiaBl0EdFCkTjd6fqwisQ",
+        authDomain: "kelt-pub-menu-2df61.firebaseapp.com",
+        databaseURL: "https://kelt-pub-menu-2df61-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "kelt-pub-menu-2df61",
+        storageBucket: "kelt-pub-menu-2df61.firebasestorage.app"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const params = new URLSearchParams(location.search);
+    let cafeId = params.get('cafe');
+    if (!cafeId) cafeId = prompt('Unesite ID kafića (npr. gradski_pub):');
+    if (!cafeId) { document.body.innerHTML = '<div class="empty">Nedostaje ID kafića.</div>'; throw new Error(); }
+    const pendingRef = ref(db, `${cafeId}/orders/pending`);
+    const historyRef = ref(db, `${cafeId}/orders/history`);
+    let soundEnabled = true;
+    let audio = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
+    audio.load();
+    function playSound() { if (!soundEnabled) return; audio.play().catch(e => { document.addEventListener('click', function unlock() { audio.play().catch(()=>{}); document.removeEventListener('click', unlock); }, { once: true }); }); }
+    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])); }
+    function showToast(msg) { const toast = document.createElement('div'); toast.className = 'toast'; toast.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`; document.body.appendChild(toast); setTimeout(() => toast.remove(), 2500); }
+    let orders = [];
+    function aggregateItems(itemsArray) { const map = new Map(); for (const it of itemsArray) { const key = `${it.itemName}|${it.size || ''}`; if (map.has(key)) { const ex = map.get(key); ex.quantity += 1; ex.totalPrice += parseFloat(it.price); } else { map.set(key, { itemName: it.itemName, size: it.size || null, quantity: 1, totalPrice: parseFloat(it.price), note: it.note || null }); } } return Array.from(map.values()); }
+    async function closeTable(tableNumber, paid = false) { const toArchive = orders.filter(o => o.tableNumber == tableNumber); if (!toArchive.length) { showToast(`Nema narudžbi za sto ${tableNumber}.`); return; } if (confirm(`Zatvoriti račun za sto ${tableNumber}? Sve narudžbe će biti arhivirane.`)) { try { let allItems = [], totalAmount = 0; for (const order of toArchive) { if (order.items && Array.isArray(order.items)) { order.items.forEach(it => { allItems.push(it); totalAmount += parseFloat(it.price); }); } else if (order.type === 'waiter') allItems.push({ type: 'waiter', note: 'Poziv konobara' }); else if (order.type === 'bill_request') allItems.push({ type: 'bill_request', note: 'Zahtjev za računom' }); } const newHistoryRef = push(historyRef); await set(newHistoryRef, { tableNumber, closedAt: Date.now(), totalAmount, items: allItems, ordersCount: toArchive.length, paid }); for (const order of toArchive) await remove(ref(db, `${cafeId}/orders/pending/${order.id}`)); orders = orders.filter(o => o.tableNumber != tableNumber); renderTables(); showToast(`✅ Račun za sto ${tableNumber} zatvoren.`); } catch(e) { showToast('Greška: ' + e.message); } } }
+    async function setTableNumber(orderId, currentTable) { let newTable = prompt('Unesite broj stola:', currentTable === '?' ? '' : currentTable); if (newTable && !isNaN(parseInt(newTable))) { await update(ref(db, `${cafeId}/orders/pending/${orderId}`), { tableNumber: parseInt(newTable) }); showToast(`Sto postavljen na ${newTable}`); } else if (newTable !== null) showToast('Unesite ispravan broj'); }
+    async function acceptOrder(orderId) { try { await update(ref(db, `${cafeId}/orders/pending/${orderId}`), { status: 'accepted' }); showToast('Narudžba prihvaćena'); } catch(e) { showToast('Greška'); } }
+    async function completeOrder(orderId) { try { await update(ref(db, `${cafeId}/orders/pending/${orderId}`), { status: 'completed' }); showToast('Realizovano'); } catch(e) { showToast('Greška'); } }
+    function renderTables() { const container = document.getElementById('output'); const tablesMap = new Map(); for (const order of orders) { let table = order.tableNumber; if (table === undefined || table === null) table = '?'; if (!tablesMap.has(table)) tablesMap.set(table, { orders: [], total: 0, completedGroups: new Map() }); const data = tablesMap.get(table); let orderTotal = 0; if (order.items && Array.isArray(order.items)) order.items.forEach(it => orderTotal += parseFloat(it.price)); data.total += orderTotal; if (order.status === 'completed') { const guest = order.guestName || 'Gost'; if (!data.completedGroups.has(guest)) data.completedGroups.set(guest, { items: [], total: 0 }); const group = data.completedGroups.get(guest); if (order.items && Array.isArray(order.items)) { order.items.forEach(it => { group.items.push(it); group.total += parseFloat(it.price); }); } else if (order.type === 'waiter') group.items.push({ type: 'waiter', note: 'Poziv konobara', price: 0 }); else if (order.type === 'bill_request') group.items.push({ type: 'bill_request', note: 'Zahtjev za računom', price: 0 }); } else { data.orders.push(order); } } if (tablesMap.size === 0) { container.innerHTML = '<div class="empty"><i class="fas fa-mug-hot"></i><br>Nema aktivnih stolova</div>'; return; } let html = '<div class="grid">'; for (const [table, data] of tablesMap.entries()) { const isUnknown = (table === '?'); html += `<div class="table-card"><div class="table-header"><div class="table-number"><i class="fas fa-chair"></i> ${isUnknown ? '❓ Nepoznat sto' : `Sto ${escapeHtml(table)}`}</div><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;"><div class="table-total"><i class="fas fa-coins"></i> ${data.total.toFixed(2)} KM</div><button class="close-table-btn" data-table="${table}"><i class="fas fa-receipt"></i> Zatvori račun</button></div></div>`; for (const order of data.orders) { let itemsArray = order.items; if (itemsArray && typeof itemsArray === 'object' && !Array.isArray(itemsArray)) itemsArray = Object.values(itemsArray); const statusClass = order.status === 'pending' ? 'status-pending' : 'status-accepted'; let statusIcon = order.status === 'pending' ? '⏳' : '✅'; let statusText = order.status === 'pending' ? 'Na čekanju' : 'Primljeno'; html += `<div class="order-item"><div class="order-header"><span class="guest-name"><i class="fas fa-user"></i> ${escapeHtml(order.guestName || 'Gost')}</span><span class="order-status ${statusClass}">${statusIcon} ${statusText}</span></div>`; if (itemsArray && itemsArray.length) { html += `<div class="items-list">`; itemsArray.forEach(it => { html += `<div><i class="fas fa-beer"></i> ${escapeHtml(it.itemName)} ${it.size ? `(${escapeHtml(it.size)})` : ''} - ${parseFloat(it.price).toFixed(2)} KM${it.note ? `<span class="item-note"><i class="fas fa-pen"></i> ${escapeHtml(it.note)}</span>` : ''}</div>`; }); html += `</div>`; } else if (order.type === 'waiter') html += `<div class="items-list"><i class="fas fa-bell"></i> Poziv konobara</div>`; else if (order.type === 'bill_request') html += `<div class="items-list"><i class="fas fa-file-invoice"></i> Zahtjev za računom</div>`; html += `<div class="order-buttons">`; if (order.status === 'pending' && order.type !== 'bill_request') html += `<button class="btn-accept" data-id="${order.id}"><i class="fas fa-check"></i> Primljeno</button>`; if (order.status === 'accepted') html += `<button class="btn-complete" data-id="${order.id}"><i class="fas fa-check-double"></i> Realizovano</button>`; if (isUnknown) html += `<button class="btn-set-table" data-id="${order.id}" data-table="${table}"><i class="fas fa-pen"></i> Dodaj sto</button>`; html += `</div></div>`; } for (const [guest, group] of data.completedGroups.entries()) { const aggregated = aggregateItems(group.items); const totalGuest = group.total; html += `<div class="order-item"><div class="order-header"><span class="guest-name"><i class="fas fa-user-check"></i> ${escapeHtml(guest)}</span><span class="order-status status-completed">✔️ Realizovano (${totalGuest.toFixed(2)} KM)</span></div><div class="items-list">`; aggregated.forEach(it => { html += `<div><i class="fas fa-beer"></i> ${escapeHtml(it.itemName)} ${it.size ? `(${escapeHtml(it.size)})` : ''} x${it.quantity} – ${it.totalPrice.toFixed(2)} KM${it.note ? `<span class="item-note"><i class="fas fa-pen"></i> ${escapeHtml(it.note)}</span>` : ''}</div>`; }); html += `</div></div>`; } const billRequests = data.orders.filter(o => o.type === 'bill_request'); for (const req of billRequests) { html += `<div class="order-item bill-request-item"><div class="order-header"><span class="guest-name"><i class="fas fa-user"></i> ${escapeHtml(req.guestName || 'Gost')}</span><span class="order-status status-pending"><i class="fas fa-file-invoice"></i> Zahtjev za računom</span></div><div class="order-buttons"><button class="btn-pay" data-table="${table}"><i class="fas fa-euro-sign"></i> Naplaćeno</button></div></div>`; } html += `</div>`; } html += `</div>`; container.innerHTML = html; attachEvents(); }
+    function attachEvents() { document.querySelectorAll('.close-table-btn').forEach(btn => btn.onclick = async () => { const table = btn.getAttribute('data-table'); await closeTable(table === '?' ? null : table, false); }); document.querySelectorAll('.btn-set-table').forEach(btn => btn.onclick = async () => { const orderId = btn.getAttribute('data-id'); const currentTable = btn.getAttribute('data-table'); await setTableNumber(orderId, currentTable); }); document.querySelectorAll('.btn-accept').forEach(btn => btn.onclick = () => acceptOrder(btn.getAttribute('data-id'))); document.querySelectorAll('.btn-complete').forEach(btn => btn.onclick = () => completeOrder(btn.getAttribute('data-id'))); document.querySelectorAll('.btn-pay').forEach(btn => btn.onclick = async () => { const table = btn.getAttribute('data-table'); await closeTable(table === '?' ? null : table, true); }); }
+    onValue(pendingRef, (snapshot) => { const data = snapshot.val(); orders = []; if (data) { for (const [id, order] of Object.entries(data)) { let itemsArray = order.items; if (itemsArray && typeof itemsArray === 'object' && !Array.isArray(itemsArray)) itemsArray = Object.values(itemsArray); orders.push({ id, ...order, items: itemsArray }); } } renderTables(); });
+    onChildAdded(pendingRef, (snapshot) => { if (snapshot.val()) { playSound(); showToast('🔔 Nova narudžba!'); } });
+    const soundBtn = document.getElementById('soundToggleBtn'); soundBtn.onclick = () => { soundEnabled = !soundEnabled; soundBtn.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i> Zvuk uključen' : '<i class="fas fa-volume-mute"></i> Zvuk isključen'; if (soundEnabled) audio.play().catch(()=>{}); };
+</script>
+</body>
+</html>
