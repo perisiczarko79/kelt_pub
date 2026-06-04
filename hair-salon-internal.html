@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>KlikHub - Frizerski salon (Interni organizator)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0A0C10;
+            --bg-secondary: #14161C;
+            --bg-card: #1A1D25;
+            --bg-elevated: #22252E;
+            --accent-primary: #E85D04;
+            --accent-secondary: #FFBA08;
+            --accent-glow: rgba(232, 93, 4, 0.2);
+            --success: #2E7D32;
+            --warning: #F59E0B;
+            --danger: #DC2626;
+            --info: #3B82F6;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0A5B5;
+            --text-tertiary: #6B7280;
+            --border-light: rgba(255, 255, 255, 0.08);
+            --border-medium: rgba(255, 255, 255, 0.12);
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+            --shadow-glow: 0 0 20px rgba(232, 93, 4, 0.3);
+            --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 24px;
+            background-image: radial-gradient(circle at 25% 0%, rgba(232, 93, 4, 0.05) 0%, transparent 50%);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+        }
+        
+        /* KlikHub Header */
+        .brand-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #0A0C10 0%, #14161C 100%);
+            border-bottom: 2px solid var(--accent-primary);
+        }
+        .klikhub-logo a {
+            display: block;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+        .klikhub-logo a:hover { opacity: 0.8; }
+        .klikhub-logo img {
+            height: 55px;
+            width: auto;
+        }
+        .salon-header-center {
+            text-align: center;
+            flex: 1;
+        }
+        .salon-logo {
+            max-height: 100px;
+            width: auto;
+            margin: 0 auto 8px;
+            display: none;
+            object-fit: contain;
+        }
+        .salon-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-primary);
+            letter-spacing: -0.5px;
+        }
+        .salon-type {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        .spacer-right {
+            width: 55px;
+            flex-shrink: 0;
+        }
+        @media (max-width: 550px) {
+            .brand-header { gap: 12px; flex-wrap: wrap; }
+            .klikhub-logo img { height: 45px; }
+            .salon-name { font-size: 22px; }
+            .spacer-right { width: 45px; }
+            .salon-logo { max-height: 80px; }
+        }
+        
+        .panel { padding: 28px 32px; }
+        
+        .sticky-controls {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            z-index: 100;
+            padding: 16px 0;
+            margin: -16px 0 0 0;
+            backdrop-filter: blur(10px);
+            background: rgba(20, 22, 28, 0.95);
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            margin: 28px 0 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title i { color: var(--accent-primary); font-size: 1.3rem; }
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border-medium), transparent);
+            margin-left: 16px;
+        }
+        
+        .section-sub {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+            margin-left: 28px;
+        }
+        
+        .form-group { margin-bottom: 20px; }
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-medium);
+            font-size: 0.95rem;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            transition: var(--transition-fast);
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        
+        button {
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-base);
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #F48C06 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            box-shadow: var(--shadow-sm);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-medium);
+        }
+        .btn-secondary:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-color: var(--accent-primary);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+            color: white;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+            color: white;
+        }
+        .action-btn {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            border-radius: var(--radius-md);
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-light);
+        }
+        .action-btn:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-color: var(--accent-primary);
+            transform: translateY(-1px);
+        }
+        
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .time-btn {
+            aspect-ratio: 1 / 1;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            padding: 0;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-fast);
+            border: 1px solid var(--border-light);
+            position: relative;
+            overflow: hidden;
+        }
+        .time-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        .time-btn:hover::before { left: 100%; }
+        .time-btn:active { transform: scale(0.97); }
+        .time-btn.booked {
+            background: linear-gradient(135deg, #7F1D1D 0%, #991B1B 100%);
+            border-color: var(--danger);
+            cursor: pointer;
+        }
+        .time-btn.pending {
+            background: linear-gradient(135deg, #92400E 0%, #B45309 100%);
+            border-color: var(--warning);
+        }
+        .time-btn.blocked {
+            background: var(--bg-elevated);
+            opacity: 0.5;
+            cursor: pointer;
+            text-decoration: line-through;
+        }
+        .time-btn.selected {
+            border: 2px solid var(--accent-primary);
+            box-shadow: var(--shadow-glow);
+            transform: scale(0.98);
+        }
+        
+        .reservation-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-light);
+            transition: var(--transition-base);
+            position: relative;
+        }
+        .reservation-card:hover {
+            transform: translateX(4px);
+            border-color: var(--accent-primary);
+            background: var(--bg-elevated);
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .status-pending { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-confirmed { background: rgba(46, 125, 50, 0.2); color: #4CAF50; border: 1px solid rgba(76, 175, 80, 0.3); }
+        .status-completed { background: rgba(59, 130, 246, 0.2); color: var(--info); border: 1px solid rgba(59, 130, 246, 0.3); }
+        
+        .admin-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .admin-actions button {
+            width: auto;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            border-radius: var(--radius-sm);
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-light);
+        }
+        .admin-actions button:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-color: var(--accent-primary);
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+        .modal-content {
+            background: var(--bg-secondary);
+            max-width: 550px;
+            width: 100%;
+            padding: 28px;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-medium);
+            animation: modalSlideIn 0.3s ease;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .detail-row {
+            margin: 12px 0;
+            padding: 12px;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+        }
+        
+        .all-reservations-item {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            border: 1px solid var(--border-light);
+        }
+        .all-reservations-item:hover {
+            background: var(--bg-elevated);
+            border-color: var(--accent-primary);
+            transform: translateX(4px);
+        }
+        
+        .service-item, .interval-item {
+            background: var(--bg-card);
+            padding: 12px;
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .service-item input, .interval-item input {
+            flex: 1;
+            margin: 0;
+            min-width: 150px;
+        }
+        .service-item .remove-service, .interval-item .remove-interval {
+            background: var(--danger);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            color: white;
+        }
+        
+        .day-row {
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 12px;
+        }
+        .day-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .day-header label { font-weight: 500; width: 100px; }
+        .intervals-container { margin-left: 30px; }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-elevated);
+            color: var(--accent-primary);
+            padding: 14px 28px;
+            border-radius: 50px;
+            z-index: 3000;
+            font-weight: 500;
+            border: 1px solid var(--accent-primary);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideUp 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+        
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 4000;
+        }
+        .login-box {
+            background: var(--bg-secondary);
+            padding: 40px;
+            border-radius: var(--radius-xl);
+            max-width: 350px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid var(--accent-primary);
+            animation: modalSlideIn 0.3s ease;
+        }
+        .login-box i { font-size: 48px; color: var(--accent-primary); margin-bottom: 20px; }
+        .login-box h3 { margin-bottom: 20px; }
+        .login-box input { margin: 15px 0; }
+        
+        .flex-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        
+        input[type="date"] { background: var(--bg-card); border: 1px solid var(--border-medium); }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor: pointer; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-tertiary);
+        }
+        .empty-state i { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+        
+        .klikhub-footer {
+            margin-top: 0;
+            padding: 20px 32px;
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-primary) 100%);
+            border-top: 1px solid var(--border-light);
+            text-align: center;
+        }
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .copyright { font-size: 0.75rem; color: var(--text-tertiary); }
+        .footer-links { display: flex; gap: 20px; }
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: var(--transition-fast);
+        }
+        .footer-links a:hover { color: var(--accent-primary); }
+        
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            .panel { padding: 20px; }
+            .time-slots { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; }
+            .time-btn { font-size: 0.75rem; }
+            .section-title { font-size: 1rem; margin: 20px 0 12px; }
+            .footer-content { flex-direction: column; text-align: center; }
+        }
+        @media (max-width: 480px) {
+            .time-slots { grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 6px; }
+            .flex-row { gap: 8px; }
+            .action-btn { padding: 6px 12px; font-size: 0.7rem; }
+            .service-item { flex-direction: column; }
+            .interval-item { flex-direction: column; }
+        }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+                "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+            }
+        }
+    </script>
+</head>
+<body>
+
+<div class="container" id="app">
+    <!-- KlikHub Header -->
+    <div class="brand-header">
+        <div class="klikhub-logo">
+            <a href="/klikhub.html" target="_blank">
+                <img src="kh-logo.png" alt="KlikHub">
+            </a>
+        </div>
+        <div class="salon-header-center">
+            <img id="salonLogoImg" class="salon-logo" src="" alt="Logo salona">
+            <div id="salonName" class="salon-name">Frizerski salon</div>
+            <div class="salon-type">Interni organizator</div>
+        </div>
+        <div class="spacer-right"></div>
+    </div>
+
+    <div class="panel">
+        <div class="flex-row" style="justify-content: space-between; margin-bottom: 24px;">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button id="changePasswordBtn" class="action-btn"><i class="fas fa-key"></i> Promijeni šifru</button>
+                <button id="masterAdminBtn" class="action-btn" style="background: linear-gradient(135deg, #8B5CF6, #6D28D9); display:none;"><i class="fas fa-crown"></i> Master admin</button>
+                <button id="refreshBtn" class="action-btn"><i class="fas fa-sync-alt"></i> Osvježi</button>
+                <button id="showAllReservationsBtn" class="action-btn"><i class="fas fa-list-ul"></i> Sve rezervacije</button>
+            </div>
+        </div>
+
+        <div class="sticky-controls">
+            <div class="section-title"><i class="fas fa-calendar-week"></i> Termini</div>
+            <div class="flex-row" style="justify-content: space-between; margin-bottom: 16px; gap: 12px;">
+                <input type="date" id="datePicker" style="flex:2;">
+                <button id="addManualBtn" class="btn-primary" style="flex:1;"><i class="fas fa-plus-circle"></i> Ručno dodaj</button>
+                <button id="blockSlotBtn" class="btn-danger" style="flex:1;"><i class="fas fa-ban"></i> Blokiraj termin</button>
+            </div>
+            <div id="selectedDateDisplay" class="section-sub"></div>
+        </div>
+        <div id="timeSlotsContainer" class="time-slots"></div>
+
+        <div class="section-title"><i class="fas fa-clock"></i> Rezervacije na čekanju</div>
+        <div id="pendingReservationsList"></div>
+
+        <div class="section-title"><i class="fas fa-check-circle"></i> Potvrđene rezervacije</div>
+        <div id="confirmedReservationsList"></div>
+
+        <div class="section-title"><i class="fas fa-check-double"></i> Završene rezervacije</div>
+        <div id="completedReservationsList"></div>
+    </div>
+    
+    <div class="klikhub-footer">
+        <div class="footer-content">
+            <div class="copyright"><i class="far fa-copyright"></i> 2024 KlikHub. Sva prava zadržana.</div>
+            <div class="footer-links">
+                <a href="mailto:klikhub.app@gmail.com"><i class="fas fa-envelope"></i> klikhub.app@gmail.com</a>
+                <a href="tel:+38765387281"><i class="fas fa-phone"></i> +387 65 387 281</a>
+                <a href="https://wa.me/38765387281" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from 'firebase/app';
+    import { getDatabase, ref, get, set, push, update, remove, onValue, off } from 'firebase/database';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyALY3oKvPW_mDZiaBl0EdFCkTjd6fqwisQ",
+        authDomain: "kelt-pub-menu-2df61.firebaseapp.com",
+        databaseURL: "https://kelt-pub-menu-2df61-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "kelt-pub-menu-2df61",
+        storageBucket: "kelt-pub-menu-2df61.firebasestorage.app"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let salonId = null;
+    function getSalonIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        let id = params.get('salon');
+        if (!id) {
+            id = prompt('Unesite ID salona (npr. gradski_salon):');
+            if (id) window.history.replaceState({}, '', `?salon=${encodeURIComponent(id)}`);
+            else throw new Error('Missing salon ID');
+        }
+        return id;
+    }
+    try { salonId = getSalonIdFromUrl(); }
+    catch(e) {
+        document.body.innerHTML = '<div style="text-align:center;margin-top:50px;">Greška: nedostaje ID salona.</div>';
+        throw e;
+    }
+
+    const reservationsRef = ref(db, `hairSalons/${salonId}/reservations`);
+    const settingsRef = ref(db, `hairSalons/${salonId}/settings`);
+    const servicesRef = ref(db, `hairSalons/${salonId}/services`);
+    const workingHoursRef = ref(db, `hairSalons/${salonId}/settings/workingHours`);
+
+    let servicesList = [];
+    let workingHours = {};
+    let slotInterval = 30;
+    let isLoggedIn = false;
+    let isMasterAdmin = false;
+    let currentAdminPassword = 'salon123';
+    let reservationsListener = null;
+
+    async function loadServices() {
+        const snap = await get(servicesRef);
+        if (snap.exists() && Array.isArray(snap.val())) {
+            servicesList = snap.val();
+        } else {
+            servicesList = [
+                { name: "Muško šišanje", duration: 30 },
+                { name: "Žensko šišanje", duration: 30 },
+                { name: "Šišanje + brada", duration: 45 },
+                { name: "Feniranje", duration: 30 }
+            ];
+            await set(servicesRef, servicesList);
+        }
+    }
+
+    async function loadWorkingHours() {
+        const snap = await get(workingHoursRef);
+        if (snap.exists()) {
+            workingHours = snap.val();
+        } else {
+            workingHours = {
+                monday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                tuesday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                wednesday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                thursday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                friday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                saturday: { enabled: true, intervals: [{ start: "09:00", end: "15:00" }] },
+                sunday: { enabled: false, intervals: [] }
+            };
+            await set(workingHoursRef, workingHours);
+        }
+    }
+
+    async function loadSlotInterval() {
+        const snap = await get(settingsRef);
+        if (snap.exists() && snap.val().slotInterval) {
+            slotInterval = snap.val().slotInterval;
+        } else {
+            slotInterval = 30;
+            await update(settingsRef, { slotInterval });
+        }
+    }
+
+    async function loadSalonNameAndLogo() {
+        const snap = await get(settingsRef);
+        if (snap.exists()) {
+            if (snap.val().name) document.getElementById('salonName').textContent = snap.val().name;
+            if (snap.val().logoBase64) {
+                const img = document.getElementById('salonLogoImg');
+                img.src = snap.val().logoBase64;
+                img.style.display = 'block';
+            }
+        }
+    }
+
+    async function autoCompleteOldReservations() {
+        const snapshot = await get(reservationsRef);
+        const all = snapshot.val() || {};
+        const now = new Date();
+        const updates = {};
+        for (const [id, res] of Object.entries(all)) {
+            if (res.status === 'confirmed') {
+                const [year, month, day] = res.date.split('-');
+                const [hour, minute] = res.time.split(':');
+                const resDateTime = new Date(year, month - 1, day, hour, minute);
+                if (resDateTime < now) {
+                    updates[`hairSalons/${salonId}/reservations/${id}/status`] = 'completed';
+                }
+            }
+        }
+        if (Object.keys(updates).length) await update(ref(db), updates);
+    }
+
+    function startRealtimeSync() {
+        if (reservationsListener) off(reservationsRef, 'value', reservationsListener);
+        reservationsListener = onValue(reservationsRef, async () => {
+            await renderAllLists();
+            await renderTimeSlots();
+        }, (error) => { showToast('Greška pri sinhronizaciji: ' + error.message); });
+    }
+
+    function getTimeSlotsForDate(date) {
+        const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+        const dayOfWeek = dayNames[new Date(date).getDay()];
+        const dayData = workingHours[dayOfWeek];
+        if (!dayData || !dayData.enabled) return [];
+        const slots = [];
+        for (const interval of dayData.intervals) {
+            let [sh, sm] = interval.start.split(':').map(Number);
+            let [eh, em] = interval.end.split(':').map(Number);
+            let start = sh * 60 + sm;
+            let end = eh * 60 + em;
+            for (let t = start; t < end; t += slotInterval) {
+                slots.push(`${Math.floor(t/60).toString().padStart(2,'0')}:${(t%60).toString().padStart(2,'0')}`);
+            }
+        }
+        return slots;
+    }
+
+    function getSlotsOccupiedByReservation(startTime, durationMinutes) {
+        const slots = [];
+        let [h, m] = startTime.split(':').map(Number);
+        let total = h * 60 + m;
+        let remaining = durationMinutes;
+        while (remaining > 0) {
+            slots.push(`${Math.floor(total/60).toString().padStart(2,'0')}:${(total%60).toString().padStart(2,'0')}`);
+            total += slotInterval;
+            remaining -= slotInterval;
+        }
+        return slots;
+    }
+
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const [y, m, d] = dateStr.split('-');
+        return `${d}.${m}.${y}.`;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m]));
+    }
+
+    async function loadReservationsForDate(date) {
+        const snap = await get(reservationsRef);
+        const all = snap.val() || {};
+        return Object.entries(all).filter(([, res]) => res.date === date).map(([id, res]) => ({ id, ...res }));
+    }
+
+    async function loadBlockedSlotsForDate(date) {
+        const snap = await get(ref(db, `hairSalons/${salonId}/blockedSlots/${date}`));
+        return snap.exists() ? Object.keys(snap.val()) : [];
+    }
+
+    async function renderTimeSlots() {
+        const date = document.getElementById('datePicker').value;
+        const container = document.getElementById('timeSlotsContainer');
+        if (!date) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-times"></i><br>Odaberite datum</div>';
+            document.getElementById('selectedDateDisplay').innerHTML = '';
+            return;
+        }
+        document.getElementById('selectedDateDisplay').innerHTML = `<i class="fas fa-calendar-day"></i> ${formatDate(date)}`;
+        const [reservations, blocked, allSlots] = await Promise.all([
+            loadReservationsForDate(date),
+            loadBlockedSlotsForDate(date),
+            Promise.resolve(getTimeSlotsForDate(date))
+        ]);
+        container.innerHTML = '';
+        const occupiedBy = new Map();
+        for (const res of reservations) {
+            const duration = res.duration || servicesList.find(s => s.name === res.service)?.duration || 30;
+            for (const slot of getSlotsOccupiedByReservation(res.time, duration)) {
+                occupiedBy.set(slot, { status: res.status, id: res.id, data: res });
+            }
+        }
+        if (allSlots.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-moon"></i><br>Nema radnih termina za ovaj datum</div>';
+            return;
+        }
+        for (const slot of allSlots) {
+            const btn = document.createElement('button');
+            btn.className = 'time-btn';
+            btn.innerHTML = `<i class="fas fa-clock" style="font-size:.7rem;margin-right:4px;"></i>${slot}`;
+            if (blocked.includes(slot)) {
+                btn.classList.add('blocked');
+                btn.onclick = async () => {
+                    await remove(ref(db, `hairSalons/${salonId}/blockedSlots/${date}/${slot}`));
+                    showToast(`Termin ${slot} odblokiran`);
+                    renderTimeSlots();
+                };
+            } else if (occupiedBy.has(slot)) {
+                const occ = occupiedBy.get(slot);
+                btn.classList.add(occ.status === 'pending' ? 'pending' : 'booked');
+                btn.onclick = () => showReservationDetails(occ.id, occ.data);
+            } else {
+                btn.onclick = () => showAddReservationModal(slot);
+            }
+            container.appendChild(btn);
+        }
+    }
+
+    async function renderAllLists() {
+        const snapshot = await get(reservationsRef);
+        const all = snapshot.val() || {};
+        const pending = [], confirmed = [], completed = [];
+        for (const [id, res] of Object.entries(all)) {
+            const [year, month, day] = res.date.split('-');
+            const [hour, minute] = res.time.split(':');
+            const dt = new Date(year, month - 1, day, hour, minute);
+            if (res.status === 'pending') pending.push({ id, ...res, dateTime: dt });
+            else if (res.status === 'confirmed') confirmed.push({ id, ...res, dateTime: dt });
+            else if (res.status === 'completed') completed.push({ id, ...res, dateTime: dt });
+        }
+        pending.sort((a,b) => a.dateTime - b.dateTime);
+        confirmed.sort((a,b) => a.dateTime - b.dateTime);
+        completed.sort((a,b) => b.dateTime - a.dateTime);
+        renderList('pendingReservationsList', pending, 'pending');
+        renderList('confirmedReservationsList', confirmed, 'confirmed');
+        renderList('completedReservationsList', completed, 'completed');
+        attachListEvents();
+    }
+
+    function renderList(containerId, list, type) {
+        const container = document.getElementById(containerId);
+        const emptyMessages = {
+            pending:   { icon: 'fa-hourglass-half', text: 'Nema rezervacija na čekanju' },
+            confirmed: { icon: 'fa-check-circle',   text: 'Nema potvrđenih rezervacija' },
+            completed: { icon: 'fa-check-double',   text: 'Nema završenih rezervacija'  }
+        };
+        if (list.length === 0) {
+            const e = emptyMessages[type];
+            container.innerHTML = `<div class="empty-state"><i class="fas ${e.icon}"></i><br>${e.text}</div>`;
+            return;
+        }
+        container.innerHTML = '';
+        for (const res of list) {
+            const div = document.createElement('div');
+            div.className = 'reservation-card';
+            const statusMap = {
+                pending:   { cls: 'status-pending',   icon: 'fa-clock',        label: 'Na čekanju' },
+                confirmed: { cls: 'status-confirmed', icon: 'fa-check-circle', label: 'Potvrđeno'  },
+                completed: { cls: 'status-completed', icon: 'fa-check-double', label: 'Završeno'   }
+            };
+            const s = statusMap[res.status];
+            let actions = '';
+            if (type === 'pending') {
+                actions = `<button class="pending-confirm" data-id="${res.id}"><i class="fas fa-check"></i> Potvrdi</button>
+                           <button class="pending-cancel" data-id="${res.id}"><i class="fas fa-times"></i> Otkaži</button>
+                           <button class="pending-block" data-id="${res.id}" data-date="${res.date}" data-time="${res.time}" data-duration="${res.duration || 30}"><i class="fas fa-lock"></i> Blokiraj</button>`;
+            } else if (type === 'confirmed') {
+                actions = `<button class="confirmed-complete" data-id="${res.id}"><i class="fas fa-check-double"></i> Završi</button>
+                           <button class="confirmed-cancel" data-id="${res.id}"><i class="fas fa-trash"></i> Otkaži</button>
+                           <button class="confirmed-block" data-id="${res.id}" data-date="${res.date}" data-time="${res.time}" data-duration="${res.duration || 30}"><i class="fas fa-lock"></i> Blokiraj</button>`;
+            } else {
+                actions = `<button class="completed-delete" data-id="${res.id}"><i class="fas fa-trash-alt"></i> Obriši</button>`;
+            }
+            div.innerHTML = `
+                <div><i class="fas fa-calendar-alt"></i> <strong>${formatDate(res.date)} ${res.time}</strong> – ${escapeHtml(res.service)} (${res.duration || 30} min) <span class="status-badge ${s.cls}"><i class="fas ${s.icon}"></i> ${s.label}</span></div>
+                <div><i class="fas fa-user"></i> ${escapeHtml(res.clientName)}</div>
+                <div><i class="fas fa-phone"></i> ${escapeHtml(res.clientPhone)}</div>
+                <div class="admin-actions">${actions}</div>
+            `;
+            container.appendChild(div);
+        }
+    }
+
+    function attachListEvents() {
+        document.querySelectorAll('.pending-confirm').forEach(btn => {
+            btn.onclick = async () => {
+                await update(ref(db, `hairSalons/${salonId}/reservations/${btn.dataset.id}`), { status: 'confirmed' });
+                showToast('Rezervacija potvrđena');
+            };
+        });
+        document.querySelectorAll('.pending-cancel, .confirmed-cancel').forEach(btn => {
+            btn.onclick = async () => {
+                if (!confirm('Sigurno želite otkazati?')) return;
+                await remove(ref(db, `hairSalons/${salonId}/reservations/${btn.dataset.id}`));
+                showToast('Rezervacija otkazana');
+            };
+        });
+        document.querySelectorAll('.confirmed-complete').forEach(btn => {
+            btn.onclick = async () => {
+                await update(ref(db, `hairSalons/${salonId}/reservations/${btn.dataset.id}`), { status: 'completed' });
+                showToast('Označeno kao završeno');
+            };
+        });
+        document.querySelectorAll('.completed-delete').forEach(btn => {
+            btn.onclick = async () => {
+                if (!confirm('Trajno obrisati ovu rezervaciju?')) return;
+                await remove(ref(db, `hairSalons/${salonId}/reservations/${btn.dataset.id}`));
+                showToast('Rezervacija obrisana');
+            };
+        });
+        document.querySelectorAll('.pending-block, .confirmed-block').forEach(btn => {
+            btn.onclick = async () => {
+                const { date, time, duration } = btn.dataset;
+                const dur = parseInt(duration) || 30;
+                if (!confirm(`Blokirati termin ${formatDate(date)} od ${time} (${dur} min)?`)) return;
+                const slots = getSlotsOccupiedByReservation(time, dur);
+                for (const slot of slots) await set(ref(db, `hairSalons/${salonId}/blockedSlots/${date}/${slot}`), true);
+                if (btn.dataset.id) await remove(ref(db, `hairSalons/${salonId}/reservations/${btn.dataset.id}`));
+                showToast('Termin blokiran');
+                renderTimeSlots();
+            };
+        });
+    }
+
+    async function showReservationDetails(resId, reservation) {
+        const dur = reservation.duration || 30;
+        const statusMap = {
+            pending:   { label: 'Na čekanju', icon: 'fa-clock' },
+            confirmed: { label: 'Potvrđeno',  icon: 'fa-check-circle' },
+            completed: { label: 'Završeno',   icon: 'fa-check-double' }
+        };
+        const s = statusMap[reservation.status];
+        const modalDiv = document.createElement('div');
+        modalDiv.className = 'modal';
+        modalDiv.innerHTML = `
+            <div class="modal-content">
+                <h3><i class="fas ${s.icon}" style="color:var(--accent-primary);margin-right:10px;"></i>Detalji rezervacije</h3>
+                <div class="detail-row"><i class="fas fa-calendar-alt"></i> <strong>Datum:</strong> ${formatDate(reservation.date)}</div>
+                <div class="detail-row"><i class="fas fa-clock"></i> <strong>Vrijeme:</strong> ${reservation.time} (${dur} min)</div>
+                <div class="detail-row"><i class="fas fa-cut"></i> <strong>Usluga:</strong> ${escapeHtml(reservation.service)}</div>
+                <div class="detail-row"><i class="fas fa-user"></i> <strong>Ime:</strong> ${escapeHtml(reservation.clientName)}</div>
+                <div class="detail-row"><i class="fas fa-phone"></i> <strong>Telefon:</strong> ${escapeHtml(reservation.clientPhone)}</div>
+                <div class="detail-row"><i class="fas fa-tag"></i> <strong>Status:</strong> ${s.label}</div>
+                <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px;">
+                    ${reservation.status === 'pending' ? `<button id="mdConfirm" class="btn-success"><i class="fas fa-check"></i> Potvrdi</button>` : ''}
+                    ${reservation.status === 'confirmed' ? `<button id="mdComplete" style="background:var(--info);color:#fff;padding:10px 20px;border-radius:var(--radius-md);font-weight:600;"><i class="fas fa-check-double"></i> Završi</button>` : ''}
+                    ${reservation.status !== 'canceled' ? `<button id="mdCancel" class="btn-danger"><i class="fas fa-trash"></i> Otkaži</button>` : ''}
+                    <button id="mdClose" class="btn-secondary">Zatvori</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+        modalDiv.querySelector('#mdClose').onclick = () => modalDiv.remove();
+        if (reservation.status === 'pending') {
+            modalDiv.querySelector('#mdConfirm').onclick = async () => {
+                await update(ref(db, `hairSalons/${salonId}/reservations/${resId}`), { status: 'confirmed' });
+                showToast('Rezervacija potvrđena');
+                modalDiv.remove();
+            };
+        }
+        if (reservation.status === 'confirmed') {
+            modalDiv.querySelector('#mdComplete').onclick = async () => {
+                await update(ref(db, `hairSalons/${salonId}/reservations/${resId}`), { status: 'completed' });
+                showToast('Označeno kao završeno');
+                modalDiv.remove();
+            };
+        }
+        if (reservation.status !== 'canceled') {
+            modalDiv.querySelector('#mdCancel').onclick = async () => {
+                if (!confirm('Sigurno želite otkazati?')) return;
+                await remove(ref(db, `hairSalons/${salonId}/reservations/${resId}`));
+                showToast('Rezervacija otkazana');
+                modalDiv.remove();
+            };
+        }
+    }
+
+    async function showAddReservationModal(selectedTime = null) {
+        const date = document.getElementById('datePicker').value;
+        if (!date) { showToast('Odaberite datum'); return; }
+        await loadServices();
+        const allSlots = getTimeSlotsForDate(date);
+        const timeHtml = selectedTime
+            ? `<input type="text" value="${selectedTime}" readonly style="background:var(--bg-elevated);">`
+            : `<select id="modalTimeSelect" style="border-radius:var(--radius-md);"><option value="">-- Odaberi termin --</option>${allSlots.map(t => `<option value="${t}">${t}</option>`).join('')}</select>`;
+        const servicesOptions = servicesList.map(s => `<option value="${s.name}" data-duration="${s.duration}">${s.name} (${s.duration} min)</option>`).join('');
+        const modalDiv = document.createElement('div');
+        modalDiv.className = 'modal';
+        modalDiv.innerHTML = `
+            <div class="modal-content">
+                <h3><i class="fas fa-plus-circle" style="color:var(--accent-primary);margin-right:10px;"></i>Dodaj rezervaciju za ${formatDate(date)}</h3>
+                <div class="form-group"><label><i class="fas fa-clock"></i> Termin</label>${timeHtml}</div>
+                <div class="form-group"><label><i class="fas fa-cut"></i> Usluga</label><select id="modalServiceSelect">${servicesOptions}</select></div>
+                <div class="form-group"><label><i class="fas fa-user"></i> Ime klijenta</label><input type="text" id="modalClientName" placeholder="Ime i prezime"></div>
+                <div class="form-group"><label><i class="fas fa-phone"></i> Telefon</label><input type="text" id="modalClientPhone" placeholder="Broj telefona"></div>
+                <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px;"><button id="modalCancelAdd" class="btn-secondary">Odustani</button><button id="modalSaveAdd" class="btn-primary"><i class="fas fa-save"></i> Dodaj rezervaciju</button></div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+        modalDiv.querySelector('#modalCancelAdd').onclick = () => modalDiv.remove();
+        modalDiv.querySelector('#modalSaveAdd').onclick = async () => {
+            let time = selectedTime;
+            if (!time) {
+                time = modalDiv.querySelector('#modalTimeSelect').value;
+                if (!time) { showToast('Odaberite termin'); return; }
+            }
+            const serviceSelect = modalDiv.querySelector('#modalServiceSelect');
+            const serviceName = serviceSelect.value;
+            const duration = parseInt(serviceSelect.options[serviceSelect.selectedIndex].dataset.duration);
+            const name = modalDiv.querySelector('#modalClientName').value.trim();
+            const phone = modalDiv.querySelector('#modalClientPhone').value.trim();
+            if (!name || !phone) { showToast('Unesite ime i broj telefona'); return; }
+            const [reservations, blocked] = await Promise.all([loadReservationsForDate(date), loadBlockedSlotsForDate(date)]);
+            const slotsToOccupy = getSlotsOccupiedByReservation(time, duration);
+            const occupiedSet = new Set(blocked);
+            for (const res of reservations) {
+                const d = res.duration || 30;
+                for (const s of getSlotsOccupiedByReservation(res.time, d)) occupiedSet.add(s);
+            }
+            if (slotsToOccupy.some(s => occupiedSet.has(s))) { showToast('Termin nije slobodan za odabranu uslugu'); return; }
+            await push(reservationsRef, { date, time, service: serviceName, duration, clientName: name, clientPhone: phone, status: 'confirmed', createdAt: Date.now() });
+            showToast('Rezervacija dodana');
+            modalDiv.remove();
+        };
+    }
+
+    async function showBlockSlotModal() {
+        const date = document.getElementById('datePicker').value;
+        if (!date) { showToast('Odaberite datum'); return; }
+        const [reservations, blocked, allSlots] = await Promise.all([loadReservationsForDate(date), loadBlockedSlotsForDate(date), Promise.resolve(getTimeSlotsForDate(date))]);
+        const occupiedSet = new Set(blocked);
+        for (const res of reservations) {
+            const d = res.duration || 30;
+            for (const s of getSlotsOccupiedByReservation(res.time, d)) occupiedSet.add(s);
+        }
+        const freeSlots = allSlots.filter(s => !occupiedSet.has(s));
+        if (!freeSlots.length) { showToast('Nema slobodnih termina za blokiranje'); return; }
+        const modalDiv = document.createElement('div');
+        modalDiv.className = 'modal';
+        modalDiv.innerHTML = `
+            <div class="modal-content">
+                <h3><i class="fas fa-ban" style="color:var(--danger);margin-right:10px;"></i>Blokiraj termin za ${formatDate(date)}</h3>
+                <div class="form-group"><label>Odaberi termin</label><select id="blockTimeSelect">${freeSlots.map(s => `<option value="${s}">${s}</option>`).join('')}</select></div>
+                <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px;"><button id="modalCancelBlock" class="btn-secondary">Odustani</button><button id="modalConfirmBlock" class="btn-danger"><i class="fas fa-lock"></i> Blokiraj</button></div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+        modalDiv.querySelector('#modalCancelBlock').onclick = () => modalDiv.remove();
+        modalDiv.querySelector('#modalConfirmBlock').onclick = async () => {
+            const time = modalDiv.querySelector('#blockTimeSelect').value;
+            await set(ref(db, `hairSalons/${salonId}/blockedSlots/${date}/${time}`), true);
+            showToast(`Termin ${time} blokiran`);
+            modalDiv.remove();
+            renderTimeSlots();
+        };
+    }
+
+    async function showAllReservations() {
+        const snapshot = await get(reservationsRef);
+        const all = snapshot.val() || {};
+        const list = Object.entries(all).map(([id, res]) => ({ id, ...res })).sort((a,b) => (a.date + a.time).localeCompare(b.date + b.time));
+        const statusMap = {
+            pending:   { cls: 'status-pending',   icon: 'fa-clock',        label: 'Na čekanju' },
+            confirmed: { cls: 'status-confirmed', icon: 'fa-check-circle', label: 'Potvrđeno'  },
+            completed: { cls: 'status-completed', icon: 'fa-check-double', label: 'Završeno'   }
+        };
+        const itemsHtml = list.map(res => {
+            const s = statusMap[res.status];
+            return `<div class="all-reservations-item" data-id="${res.id}">
+                        <div><i class="fas fa-calendar-alt"></i> <strong>${formatDate(res.date)} ${res.time}</strong> – ${escapeHtml(res.service)} (${res.duration} min)</div>
+                        <div><i class="fas fa-user"></i> ${escapeHtml(res.clientName)} &nbsp; <i class="fas fa-phone"></i> ${escapeHtml(res.clientPhone)}</div>
+                        <div><span class="status-badge ${s.cls}"><i class="fas ${s.icon}"></i> ${s.label}</span></div>
+                    </div>`;
+        }).join('') || '<div class="empty-state"><i class="fas fa-inbox"></i><br>Nema rezervacija</div>';
+        const modalDiv = document.createElement('div');
+        modalDiv.className = 'modal';
+        modalDiv.innerHTML = `<div class="modal-content"><h3><i class="fas fa-list-ul"></i> Sve rezervacije (${list.length})</h3><div style="max-height:60vh;overflow-y:auto;">${itemsHtml}</div><div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px;"><button id="closeAllModal" class="btn-secondary">Zatvori</button></div></div>`;
+        document.body.appendChild(modalDiv);
+        modalDiv.querySelectorAll('.all-reservations-item').forEach(el => {
+            el.onclick = async () => {
+                const res = list.find(r => r.id === el.dataset.id);
+                if (res) { modalDiv.remove(); await showReservationDetails(res.id, res); }
+            };
+        });
+        modalDiv.querySelector('#closeAllModal').onclick = () => modalDiv.remove();
+    }
+
+    async function changeAdminPassword() {
+        const oldPass = prompt('Unesite trenutnu admin šifru:');
+        if (!oldPass) return;
+        if (oldPass !== currentAdminPassword) { showToast('Pogrešna stara šifra'); return; }
+        const newPass = prompt('Unesite novu admin šifru (minimum 4 znaka):');
+        if (newPass && newPass.trim().length >= 4) {
+            await update(settingsRef, { adminPassword: newPass.trim() });
+            currentAdminPassword = newPass.trim();
+            showToast('Šifra uspješno promijenjena');
+        } else { showToast('Šifra nije promijenjena (mora imati bar 4 znaka)'); }
+    }
+
+    async function showMasterAdminModal() {
+        if (!isMasterAdmin) { showToast('Nemate ovlaštenje za ove postavke'); return; }
+        let tempServices = JSON.parse(JSON.stringify(servicesList));
+        let tempWH = JSON.parse(JSON.stringify(workingHours));
+        const modalDiv = document.createElement('div');
+        modalDiv.className = 'modal';
+        modalDiv.innerHTML = `
+            <div class="modal-content">
+                <h3><i class="fas fa-crown" style="color:var(--accent-secondary);"></i> Master admin – Postavke salona</h3>
+                <h4><i class="fas fa-cut"></i> Usluge</h4><div id="masterServicesContainer"></div><button type="button" id="masterAddServiceBtn" class="btn-secondary" style="margin-top:8px;"><i class="fas fa-plus"></i> Dodaj uslugu</button>
+                <hr><h4><i class="fas fa-clock"></i> Radno vrijeme</h4><div id="masterWorkingHoursContainer"></div>
+                <hr><h4><i class="fas fa-hourglass-half"></i> Interval termina (minute)</h4>
+                <select id="masterSlotIntervalSelect">${[15,30,45,60].map(v => `<option value="${v}" ${slotInterval === v ? 'selected' : ''}>${v} minuta</option>`).join('')}</select>
+                <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px;"><button id="closeMasterModal" class="btn-secondary">Odustani</button><button id="saveMasterBtn" class="btn-primary"><i class="fas fa-save"></i> Sačuvaj promjene</button></div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+        const servicesContainer = modalDiv.querySelector('#masterServicesContainer');
+        const renderServices = () => {
+            servicesContainer.innerHTML = '';
+            tempServices.forEach((s, idx) => {
+                const div = document.createElement('div');
+                div.className = 'service-item';
+                div.innerHTML = `<input type="text" class="svc-name" value="${escapeHtml(s.name)}" data-idx="${idx}" style="flex:2;"><input type="number" class="svc-dur" value="${s.duration}" data-idx="${idx}" style="width:130px;"><button class="remove-service" data-idx="${idx}"><i class="fas fa-trash"></i></button>`;
+                servicesContainer.appendChild(div);
+            });
+            servicesContainer.querySelectorAll('.svc-name').forEach(inp => inp.onchange = () => { tempServices[inp.dataset.idx].name = inp.value; });
+            servicesContainer.querySelectorAll('.svc-dur').forEach(inp => inp.onchange = () => { tempServices[inp.dataset.idx].duration = parseInt(inp.value); });
+            servicesContainer.querySelectorAll('.remove-service').forEach(btn => btn.onclick = () => { tempServices.splice(parseInt(btn.dataset.idx), 1); renderServices(); });
+        };
+        renderServices();
+        modalDiv.querySelector('#masterAddServiceBtn').onclick = () => { tempServices.push({ name: "Nova usluga", duration: 30 }); renderServices(); };
+        const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+        const dayNames = ['Ponedjeljak','Utorak','Srijeda','Četvrtak','Petak','Subota','Nedjelja'];
+        const whContainer = modalDiv.querySelector('#masterWorkingHoursContainer');
+        const renderWorkingHours = () => {
+            whContainer.innerHTML = '';
+            days.forEach((day, idx) => {
+                const dayData = tempWH[day] || { enabled: true, intervals: [{ start:"09:00", end:"20:00" }] };
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day-row';
+                dayDiv.innerHTML = `<div class="day-header"><label style="width:100px;">${dayNames[idx]}</label><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" class="day-enabled" ${dayData.enabled ? 'checked' : ''}> Radni dan</label></div><div class="intervals-container"></div><button class="btn-secondary add-interval" data-day="${day}" style="margin-top:8px;"><i class="fas fa-plus"></i> Dodaj interval</button>`;
+                whContainer.appendChild(dayDiv);
+                const ic = dayDiv.querySelector('.intervals-container');
+                const renderIntervals = () => {
+                    ic.innerHTML = '';
+                    (tempWH[day]?.intervals || []).forEach((interval, iidx) => {
+                        const intDiv = document.createElement('div');
+                        intDiv.className = 'interval-item';
+                        intDiv.innerHTML = `<input type="time" class="int-start" value="${interval.start}" data-day="${day}" data-idx="${iidx}"><span>-</span><input type="time" class="int-end" value="${interval.end}" data-day="${day}" data-idx="${iidx}"><button class="remove-interval" data-day="${day}" data-idx="${iidx}"><i class="fas fa-trash"></i></button>`;
+                        ic.appendChild(intDiv);
+                    });
+                    ic.querySelectorAll('.int-start').forEach(inp => inp.onchange = () => { tempWH[inp.dataset.day].intervals[inp.dataset.idx].start = inp.value; });
+                    ic.querySelectorAll('.int-end').forEach(inp => inp.onchange = () => { tempWH[inp.dataset.day].intervals[inp.dataset.idx].end = inp.value; });
+                    ic.querySelectorAll('.remove-interval').forEach(btn => btn.onclick = () => { tempWH[btn.dataset.day].intervals.splice(parseInt(btn.dataset.idx), 1); renderWorkingHours(); });
+                };
+                renderIntervals();
+                dayDiv.querySelector('.day-enabled').onchange = e => { if (!tempWH[day]) tempWH[day] = { enabled: false, intervals: [] }; tempWH[day].enabled = e.target.checked; };
+                dayDiv.querySelector('.add-interval').onclick = () => { if (!tempWH[day]) tempWH[day] = { enabled: true, intervals: [] }; if (!tempWH[day].intervals) tempWH[day].intervals = []; tempWH[day].intervals.push({ start:"09:00", end:"17:00" }); renderWorkingHours(); };
+            });
+        };
+        renderWorkingHours();
+        modalDiv.querySelector('#closeMasterModal').onclick = () => modalDiv.remove();
+        modalDiv.querySelector('#saveMasterBtn').onclick = async () => {
+            const newInterval = parseInt(modalDiv.querySelector('#masterSlotIntervalSelect').value);
+            try {
+                await Promise.all([set(servicesRef, tempServices), set(workingHoursRef, tempWH), update(settingsRef, { slotInterval: newInterval })]);
+                showToast('Postavke salona su sačuvane');
+                modalDiv.remove();
+                await Promise.all([loadServices(), loadWorkingHours(), loadSlotInterval()]);
+                renderTimeSlots();
+            } catch(e) { showToast('Greška: ' + e.message); }
+        };
+    }
+
+    document.getElementById('datePicker').addEventListener('change', renderTimeSlots);
+    document.getElementById('addManualBtn').onclick = () => showAddReservationModal(null);
+    document.getElementById('blockSlotBtn').onclick = () => showBlockSlotModal();
+    document.getElementById('refreshBtn').onclick = () => { renderTimeSlots(); showToast('Sve je osvježeno'); };
+    document.getElementById('changePasswordBtn').onclick = () => changeAdminPassword();
+    document.getElementById('showAllReservationsBtn').onclick = () => showAllReservations();
+    document.getElementById('masterAdminBtn').onclick = () => showMasterAdminModal();
+
+    async function initAfterLogin() {
+        await Promise.all([loadServices(), loadWorkingHours(), loadSlotInterval(), loadSalonNameAndLogo()]);
+        await autoCompleteOldReservations();
+        document.getElementById('datePicker').value = new Date().toISOString().split('T')[0];
+        await renderTimeSlots();
+        startRealtimeSync();
+    }
+
+    function showLogin() {
+        const overlay = document.createElement('div');
+        overlay.className = 'login-overlay';
+        overlay.innerHTML = `<div class="login-box"><i class="fas fa-cut"></i><h3>Prijava za frizera</h3><input type="password" id="adminPassInput" placeholder="Šifra"><button id="adminLoginBtn" class="btn-primary" style="width:100%;"><i class="fas fa-sign-in-alt"></i> Prijavi se</button></div>`;
+        document.body.appendChild(overlay);
+        const tryLogin = async () => {
+            const pass = document.getElementById('adminPassInput').value;
+            const [settingsSnap, masterSnap] = await Promise.all([get(settingsRef), get(ref(db, 'masterPassword'))]);
+            const localPassword = settingsSnap.exists() ? settingsSnap.val().adminPassword : 'salon123';
+            const masterPassword = masterSnap.exists() ? masterSnap.val() : null;
+            if (pass === localPassword) {
+                isLoggedIn = true; isMasterAdmin = false;
+                document.getElementById('masterAdminBtn').style.display = 'none';
+                overlay.remove();
+                showToast('Uspješno ste prijavljeni');
+                await initAfterLogin();
+            } else if (masterPassword && pass === masterPassword) {
+                isLoggedIn = true; isMasterAdmin = true;
+                document.getElementById('masterAdminBtn').style.display = 'inline-block';
+                overlay.remove();
+                showToast('Prijavljeni ste kao Master admin');
+                await initAfterLogin();
+            } else { showToast('Pogrešna šifra'); }
+        };
+        document.getElementById('adminLoginBtn').onclick = tryLogin;
+        document.getElementById('adminPassInput').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+    }
+    showLogin();
+</script>
+</body>
+</html>
