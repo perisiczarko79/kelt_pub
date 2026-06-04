@@ -322,3 +322,233 @@
     margin-left:14px;
     opacity:.75;
 }
+/* ==========================================
+   KELT PREMIUM UI FIX PACK
+   ========================================== */
+
+/* X DUGME */
+
+.theme-kelt-irish-premium .close-cart,
+.theme-kelt-irish-premium .close-order{
+
+    width:42px;
+    height:42px;
+
+    border-radius:50%;
+
+    background:rgba(212,169,106,.12);
+
+    color:#D4A96A;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:22px;
+
+    border:none;
+
+    float:right;
+}
+
+/* WELCOME DUGMAD */
+
+.theme-kelt-irish-premium .welcome-msg button{
+
+    appearance:none;
+    -webkit-appearance:none;
+
+    background:
+        linear-gradient(
+            135deg,
+            #B88A45,
+            #D4A96A
+        ) !important;
+
+    color:#08110C !important;
+
+    border:none !important;
+
+    border-radius:18px;
+
+    padding:10px 16px;
+
+    font-weight:700;
+
+    box-shadow:
+        0 4px 12px rgba(212,169,106,.18);
+}
+
+/* INPUT POLJA */
+
+.theme-kelt-irish-premium input,
+.theme-kelt-irish-premium textarea,
+.theme-kelt-irish-premium select{
+
+    background:#07100B;
+
+    border:
+        1px solid rgba(212,169,106,.15);
+
+    color:#F8F3EA;
+
+    border-radius:14px;
+}
+
+.theme-kelt-irish-premium input:focus,
+.theme-kelt-irish-premium textarea:focus{
+
+    outline:none;
+
+    border-color:#D4A96A;
+
+    box-shadow:
+        0 0 15px rgba(212,169,106,.15);
+}
+
+/* STATUS NARUDŽBE */
+
+.theme-kelt-irish-premium .order-status.pending{
+
+    background:#D4A96A;
+
+    color:#08110C;
+
+    font-weight:700;
+}
+
+.theme-kelt-irish-premium .order-status.accepted{
+
+    background:#1E7A46;
+
+    color:white;
+}
+
+.theme-kelt-irish-premium .order-status.completed{
+
+    background:#2A9D5B;
+
+    color:white;
+}
+
+/* KORPA STAVKE */
+
+.theme-kelt-irish-premium .cart-item,
+.theme-kelt-irish-premium .order-item{
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(20,35,26,.95),
+            rgba(10,18,12,.95)
+        );
+
+    border:
+        1px solid rgba(212,169,106,.08);
+
+    border-radius:20px;
+}
+
+/* UKUPNO */
+
+.theme-kelt-irish-premium .cart-total,
+.theme-kelt-irish-premium .order-total{
+
+    color:#F8F3EA;
+
+    font-size:20px;
+
+    font-weight:800;
+}
+
+/* ISPRAZNI KORPU */
+
+.theme-kelt-irish-premium #clearCartBtn{
+
+    width:100%;
+
+    padding:12px;
+
+    margin:12px 0;
+
+    border:none;
+
+    border-radius:18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #7A1D1D,
+            #B22222
+        );
+
+    color:white;
+
+    font-weight:700;
+
+    font-size:15px;
+}
+
+/* POŠALJI NARUDŽBU */
+
+.theme-kelt-irish-premium .send-order-btn{
+
+    background:
+        linear-gradient(
+            135deg,
+            #B88A45,
+            #D4A96A
+        );
+
+    color:#08110C;
+
+    border:none;
+
+    font-weight:800;
+
+    border-radius:999px;
+
+    box-shadow:
+        0 8px 20px rgba(212,169,106,.20);
+}
+
+/* MODAL */
+
+.theme-kelt-irish-premium .modal-content,
+.theme-kelt-irish-premium .cart-content,
+.theme-kelt-irish-premium .order-content{
+
+    border-radius:28px;
+
+    box-shadow:
+        0 25px 60px rgba(0,0,0,.55),
+        0 0 35px rgba(212,169,106,.08);
+}
+
+/* TABELE */
+
+.theme-kelt-irish-premium .history-table th{
+
+    background:#132019;
+
+    color:#D4A96A;
+}
+
+.theme-kelt-irish-premium .history-table td{
+
+    color:#F8F3EA;
+}
+
+/* SCROLLBAR */
+
+.theme-kelt-irish-premium ::-webkit-scrollbar{
+
+    width:8px;
+}
+
+.theme-kelt-irish-premium ::-webkit-scrollbar-thumb{
+
+    background:#D4A96A;
+
+    border-radius:999px;
+}
