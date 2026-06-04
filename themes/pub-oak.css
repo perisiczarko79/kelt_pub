@@ -1,0 +1,13 @@
+.theme-pub-oak {
+    --bg-dark: #1A120B;
+    --bg-card: #2B1D13;
+    --bg-elevated: #3A281A;
+
+    --primary: #C97B36;
+    --primary-light: #E59A4C;
+
+    --text-light: #F5EBDD;
+    --text-muted: #C2A98A;
+
+    --border-color: rgba(201,123,54,.18);
+}
