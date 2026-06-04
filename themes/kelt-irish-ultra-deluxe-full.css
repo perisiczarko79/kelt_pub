@@ -1,0 +1,206 @@
+
+/* =====================================================
+   KELT IRISH ULTRA DELUXE
+   Premium Irish Pub Theme for KlikHub
+   ===================================================== */
+
+.theme-kelt-irish-ultra{
+    --bg-dark:#0c120e;
+    --bg-card:#162019;
+    --bg-elevated:#1d2b22;
+
+    --primary:#d4a96a;
+    --primary-light:#f0ca8c;
+
+    --text-light:#f5efe4;
+    --text-muted:#baa07a;
+    --text-tertiary:#7d6a4d;
+
+    --border-color:rgba(212,169,106,.15);
+    --border-medium:rgba(212,169,106,.30);
+}
+
+/* BACKGROUND */
+
+.theme-kelt-irish-ultra body{
+    background:
+    radial-gradient(circle at top, rgba(212,169,106,.12), transparent 35%),
+    radial-gradient(circle at bottom left, rgba(31,84,52,.18), transparent 40%),
+    linear-gradient(180deg,#09100b,#0c120e);
+}
+
+/* HEADER */
+
+.theme-kelt-irish-ultra .brand-header{
+    position:relative;
+}
+
+.theme-kelt-irish-ultra .brand-header::before{
+    content:"☘";
+    position:absolute;
+    left:50%;
+    top:10px;
+    transform:translateX(-50%);
+    font-size:180px;
+    color:rgba(212,169,106,.035);
+    pointer-events:none;
+}
+
+/* LOGO */
+
+.theme-kelt-irish-ultra .cafe-logo-row{
+    position:relative;
+    min-height:180px;
+}
+
+.theme-kelt-irish-ultra .cafe-logo-row::before{
+    content:"";
+    position:absolute;
+    width:240px;
+    height:240px;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    border:2px solid rgba(212,169,106,.25);
+    box-shadow:
+    0 0 40px rgba(212,169,106,.12),
+    inset 0 0 30px rgba(212,169,106,.08);
+}
+
+.theme-kelt-irish-ultra .cafe-logo-img{
+    filter:
+    drop-shadow(0 0 20px rgba(212,169,106,.25))
+    drop-shadow(0 0 40px rgba(212,169,106,.10));
+}
+
+/* CONTACT BAR */
+
+.theme-kelt-irish-ultra .klikhub-contact-bar{
+    background:linear-gradient(145deg,rgba(212,169,106,.05),rgba(0,0,0,.25));
+    border:1px solid rgba(212,169,106,.15);
+}
+
+/* NAVIGATION */
+
+.theme-kelt-irish-ultra .category-nav{
+    background:rgba(12,18,14,.95);
+    border-bottom:1px solid rgba(212,169,106,.12);
+}
+
+.theme-kelt-irish-ultra .category-nav button{
+    background:rgba(255,255,255,.02);
+    border:1px solid rgba(212,169,106,.12);
+}
+
+.theme-kelt-irish-ultra .category-nav button.active{
+    background:linear-gradient(135deg,#a77b3f,#d4a96a);
+    color:#fff;
+    box-shadow:0 0 20px rgba(212,169,106,.25);
+}
+
+/* TITLES */
+
+.theme-kelt-irish-ultra .cafe-name{
+    background:linear-gradient(180deg,#fff4d4,#d4a96a,#9f7237);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    font-weight:800;
+    letter-spacing:1px;
+}
+
+.theme-kelt-irish-ultra .category-title{
+    text-align:center;
+    color:#d4a96a;
+}
+
+.theme-kelt-irish-ultra .category-title::before,
+.theme-kelt-irish-ultra .category-title::after{
+    content:"☘";
+    margin:0 12px;
+    color:rgba(212,169,106,.45);
+}
+
+/* CARDS */
+
+.theme-kelt-irish-ultra .card{
+    background:linear-gradient(145deg,rgba(255,255,255,.02),rgba(0,0,0,.18));
+    border:1px solid rgba(212,169,106,.12);
+    box-shadow:0 10px 25px rgba(0,0,0,.25);
+}
+
+.theme-kelt-irish-ultra .card:hover{
+    border-color:rgba(212,169,106,.35);
+    box-shadow:
+    0 15px 35px rgba(0,0,0,.35),
+    0 0 20px rgba(212,169,106,.08);
+}
+
+.theme-kelt-irish-ultra .card.featured{
+    box-shadow:
+    0 0 30px rgba(212,169,106,.12),
+    0 10px 25px rgba(0,0,0,.30);
+}
+
+.theme-kelt-irish-ultra .card.featured::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-150%;
+    width:50%;
+    height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
+    transform:skewX(-25deg);
+    animation:shimmer 7s infinite;
+}
+
+@keyframes shimmer{
+    0%{left:-150%;}
+    50%,100%{left:160%;}
+}
+
+.theme-kelt-irish-ultra .item-name{
+    color:#f5efe4;
+}
+
+.theme-kelt-irish-ultra .price-display{
+    color:#d4a96a;
+    text-shadow:0 0 10px rgba(212,169,106,.20);
+}
+
+/* BUTTONS */
+
+.theme-kelt-irish-ultra .cart-btn,
+.theme-kelt-irish-ultra .waiter-btn,
+.theme-kelt-irish-ultra .badge{
+    background:linear-gradient(135deg,#a77b3f,#d4a96a);
+}
+
+.theme-kelt-irish-ultra .cart-icon{
+    background:linear-gradient(135deg,#a77b3f,#d4a96a);
+    box-shadow:0 0 25px rgba(212,169,106,.25);
+}
+
+/* MODALS */
+
+.theme-kelt-irish-ultra .modal-content,
+.theme-kelt-irish-ultra .cart-content,
+.theme-kelt-irish-ultra .order-content{
+    background:#162019;
+    border:1px solid rgba(212,169,106,.25);
+}
+
+/* FOOTER */
+
+.theme-kelt-irish-ultra .klikhub-footer{
+    background:linear-gradient(180deg,rgba(212,169,106,.04),rgba(0,0,0,.18));
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+  .theme-kelt-irish-ultra .cafe-logo-row::before{
+      width:180px;
+      height:180px;
+  }
+}
