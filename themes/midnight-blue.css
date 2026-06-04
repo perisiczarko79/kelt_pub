@@ -1,0 +1,13 @@
+.theme-midnight-blue {
+    --bg-dark: #08111F;
+    --bg-card: #102038;
+    --bg-elevated: #162B48;
+
+    --primary: #4DA3FF;
+    --primary-light: #7FC0FF;
+
+    --text-light: #F1F5F9;
+    --text-muted: #94A3B8;
+
+    --border-color: rgba(77,163,255,.15);
+}
