@@ -534,7 +534,169 @@
 
     text-transform: uppercase;
 }
+/* ==========================================
+   KELT IRISH PREMIUM FIX PACK
+   ========================================== */
 
+/* MANJA DJETELINA I KRUG IZA LOGA */
+
+.theme-kelt-irish-premium .brand-header::before{
+    opacity:.45;
+}
+
+.theme-kelt-irish-premium .cafe-logo-row::before{
+    width:170px !important;
+    height:170px !important;
+    border-width:1px;
+    opacity:.55;
+    box-shadow:
+        0 0 25px rgba(212,169,106,.10);
+}
+
+/* WELCOME PANEL */
+
+.theme-kelt-irish-premium .welcome-msg{
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(15,25,18,.95),
+            rgba(8,15,11,.95)
+        );
+
+    border:
+        1px solid rgba(212,169,106,.15);
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.25);
+}
+
+/* DUGMAD */
+
+.theme-kelt-irish-premium .welcome-msg button{
+
+    background:
+        linear-gradient(
+            135deg,
+            #B88A45,
+            #D4A96A
+        ) !important;
+
+    color:#08110C !important;
+
+    border:none !important;
+
+    border-radius:16px;
+
+    padding:8px 14px;
+
+    font-weight:700;
+
+    box-shadow:
+        0 4px 12px rgba(212,169,106,.20);
+}
+
+/* PREPORUKA KARTICA */
+
+.theme-kelt-irish-premium .card.featured{
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(16,26,20,.98),
+            rgba(8,14,10,.98)
+        ) !important;
+
+    border:
+        1px solid rgba(212,169,106,.25);
+
+    box-shadow:
+        0 0 25px rgba(212,169,106,.10),
+        0 12px 30px rgba(0,0,0,.35);
+}
+
+/* AKCIJA KARTICA */
+
+.theme-kelt-irish-premium .card.promo{
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(45,12,12,.95),
+            rgba(18,8,8,.95)
+        ) !important;
+
+    border:
+        1px solid rgba(220,70,70,.35);
+}
+
+/* ZLATNA CIJENA */
+
+.theme-kelt-irish-premium .price-display{
+
+    color:#E5C189;
+
+    text-shadow:
+        0 0 15px rgba(212,169,106,.18);
+}
+
+/* KATEGORIJE */
+
+.theme-kelt-irish-premium .category-nav{
+
+    box-shadow:
+        0 10px 35px rgba(0,0,0,.35);
+}
+
+/* KARTICE */
+
+.theme-kelt-irish-premium .card{
+
+    backdrop-filter:blur(12px);
+
+    border-radius:26px;
+}
+
+/* KORPA */
+
+.theme-kelt-irish-premium .cart-btn{
+
+    border-radius:999px;
+
+    box-shadow:
+        0 8px 20px rgba(212,169,106,.20);
+}
+
+/* KORPA IKONICA */
+
+.theme-kelt-irish-premium .cart-icon{
+
+    box-shadow:
+        0 0 30px rgba(212,169,106,.25),
+        0 8px 25px rgba(0,0,0,.35);
+}
+
+/* NASLOV KATEGORIJE */
+
+.theme-kelt-irish-premium .category-title{
+
+    text-align:center;
+    font-size:34px;
+}
+
+.theme-kelt-irish-premium .category-title::before{
+
+    content:"☘";
+    margin-right:14px;
+    opacity:.75;
+}
+
+.theme-kelt-irish-premium .category-title::after{
+
+    content:"☘";
+    margin-left:14px;
+    opacity:.75;
+}
 .theme-kelt-irish-premium .footer-motto::before {
     content: "☘ ";
 }
