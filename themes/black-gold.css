@@ -1,0 +1,13 @@
+.theme-black-gold {
+    --bg-dark: #050505;
+    --bg-card: #111111;
+    --bg-elevated: #1A1A1A;
+
+    --primary: #D4AF37;
+    --primary-light: #E8C75F;
+
+    --text-light: #FAFAFA;
+    --text-muted: #B8B8B8;
+
+    --border-color: rgba(212,175,55,.20);
+}
