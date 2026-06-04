@@ -438,7 +438,229 @@
     .theme-rustica .price-display {
         font-size: 20px;
     }
+/* =======================================================
+   RUSTICA PREMIUM EXTENSION
+   KELT PUB EDITION
+======================================================= */
 
+/* GLASS EFEKAT */
+
+.theme-rustica .card,
+.theme-rustica .modal-content,
+.theme-rustica .cart-content,
+.theme-rustica .order-content,
+.theme-rustica .history-table {
+    backdrop-filter: blur(12px);
+}
+
+/* KATEGORIJE */
+
+.theme-rustica .category-title {
+    position: relative;
+}
+
+.theme-rustica .category-title::after {
+    content: "";
+    display: block;
+
+    width: 70px;
+    height: 3px;
+
+    margin-top: 8px;
+
+    border-radius: 999px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #C4622A,
+            #D4A96A
+        );
+}
+
+/* GLATKO SKROLOVANJE */
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* SCROLLBAR */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #110C08;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #6B4226;
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #C4622A;
+}
+
+/* LOGO EFEKAT */
+
+.theme-rustica .cafe-logo-img {
+    transition:
+        transform .35s ease,
+        filter .35s ease;
+}
+
+.theme-rustica .cafe-logo-img:hover {
+    transform: scale(1.03);
+
+    filter:
+        drop-shadow(
+            0 0 35px rgba(196,98,42,.25)
+        );
+}
+
+/* KLIKHUB LOGO */
+
+.theme-rustica .kh-logo-img {
+    transition:
+        transform .3s ease,
+        filter .3s ease;
+}
+
+.theme-rustica .kh-logo-img:hover {
+    transform: translateY(-1px);
+
+    filter:
+        drop-shadow(
+            0 0 18px rgba(196,98,42,.25)
+        );
+}
+
+/* PREPORUČENI ARTIKLI */
+
+.theme-rustica .card.featured .item-name::before {
+    content: "★ ";
+    color: #D4A96A;
+}
+
+/* AKCIJA */
+
+.theme-rustica .card.promo .item-name::before {
+    content: "🔥 ";
+}
+
+/* HOVER ZA CIJENE */
+
+.theme-rustica .card:hover .price-display {
+    text-shadow:
+        0 0 20px rgba(212,169,106,.40);
+}
+
+/* DODAJ U KORPU */
+
+.theme-rustica .cart-btn {
+    letter-spacing: .3px;
+}
+
+.theme-rustica .cart-btn:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 0 28px rgba(196,98,42,.35),
+        0 10px 25px rgba(0,0,0,.35);
+}
+
+/* KORPA */
+
+.theme-rustica .cart-icon:hover {
+    box-shadow:
+        0 0 35px rgba(196,98,42,.40),
+        0 10px 30px rgba(0,0,0,.45);
+}
+
+/* KONOBAR */
+
+.theme-rustica .waiter-btn:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 0 24px rgba(168,48,32,.30);
+}
+
+/* TOAST */
+
+.theme-rustica .toast {
+    color: #F5EDE0;
+}
+
+/* TABELA ISTORIJE */
+
+.theme-rustica .history-table th {
+    background: #261A0E;
+}
+
+.theme-rustica .history-table td {
+    background: rgba(255,255,255,.01);
+}
+
+/* FOOTER */
+
+.theme-rustica .footer-motto {
+    color: #D4A96A;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+
+    font-size: 11px;
+}
+
+.theme-rustica .footer-motto:hover {
+    color: #F5EDE0;
+}
+
+/* KLIKHUB FOOTER */
+
+.theme-rustica .klikhub-footer {
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.02);
+}
+
+/* ANIMACIJA KARTICA */
+
+.theme-rustica .card {
+    will-change: transform;
+}
+
+/* MOBILNI PREMIUM */
+
+@media (max-width: 768px) {
+
+    .theme-rustica .card {
+        border-radius: 18px;
+    }
+
+    .theme-rustica .price-display {
+        font-size: 21px;
+    }
+
+    .theme-rustica .item-name {
+        font-size: 18px;
+    }
+
+    .theme-rustica .category-title {
+        font-size: 22px;
+    }
+
+    .theme-rustica .cart-btn {
+        font-size: 13px;
+    }
+
+    .theme-rustica .waiter-btn {
+        font-size: 15px;
+    }
+}
     .theme-rustica .item-name {
         font-size: 18px;
     }
