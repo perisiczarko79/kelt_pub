@@ -1,0 +1,412 @@
+.theme-kelt-pub {
+    --bg-dark: #09120D;
+    --bg-card: #132018;
+    --bg-elevated: #1B2D22;
+
+    --primary: #D4AF37;
+    --primary-light: #E7C55A;
+
+    --text-light: #F8FAF8;
+    --text-muted: #A8B5AA;
+    --text-tertiary: #6E7B72;
+
+    --border-color: rgba(212,175,55,.18);
+    --border-medium: rgba(212,175,55,.25);
+
+    --shadow-glow: 0 0 25px rgba(212,175,55,.18);
+
+    /* Dodane varijable za promo */
+    --promo-color: #DC2626;
+    --promo-glow: rgba(220,38,38,.18);
+}
+
+/* POZADINA */
+
+.theme-kelt-pub body {
+    background:
+        linear-gradient(
+            180deg,
+            #08110C 0%,
+            #0E1712 50%,
+            #09120D 100%
+        );
+}
+
+.theme-kelt-pub body::before {
+    background:
+        radial-gradient(
+            circle at top,
+            rgba(212,175,55,.10),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at bottom,
+            rgba(255,255,255,.02),
+            transparent 50%
+        );
+}
+
+/* KONTAKT BAR */
+
+.theme-kelt-pub .klikhub-contact-bar {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.03),
+            rgba(0,0,0,.15)
+        );
+
+    border: 1px solid rgba(212,175,55,.15);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.04),
+        0 10px 30px rgba(0,0,0,.25);
+}
+
+/* NAVIGACIJA */
+
+.theme-kelt-pub .category-nav {
+    background: rgba(9,18,13,.95);
+
+    border-bottom: 1px solid rgba(212,175,55,.12);
+
+    backdrop-filter: blur(16px);
+}
+
+.theme-kelt-pub .category-nav button {
+    background: rgba(255,255,255,.03);
+
+    border: 1px solid rgba(212,175,55,.08);
+
+    font-weight: 600;
+}
+
+.theme-kelt-pub .category-nav button:hover {
+    transform: translateY(-2px);
+}
+
+.theme-kelt-pub .category-nav button.active {
+    background:
+        linear-gradient(
+            135deg,
+            #D4AF37,
+            #E7C55A
+        );
+
+    color: #111111;
+
+    box-shadow:
+        0 0 18px rgba(212,175,55,.25),
+        0 8px 20px rgba(0,0,0,.25);
+}
+
+/* NASLOVI KATEGORIJA */
+
+.theme-kelt-pub .category-title {
+    color: #E7C55A;
+
+    text-shadow:
+        0 0 10px rgba(212,175,55,.15);
+
+    letter-spacing: .5px;
+}
+
+/* KARTICE */
+
+.theme-kelt-pub .card {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.02),
+            rgba(0,0,0,.12)
+        );
+
+    border: 1px solid rgba(212,175,55,.08);
+
+    box-shadow:
+        0 8px 24px rgba(0,0,0,.22);
+
+    overflow: hidden;
+}
+
+.theme-kelt-pub .card::after {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(212,175,55,.40),
+            transparent
+        );
+}
+
+.theme-kelt-pub .card:hover {
+    transform: translateY(-4px);
+
+    border-color: rgba(212,175,55,.30);
+
+    box-shadow:
+        0 15px 35px rgba(0,0,0,.35),
+        0 0 20px rgba(212,175,55,.10);
+}
+
+/* PREPORUKA */
+
+.theme-kelt-pub .card.featured {
+    border-color: rgba(212,175,55,.40);
+
+    box-shadow:
+        0 0 20px rgba(212,175,55,.12);
+}
+
+/* AKCIJA — poboljšano s glow efektom */
+
+.theme-kelt-pub .card.promo {
+    border-color: rgba(220,38,38,.50);
+
+    box-shadow:
+        0 8px 24px rgba(0,0,0,.22),
+        0 0 18px rgba(220,38,38,.12);
+}
+
+.theme-kelt-pub .card.promo:hover {
+    border-color: rgba(220,38,38,.70);
+
+    box-shadow:
+        0 15px 35px rgba(0,0,0,.35),
+        0 0 25px rgba(220,38,38,.20);
+}
+
+.theme-kelt-pub .card.promo::after {
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(220,38,38,.45),
+            transparent
+        );
+}
+
+/* NAZIV ARTIKLA */
+
+.theme-kelt-pub .item-name {
+    color: #FDFDFD;
+
+    letter-spacing: -.3px;
+}
+
+/* CIJENE */
+
+.theme-kelt-pub .price-display {
+    color: #E7C55A;
+
+    text-shadow:
+        0 0 12px rgba(212,175,55,.25);
+
+    font-weight: 800;
+}
+
+/* OPIS — dodan padding-left */
+
+.theme-kelt-pub .description {
+    border-left: 2px solid rgba(212,175,55,.35);
+
+    padding-left: 10px;
+
+    line-height: 1.55;
+}
+
+/* VELIČINE */
+
+.theme-kelt-pub .size-btn {
+    background: rgba(255,255,255,.02);
+
+    border: 1px solid rgba(212,175,55,.08);
+}
+
+.theme-kelt-pub .size-btn:hover {
+    border-color: rgba(212,175,55,.35);
+}
+
+.theme-kelt-pub .size-btn.active {
+    background:
+        linear-gradient(
+            135deg,
+            #D4AF37,
+            #E7C55A
+        );
+
+    color: #111111;
+
+    border-color: transparent;
+}
+
+/* BADGE */
+
+.theme-kelt-pub .badge {
+    background:
+        linear-gradient(
+            135deg,
+            #D4AF37,
+            #E7C55A
+        );
+
+    color: #111111;
+}
+
+/* KORPA */
+
+.theme-kelt-pub .cart-icon {
+    background:
+        linear-gradient(
+            135deg,
+            #D4AF37,
+            #E7C55A
+        );
+
+    color: #111111;
+
+    box-shadow:
+        0 0 25px rgba(212,175,55,.25),
+        0 8px 25px rgba(0,0,0,.35);
+}
+
+.theme-kelt-pub .cart-count {
+    background: #DC2626;
+}
+
+/* DODAJ U KORPU */
+
+.theme-kelt-pub .cart-btn {
+    background:
+        linear-gradient(
+            135deg,
+            #CFA62D,
+            #E7C55A
+        );
+
+    color: #111111;
+
+    font-weight: 700;
+
+    box-shadow:
+        0 0 15px rgba(212,175,55,.18);
+}
+
+.theme-kelt-pub .cart-btn:hover {
+    box-shadow:
+        0 0 25px rgba(212,175,55,.30);
+}
+
+/* POZOVI KONOBARA */
+
+.theme-kelt-pub .waiter-btn {
+    background:
+        linear-gradient(
+            135deg,
+            #C62828,
+            #E53935
+        );
+
+    box-shadow:
+        0 0 18px rgba(198,40,40,.20);
+}
+
+/* MODALI */
+
+.theme-kelt-pub .modal-content,
+.theme-kelt-pub .cart-content,
+.theme-kelt-pub .order-content {
+    border: 1px solid rgba(212,175,55,.25);
+
+    box-shadow:
+        0 20px 50px rgba(0,0,0,.45),
+        0 0 25px rgba(212,175,55,.08);
+}
+
+/* TOAST */
+
+.theme-kelt-pub .toast {
+    border: 1px solid rgba(212,175,55,.30);
+
+    box-shadow:
+        0 0 20px rgba(212,175,55,.12);
+}
+
+/* FOOTER */
+
+.theme-kelt-pub .klikhub-footer {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.02),
+            rgba(0,0,0,.12)
+        );
+
+    border-top: 1px solid rgba(212,175,55,.12);
+}
+
+/* KLIKHUB LOGO */
+
+.theme-kelt-pub .kh-logo-img {
+    filter:
+        drop-shadow(
+            0 0 10px rgba(212,175,55,.15)
+        );
+}
+
+/* PUB LOGO */
+
+.theme-kelt-pub .cafe-logo-img {
+    filter:
+        drop-shadow(
+            0 0 25px rgba(212,175,55,.15)
+        );
+}
+
+/* MOBILNI TELEFONI */
+
+@media (max-width: 768px) {
+
+    .theme-kelt-pub .card {
+        border-radius: 18px;
+    }
+
+    .theme-kelt-pub .price-display {
+        font-size: 20px;
+    }
+
+    .theme-kelt-pub .item-name {
+        font-size: 18px;
+    }
+
+    /* Smanjen hover lift na mobilnom — touch uređaji nemaju hover pa
+       translateY može izgledati čudno ako se aktivira na tap */
+
+    .theme-kelt-pub .card:hover {
+        transform: translateY(-2px);
+    }
+
+    /* Opis čitljiviji na manjem ekranu */
+
+    .theme-kelt-pub .description {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    /* Nav gumbi — malo veći touch target */
+
+    .theme-kelt-pub .category-nav button {
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+}
