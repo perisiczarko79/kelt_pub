@@ -1,0 +1,444 @@
+.theme-latte {
+    --bg-light: #F5EFE6;
+    --bg-card: #FDFAF6;
+    --bg-elevated: #FFFFFF;
+
+    --primary: #8B5E3C;
+    --primary-light: #A6724E;
+    --primary-glow: rgba(139,94,60,.15);
+
+    --accent: #C49A6C;
+    --accent-soft: rgba(196,154,108,.12);
+
+    --cream: #EDE4D8;
+    --cream-dark: #D9CCBB;
+
+    --text-dark: #2C1F14;
+    --text-muted: #7A6352;
+    --text-tertiary: #A8917D;
+
+    --border-color: rgba(139,94,60,.12);
+    --border-medium: rgba(139,94,60,.22);
+
+    --shadow-soft: 0 4px 20px rgba(139,94,60,.10);
+    --shadow-glow: 0 0 25px rgba(196,154,108,.18);
+}
+
+/* POZADINA */
+
+.theme-latte body {
+    background:
+        linear-gradient(
+            180deg,
+            #F0E9DE 0%,
+            #F5EFE6 50%,
+            #EDE4D8 100%
+        );
+}
+
+.theme-latte body::before {
+    background:
+        radial-gradient(
+            ellipse at top,
+            rgba(196,154,108,.12),
+            transparent 40%
+        ),
+        radial-gradient(
+            ellipse at bottom right,
+            rgba(139,94,60,.06),
+            transparent 50%
+        );
+}
+
+/* KONTAKT BAR */
+
+.theme-latte .klikhub-contact-bar {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.70),
+            rgba(237,228,216,.50)
+        );
+
+    border: 1px solid rgba(139,94,60,.14);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.80),
+        0 4px 20px rgba(139,94,60,.08);
+}
+
+/* NAVIGACIJA */
+
+.theme-latte .category-nav {
+    background: rgba(245,239,230,.96);
+
+    border-bottom: 1px solid rgba(139,94,60,.12);
+
+    backdrop-filter: blur(16px);
+}
+
+.theme-latte .category-nav button {
+    background: rgba(255,255,255,.60);
+
+    border: 1px solid rgba(139,94,60,.12);
+
+    font-weight: 600;
+
+    color: #7A6352;
+}
+
+.theme-latte .category-nav button:hover {
+    transform: translateY(-2px);
+
+    background: rgba(255,255,255,.90);
+
+    border-color: rgba(139,94,60,.28);
+
+    color: #2C1F14;
+}
+
+.theme-latte .category-nav button.active {
+    background:
+        linear-gradient(
+            135deg,
+            #8B5E3C,
+            #A6724E
+        );
+
+    color: #FDFAF6;
+
+    font-weight: 700;
+
+    box-shadow:
+        0 0 16px rgba(139,94,60,.22),
+        0 6px 16px rgba(139,94,60,.18);
+}
+
+/* NASLOVI KATEGORIJA */
+
+.theme-latte .category-title {
+    color: #8B5E3C;
+
+    text-shadow: none;
+
+    letter-spacing: .4px;
+}
+
+/* KARTICE */
+
+.theme-latte .card {
+    background: #FDFAF6;
+
+    border: 1px solid rgba(139,94,60,.10);
+
+    box-shadow:
+        0 4px 16px rgba(139,94,60,.08),
+        0 1px 4px rgba(139,94,60,.06);
+
+    overflow: hidden;
+}
+
+.theme-latte .card::after {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 2px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(196,154,108,.50),
+            transparent
+        );
+}
+
+.theme-latte .card:hover {
+    transform: translateY(-4px);
+
+    border-color: rgba(139,94,60,.22);
+
+    box-shadow:
+        0 12px 30px rgba(139,94,60,.14),
+        0 0 0 1px rgba(139,94,60,.06);
+}
+
+/* PREPORUKA */
+
+.theme-latte .card.featured {
+    background:
+        linear-gradient(
+            145deg,
+            #FFFDF9,
+            #FDF8F0
+        );
+
+    border-color: rgba(196,154,108,.40);
+
+    box-shadow:
+        0 6px 24px rgba(139,94,60,.12),
+        0 0 0 1px rgba(196,154,108,.15);
+}
+
+/* AKCIJA */
+
+.theme-latte .card.promo {
+    border-color: rgba(185,74,60,.35);
+
+    background:
+        linear-gradient(
+            145deg,
+            #FFFDF9,
+            #FDF5F4
+        );
+
+    box-shadow:
+        0 4px 16px rgba(139,94,60,.08),
+        0 0 16px rgba(185,74,60,.08);
+}
+
+.theme-latte .card.promo:hover {
+    border-color: rgba(185,74,60,.52);
+
+    box-shadow:
+        0 12px 30px rgba(139,94,60,.14),
+        0 0 22px rgba(185,74,60,.12);
+}
+
+.theme-latte .card.promo::after {
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(185,74,60,.40),
+            transparent
+        );
+}
+
+/* NAZIV ARTIKLA */
+
+.theme-latte .item-name {
+    color: #2C1F14;
+
+    letter-spacing: -.2px;
+}
+
+/* CIJENE */
+
+.theme-latte .price-display {
+    color: #8B5E3C;
+
+    text-shadow: none;
+
+    font-weight: 800;
+}
+
+/* OPIS */
+
+.theme-latte .description {
+    border-left: 2px solid rgba(139,94,60,.28);
+
+    padding-left: 10px;
+
+    line-height: 1.55;
+
+    color: #7A6352;
+}
+
+/* VELIČINE */
+
+.theme-latte .size-btn {
+    background: rgba(139,94,60,.06);
+
+    border: 1px solid rgba(139,94,60,.14);
+
+    color: #7A6352;
+}
+
+.theme-latte .size-btn:hover {
+    background: rgba(139,94,60,.10);
+
+    border-color: rgba(139,94,60,.32);
+
+    color: #2C1F14;
+}
+
+.theme-latte .size-btn.active {
+    background:
+        linear-gradient(
+            135deg,
+            #8B5E3C,
+            #A6724E
+        );
+
+    color: #FDFAF6;
+
+    border-color: transparent;
+
+    font-weight: 700;
+}
+
+/* BADGE */
+
+.theme-latte .badge {
+    background:
+        linear-gradient(
+            135deg,
+            #8B5E3C,
+            #A6724E
+        );
+
+    color: #FDFAF6;
+}
+
+/* KORPA */
+
+.theme-latte .cart-icon {
+    background:
+        linear-gradient(
+            135deg,
+            #8B5E3C,
+            #A6724E
+        );
+
+    color: #FDFAF6;
+
+    box-shadow:
+        0 0 22px rgba(139,94,60,.22),
+        0 8px 25px rgba(139,94,60,.20);
+}
+
+.theme-latte .cart-count {
+    background: #C0392B;
+}
+
+/* DODAJ U KORPU */
+
+.theme-latte .cart-btn {
+    background:
+        linear-gradient(
+            135deg,
+            #8B5E3C,
+            #A6724E
+        );
+
+    color: #FDFAF6;
+
+    font-weight: 700;
+
+    box-shadow:
+        0 4px 14px rgba(139,94,60,.20);
+}
+
+.theme-latte .cart-btn:hover {
+    box-shadow:
+        0 6px 22px rgba(139,94,60,.32);
+}
+
+/* POZOVI KONOBARA */
+
+.theme-latte .waiter-btn {
+    background:
+        linear-gradient(
+            135deg,
+            #C0392B,
+            #E74C3C
+        );
+
+    box-shadow:
+        0 0 16px rgba(192,57,43,.18);
+}
+
+/* MODALI */
+
+.theme-latte .modal-content,
+.theme-latte .cart-content,
+.theme-latte .order-content {
+    background: #FDFAF6;
+
+    border: 1px solid rgba(139,94,60,.18);
+
+    box-shadow:
+        0 20px 50px rgba(139,94,60,.16),
+        0 0 0 1px rgba(196,154,108,.08);
+}
+
+/* TOAST */
+
+.theme-latte .toast {
+    background: #FFFFFF;
+
+    border: 1px solid rgba(139,94,60,.22);
+
+    box-shadow:
+        0 8px 24px rgba(139,94,60,.12);
+
+    color: #2C1F14;
+}
+
+/* FOOTER */
+
+.theme-latte .klikhub-footer {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.40),
+            rgba(237,228,216,.60)
+        );
+
+    border-top: 1px solid rgba(139,94,60,.12);
+}
+
+/* KLIKHUB LOGO */
+
+.theme-latte .kh-logo-img {
+    filter:
+        drop-shadow(
+            0 0 8px rgba(139,94,60,.15)
+        );
+}
+
+/* CAFE LOGO */
+
+.theme-latte .cafe-logo-img {
+    filter:
+        drop-shadow(
+            0 0 20px rgba(139,94,60,.14)
+        );
+}
+
+/* MOBILNI */
+
+@media (max-width: 768px) {
+
+    .theme-latte .card {
+        border-radius: 18px;
+    }
+
+    .theme-latte .card:hover {
+        transform: translateY(-2px);
+    }
+
+    .theme-latte .price-display {
+        font-size: 20px;
+    }
+
+    .theme-latte .item-name {
+        font-size: 18px;
+    }
+
+    .theme-latte .description {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .theme-latte .category-nav button {
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+}
