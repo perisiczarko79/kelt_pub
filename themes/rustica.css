@@ -1,0 +1,455 @@
+.theme-rustica {
+    --bg-dark: #110C08;
+    --bg-card: #1C1208;
+    --bg-elevated: #261A0E;
+
+    --primary: #C4622A;
+    --primary-light: #D97840;
+    --primary-glow: rgba(196,98,42,.18);
+
+    --accent: #D4A96A;
+    --accent-soft: rgba(212,169,106,.12);
+
+    --wood: #8B6240;
+    --wood-light: #A67C52;
+
+    --text-light: #F5EDE0;
+    --text-muted: #B09070;
+    --text-tertiary: #7A6048;
+
+    --border-color: rgba(196,98,42,.14);
+    --border-medium: rgba(196,98,42,.26);
+
+    --shadow-glow: 0 0 28px rgba(196,98,42,.16);
+}
+
+/* POZADINA */
+
+.theme-rustica body {
+    background:
+        linear-gradient(
+            180deg,
+            #0E0905 0%,
+            #150F07 50%,
+            #110C08 100%
+        );
+}
+
+.theme-rustica body::before {
+    background:
+        radial-gradient(
+            ellipse at top,
+            rgba(196,98,42,.09),
+            transparent 38%
+        ),
+        radial-gradient(
+            ellipse at bottom left,
+            rgba(139,98,64,.08),
+            transparent 45%
+        );
+}
+
+/* KONTAKT BAR */
+
+.theme-rustica .klikhub-contact-bar {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(196,98,42,.05),
+            rgba(0,0,0,.22)
+        );
+
+    border: 1px solid rgba(196,98,42,.14);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.03),
+        0 10px 30px rgba(0,0,0,.28);
+}
+
+/* NAVIGACIJA */
+
+.theme-rustica .category-nav {
+    background: rgba(17,12,8,.95);
+
+    border-bottom: 1px solid rgba(196,98,42,.12);
+
+    backdrop-filter: blur(16px);
+}
+
+.theme-rustica .category-nav button {
+    background: rgba(255,255,255,.02);
+
+    border: 1px solid rgba(196,98,42,.10);
+
+    font-weight: 600;
+
+    color: #B09070;
+}
+
+.theme-rustica .category-nav button:hover {
+    transform: translateY(-2px);
+
+    border-color: rgba(196,98,42,.32);
+
+    color: #F5EDE0;
+}
+
+.theme-rustica .category-nav button.active {
+    background:
+        linear-gradient(
+            135deg,
+            #A84E20,
+            #C4622A
+        );
+
+    color: #F5EDE0;
+
+    font-weight: 700;
+
+    box-shadow:
+        0 0 20px rgba(196,98,42,.28),
+        0 8px 20px rgba(0,0,0,.30);
+}
+
+/* NASLOVI KATEGORIJA */
+
+.theme-rustica .category-title {
+    color: #D97840;
+
+    text-shadow:
+        0 0 12px rgba(196,98,42,.20);
+
+    letter-spacing: .5px;
+}
+
+/* KARTICE */
+
+.theme-rustica .card {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(196,98,42,.04),
+            rgba(0,0,0,.18)
+        );
+
+    border: 1px solid rgba(196,98,42,.10);
+
+    box-shadow:
+        0 8px 24px rgba(0,0,0,.28);
+
+    overflow: hidden;
+}
+
+.theme-rustica .card::after {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(196,98,42,.45),
+            transparent
+        );
+}
+
+.theme-rustica .card:hover {
+    transform: translateY(-4px);
+
+    border-color: rgba(196,98,42,.28);
+
+    box-shadow:
+        0 15px 35px rgba(0,0,0,.38),
+        0 0 22px rgba(196,98,42,.10);
+}
+
+/* PREPORUKA */
+
+.theme-rustica .card.featured {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(212,169,106,.07),
+            rgba(0,0,0,.18)
+        );
+
+    border-color: rgba(212,169,106,.38);
+
+    box-shadow:
+        0 0 26px rgba(212,169,106,.13),
+        0 8px 24px rgba(0,0,0,.30);
+}
+
+.theme-rustica .card.featured::after {
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(212,169,106,.50),
+            transparent
+        );
+}
+
+/* AKCIJA */
+
+.theme-rustica .card.promo {
+    border-color: rgba(180,40,40,.48);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(180,40,40,.05),
+            rgba(0,0,0,.18)
+        );
+
+    box-shadow:
+        0 8px 24px rgba(0,0,0,.28),
+        0 0 18px rgba(180,40,40,.10);
+}
+
+.theme-rustica .card.promo:hover {
+    border-color: rgba(180,40,40,.65);
+
+    box-shadow:
+        0 15px 35px rgba(0,0,0,.38),
+        0 0 25px rgba(180,40,40,.18);
+}
+
+.theme-rustica .card.promo::after {
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(180,40,40,.42),
+            transparent
+        );
+}
+
+/* NAZIV ARTIKLA */
+
+.theme-rustica .item-name {
+    color: #F5EDE0;
+
+    letter-spacing: -.2px;
+}
+
+/* CIJENE */
+
+.theme-rustica .price-display {
+    color: #D4A96A;
+
+    text-shadow:
+        0 0 14px rgba(212,169,106,.22);
+
+    font-weight: 800;
+}
+
+/* OPIS */
+
+.theme-rustica .description {
+    border-left: 2px solid rgba(196,98,42,.35);
+
+    padding-left: 10px;
+
+    line-height: 1.55;
+
+    color: #B09070;
+}
+
+/* VELIČINE */
+
+.theme-rustica .size-btn {
+    background: rgba(255,255,255,.02);
+
+    border: 1px solid rgba(196,98,42,.10);
+
+    color: #B09070;
+}
+
+.theme-rustica .size-btn:hover {
+    border-color: rgba(196,98,42,.35);
+
+    color: #F5EDE0;
+}
+
+.theme-rustica .size-btn.active {
+    background:
+        linear-gradient(
+            135deg,
+            #A84E20,
+            #C4622A
+        );
+
+    color: #F5EDE0;
+
+    border-color: transparent;
+
+    font-weight: 700;
+}
+
+/* BADGE */
+
+.theme-rustica .badge {
+    background:
+        linear-gradient(
+            135deg,
+            #A84E20,
+            #C4622A
+        );
+
+    color: #F5EDE0;
+}
+
+/* KORPA */
+
+.theme-rustica .cart-icon {
+    background:
+        linear-gradient(
+            135deg,
+            #A84E20,
+            #C4622A
+        );
+
+    color: #F5EDE0;
+
+    box-shadow:
+        0 0 28px rgba(196,98,42,.28),
+        0 8px 25px rgba(0,0,0,.40);
+}
+
+.theme-rustica .cart-count {
+    background: #DC2626;
+}
+
+/* DODAJ U KORPU */
+
+.theme-rustica .cart-btn {
+    background:
+        linear-gradient(
+            135deg,
+            #A84E20,
+            #C4622A
+        );
+
+    color: #F5EDE0;
+
+    font-weight: 700;
+
+    box-shadow:
+        0 0 15px rgba(196,98,42,.20);
+}
+
+.theme-rustica .cart-btn:hover {
+    box-shadow:
+        0 0 28px rgba(196,98,42,.35);
+}
+
+/* POZOVI KONOBARA */
+
+.theme-rustica .waiter-btn {
+    background:
+        linear-gradient(
+            135deg,
+            #7A2010,
+            #A83020
+        );
+
+    box-shadow:
+        0 0 18px rgba(168,48,32,.22);
+}
+
+/* MODALI */
+
+.theme-rustica .modal-content,
+.theme-rustica .cart-content,
+.theme-rustica .order-content {
+    background: #1C1208;
+
+    border: 1px solid rgba(196,98,42,.22);
+
+    box-shadow:
+        0 20px 50px rgba(0,0,0,.52),
+        0 0 28px rgba(196,98,42,.07);
+}
+
+/* TOAST */
+
+.theme-rustica .toast {
+    background: #261A0E;
+
+    border: 1px solid rgba(196,98,42,.28);
+
+    box-shadow:
+        0 0 20px rgba(196,98,42,.10);
+
+    color: #F5EDE0;
+}
+
+/* FOOTER */
+
+.theme-rustica .klikhub-footer {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(196,98,42,.03),
+            rgba(0,0,0,.18)
+        );
+
+    border-top: 1px solid rgba(196,98,42,.12);
+}
+
+/* KLIKHUB LOGO */
+
+.theme-rustica .kh-logo-img {
+    filter:
+        drop-shadow(
+            0 0 10px rgba(196,98,42,.18)
+        );
+}
+
+/* CAFE LOGO */
+
+.theme-rustica .cafe-logo-img {
+    filter:
+        drop-shadow(
+            0 0 25px rgba(196,98,42,.16)
+        );
+}
+
+/* MOBILNI */
+
+@media (max-width: 768px) {
+
+    .theme-rustica .card {
+        border-radius: 18px;
+    }
+
+    .theme-rustica .card:hover {
+        transform: translateY(-2px);
+    }
+
+    .theme-rustica .price-display {
+        font-size: 20px;
+    }
+
+    .theme-rustica .item-name {
+        font-size: 18px;
+    }
+
+    .theme-rustica .description {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .theme-rustica .category-nav button {
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+}
