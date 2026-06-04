@@ -1,0 +1,15 @@
+/* Tema: Pub zelena sa zlatnim detaljima */
+body.theme-pub-green {
+    --bg-dark: #1A2F1D;        /* tamno zelena pozadina */
+    --bg-card: #2B4B2F;        /* svjetlija zelena za kartice */
+    --bg-elevated: #3D6B42;    /* najsvjetlija zelena za elevated elemente */
+    --primary: #FFD700;        /* zlatna za akcente */
+    --primary-light: #FFED4A;   /* svjetlija zlatna */
+    --red-light: #E63946;
+    --text-light: #F5F5DC;     /* bež tekst */
+    --text-muted: #D4C9A8;     /* svjetliji bež */
+    --text-tertiary: #B0A87A;
+    --border-color: rgba(255,215,0,0.25);  /* zlatni border */
+    --border-medium: rgba(255,215,0,0.4);
+    --shadow-glow: 0 0 20px rgba(255,215,0,0.4);
+}
