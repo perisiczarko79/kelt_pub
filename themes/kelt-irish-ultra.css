@@ -417,3 +417,34 @@
         0 10px 30px rgba(0,0,0,.55),
         0 0 30px rgba(212,169,106,.25);
 }
+.theme-kelt-irish-ultra .close-cart,
+.theme-kelt-irish-ultra .close-order{
+
+    position:absolute;
+
+    top:-16px !important;
+    right:-12px !important;
+
+    width:56px;
+    height:56px;
+
+    border-radius:50%;
+
+    background:#233126;
+
+    border:3px solid #D4A96A;
+
+    color:#D4A96A;
+
+    font-size:26px;
+    font-weight:700;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    z-index:9999;
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,.35);
+}
