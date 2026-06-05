@@ -281,3 +281,85 @@
         font-size:28px;
     }
 }
+/* ==========================================
+   ULTRA FINAL VISUAL FIXES
+   ========================================== */
+
+/* ISPRAZNI KORPU */
+
+.theme-kelt-irish-ultra #clearCartBtn{
+    min-width:220px;
+    min-height:58px;
+    padding:16px 24px;
+    font-size:18px;
+    font-weight:700;
+}
+
+/* ADMIN DUGMAD */
+
+.theme-kelt-irish-ultra .admin-controls{
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.theme-kelt-irish-ultra .admin-btn{
+    min-height:42px;
+    padding:10px 14px;
+}
+
+/* KORPA STAVKE */
+
+.theme-kelt-irish-ultra .cart-item{
+    margin-bottom:16px;
+}
+
+/* UKUPNO ZA PLATITI */
+
+.theme-kelt-irish-ultra .grand-total,
+.theme-kelt-irish-ultra .payment-total,
+.theme-kelt-irish-ultra .final-total{
+
+    color:#D4A96A;
+
+    font-size:28px;
+
+    font-weight:900;
+
+    text-shadow:
+        0 0 18px rgba(212,169,106,.18);
+}
+
+/* NARUDŽBE KARTICE */
+
+.theme-kelt-irish-ultra .order-item{
+    margin-bottom:18px;
+}
+
+/* X DUGME */
+
+.theme-kelt-irish-ultra .close-cart,
+.theme-kelt-irish-ultra .close-order{
+
+    box-shadow:
+        0 4px 12px rgba(0,0,0,.25);
+
+    transition:.2s ease;
+}
+
+.theme-kelt-irish-ultra .close-cart:hover,
+.theme-kelt-irish-ultra .close-order:hover{
+
+    transform:scale(1.05);
+}
+
+/* MADRI / ADMIN PLAVI TON */
+
+.theme-kelt-irish-ultra .card.featured{
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18,32,24,.98),
+            rgba(10,18,12,.98)
+        ) !important;
+}
