@@ -1,4 +1,4 @@
-/* ==========================================
+i/* ==========================================
    KELT IRISH ULTRA - THEME STYLES
    Cleaned & Optimized
    ========================================== */
@@ -350,7 +350,43 @@
     .theme-kelt-irish-ultra .cafe-logo-row::before {
         width: 180px;
         height: 180px;
-    }
+    }/* ========== ALL MODAL CLOSE BUTTONS - NORMAL INSIDE ========== */
+.theme-kelt-irish-ultra .modal .close,
+.theme-kelt-irish-ultra .cart-content .close-cart,
+.theme-kelt-irish-ultra .order-content .close-order,
+.theme-kelt-irish-ultra .orders-modal button[class*="close"],
+.theme-kelt-irish-ultra .history-modal button[class*="close"] {
+    position: absolute !important;
+    top: 16px !important;
+    right: 16px !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: 36px !important;
+    height: 36px !important;
+    margin: 0 !important;
+    border-radius: 50% !important;
+    background: rgba(212, 169, 106, 0.1) !important;
+    border: 1px solid rgba(212, 169, 106, 0.3) !important;
+    color: #D4A96A !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    z-index: 10 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.theme-kelt-irish-ultra .modal .close:hover,
+.theme-kelt-irish-ultra .cart-content .close-cart:hover,
+.theme-kelt-irish-ultra .order-content .close-order:hover {
+    background: rgba(212, 169, 106, 0.25) !important;
+    transform: scale(1.05) !important;
+    border-color: #D4A96A !important;
+}
 
     .theme-kelt-irish-ultra .category-title {
         font-size: 28px;
