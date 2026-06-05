@@ -448,3 +448,37 @@
     box-shadow:
         0 8px 20px rgba(0,0,0,.35);
 }
+/* NARUDŽBE MODAL FIX */
+
+.theme-kelt-irish-ultra .order-content{
+
+    max-height:85vh !important;
+
+    overflow-y:auto !important;
+
+    overflow-x:hidden !important;
+
+    padding-right:10px;
+}
+
+/* STAVKE NARUDŽBI */
+
+.theme-kelt-irish-ultra .order-item{
+
+    overflow:hidden;
+
+    word-break:break-word;
+}
+
+/* UKUPNO NA DNU */
+
+.theme-kelt-irish-ultra .orders-total,
+.theme-kelt-irish-ultra .payment-total{
+
+    position:sticky;
+    bottom:0;
+
+    background:#162019;
+
+    padding-top:12px;
+}
