@@ -783,3 +783,115 @@
 
     border-radius:999px;
 }
+/* ==========================================
+   ULTRA FINAL MICRO FIX PACK
+   ========================================== */
+
+/* MANJE PRAZNOG PROSTORA U MODALIMA */
+
+.theme-kelt-irish-ultra .cart-content,
+.theme-kelt-irish-ultra .order-content{
+    padding-top:20px !important;
+}
+
+/* X DUGME */
+
+.theme-kelt-irish-ultra .close-cart,
+.theme-kelt-irish-ultra .close-order{
+
+    width:38px;
+    height:38px;
+
+    top:18px;
+    right:18px;
+
+    font-size:18px;
+
+    box-shadow:
+        0 4px 12px rgba(0,0,0,.25);
+}
+
+/* UKUPNO - PREMIUM NAGLASAK */
+
+.theme-kelt-irish-ultra .cart-total,
+.theme-kelt-irish-ultra .order-total{
+
+    color:#D4A96A !important;
+
+    font-size:22px;
+
+    font-weight:800;
+
+    text-shadow:
+        0 0 12px rgba(212,169,106,.15);
+}
+
+/* UKUPNO ZA PLATITI */
+
+.theme-kelt-irish-ultra .order-total-final,
+.theme-kelt-irish-ultra .payment-total,
+.theme-kelt-irish-ultra .final-total{
+
+    color:#F5EFE4;
+
+    font-size:24px;
+
+    font-weight:900;
+
+    text-align:center;
+}
+
+/* SCROLLBAR TANJI */
+
+.theme-kelt-irish-ultra ::-webkit-scrollbar{
+    width:6px;
+}
+
+.theme-kelt-irish-ultra ::-webkit-scrollbar-thumb{
+
+    background:#D4A96A;
+
+    border-radius:999px;
+
+    border:1px solid rgba(255,255,255,.08);
+}
+
+/* KORPA STAVKE */
+
+.theme-kelt-irish-ultra .cart-item,
+.theme-kelt-irish-ultra .order-item{
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+
+.theme-kelt-irish-ultra .cart-item:hover,
+.theme-kelt-irish-ultra .order-item:hover{
+
+    border-color:
+        rgba(212,169,106,.18);
+
+    box-shadow:
+        0 0 15px rgba(212,169,106,.08);
+}
+
+/* DUGME ZA SLANJE NARUDŽBE */
+
+.theme-kelt-irish-ultra .send-order-btn{
+
+    min-height:58px;
+
+    font-size:20px;
+
+    letter-spacing:.2px;
+}
+
+/* ISPRAZNI KORPU */
+
+.theme-kelt-irish-ultra #clearCartBtn{
+
+    min-height:58px;
+
+    font-size:18px;
+}
