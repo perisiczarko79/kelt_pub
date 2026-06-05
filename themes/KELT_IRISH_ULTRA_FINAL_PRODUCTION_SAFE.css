@@ -1,0 +1,905 @@
+/*
+=========================================
+KELT IRISH ULTRA FINAL PRODUCTION BUILD
+Compatible with current index.html
+Broken scrollbar block repaired
+Original selectors preserved
+=========================================
+*/
+
+/* KELT IRISH ULTRA THEME - STABLE VERSION */
+.theme-kelt-irish-ultra {
+    --bg-dark: #0c120e;
+    --bg-card: #162019;
+    --bg-elevated: #1d2b22;
+    --primary: #d4a96a;
+    --primary-light: #f0ca8c;
+    --text-light: #f5efe4;
+    --text-muted: #baa07a;
+    --text-tertiary: #7d6a4d;
+    --border-color: rgba(212,169,106,.15);
+    --border-medium: rgba(212,169,106,.30);
+}
+
+.theme-kelt-irish-ultra body {
+    background: radial-gradient(circle at top, rgba(212,169,106,.10), transparent 35%),
+                radial-gradient(circle at bottom left, rgba(31,84,52,.15), transparent 40%),
+                linear-gradient(180deg,#09100b,#0c120e);
+}
+
+.theme-kelt-irish-ultra .brand-header {
+    position: relative;
+}
+
+.theme-kelt-irish-ultra .brand-header::before {
+    content: "☘";
+    position: absolute;
+    left: 50%;
+    top: 10px;
+    transform: translateX(-50%);
+    font-size: 180px;
+    color: rgba(212,169,106,.035);
+    pointer-events: none;
+}
+
+.theme-kelt-irish-ultra .cafe-logo-row {
+    position: relative;
+    min-height: 180px;
+}
+
+.theme-kelt-irish-ultra .cafe-logo-row::before {
+    content: "";
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    border-radius: 50%;
+    border: 2px solid rgba(212,169,106,.25);
+    box-shadow: 0 0 40px rgba(212,169,106,.12);
+}
+
+.theme-kelt-irish-ultra .cafe-name {
+    background: linear-gradient(180deg,#fff4d4,#d4a96a,#9f7237);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+/* Kontakt bar i kartice */
+.theme-kelt-irish-ultra .klikhub-contact-bar {
+    background: linear-gradient(145deg, rgba(212,169,106,.05), rgba(0,0,0,.25));
+    border: 1px solid rgba(212,169,106,.15);
+}
+
+.theme-kelt-irish-ultra .card {
+    background: linear-gradient(145deg, rgba(255,255,255,.02), rgba(0,0,0,.18));
+    border: 1px solid rgba(212,169,106,.12);
+    box-shadow: 0 10px 25px rgba(0,0,0,.25);
+}
+
+.theme-kelt-irish-ultra .modal-content,
+.theme-kelt-irish-ultra .cart-content,
+.theme-kelt-irish-ultra .order-content {
+    background: #162019;
+    border: 1px solid rgba(212,169,106,.25);
+}
+
+/* Navigacija */
+.theme-kelt-irish-ultra .category-nav {
+    background: rgba(12,18,14,.95);
+    border-bottom: 1px solid rgba(212,169,106,.12);
+}
+
+.theme-kelt-irish-ultra .category-nav button {
+    background: rgba(255,255,255,.02);
+    border: 1px solid rgba(212,169,106,.12);
+}
+
+.theme-kelt-irish-ultra .category-nav button.active {
+    background: linear-gradient(135deg,#a77b3f,#d4a96a);
+    color: #fff;
+    box-shadow: 0 0 20px rgba(212,169,106,.25);
+}
+
+/* Dugmad i bedževi */
+.theme-kelt-irish-ultra .cart-btn,
+.theme-kelt-irish-ultra .waiter-btn,
+.theme-kelt-irish-ultra .badge,
+.theme-kelt-irish-ultra .cart-icon {
+    background: linear-gradient(135deg,#a77b3f,#d4a96a);
+    border: none;
+}
+
+/* Naslovi kategorija */
+.theme-kelt-irish-ultra .category-title {
+    text-align: center;
+    color: #d4a96a;
+}
+
+.theme-kelt-irish-ultra .category-title::before,
+.theme-kelt-irish-ultra .category-title::after {
+    content: "☘";
+    margin: 0 12px;
+    color: rgba(212,169,106,.45);
+}
+
+/* Tekst i cijene */
+.theme-kelt-irish-ultra .item-name {
+    color: #f5efe4;
+}
+
+.theme-kelt-irish-ultra .price-display {
+    color: #d4a96a;
+    text-shadow: 0 0 8px rgba(212,169,106,.15);
+}
+
+/* Featured kartice (bez shimmer animacije) */
+.theme-kelt-irish-ultra .card.featured {
+    box-shadow: 0 0 24px rgba(212,169,106,.12);
+    border-color: rgba(212,169,106,.35);
+}
+
+/* Hover efekti - stabilna verzija (bez transform animacije) */
+.theme-kelt-irish-ultra .card:hover {
+    border-color: rgba(212,169,106,.35);
+    box-shadow: 0 15px 35px rgba(0,0,0,.35);
+}
+
+.theme-kelt-irish-ultra .cart-btn:hover,
+.theme-kelt-irish-ultra .waiter-btn:hover,
+.theme-kelt-irish-ultra .size-btn:hover,
+.theme-kelt-irish-ultra .category-nav button:hover {
+    transform: none !important;
+    filter: brightness(1.05);
+}
+
+/* Footer */
+.theme-kelt-irish-ultra .klikhub-footer {
+    background: linear-gradient(180deg, rgba(212,169,106,.04), rgba(0,0,0,.18));
+}
+
+/* RESPONZIV */
+@media (max-width: 768px) {
+    .theme-kelt-irish-ultra .cafe-logo-row::before {
+        width: 180px;
+        height: 180px;
+    }
+}
+/* ==========================================
+   KELT IRISH PREMIUM FIX PACK
+   ========================================== */
+
+/* MANJA DJETELINA I KRUG IZA LOGA */
+
+.theme-kelt-irish-ultra .brand-header::before{
+    opacity:.45;
+}
+
+.theme-kelt-irish-ultra .cafe-logo-row::before{
+    width:170px !important;
+    height:170px !important;
+    border-width:1px;
+    opacity:.55;
+    box-shadow:
+        0 0 25px rgba(212,169,106,.10);
+}
+
+/* WELCOME PANEL */
+
+.theme-kelt-irish-ultra .welcome-msg{
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(15,25,18,.95),
+            rgba(8,15,11,.95)
+        );
+
+    border:
+        1px solid rgba(212,169,106,.15);
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.25);
+}
+
+/* DUGMAD */
+
+.theme-kelt-irish-ultra .welcome-msg button{
+
+    background:
+        linear-gradient(
+            135deg,
+            #B88A45,
+            #D4A96A
+        ) !important;
+
+    color:#08110C !important;
+
+    border:none !important;
+
+    border-radius:16px;
+
+    padding:8px 14px;
+
+    font-weight:700;
+
+    box-shadow:
+        0 4px 12px rgba(212,169,106,.20);
+}
+
+/* PREPORUKA KARTICA */
+
+.theme-kelt-irish-ultra .card.featured{
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(16,26,20,.98),
+            rgba(8,14,10,.98)
+        ) !important;
+
+    border:
+        1px solid rgba(212,169,106,.25);
+
+    box-shadow:
+        0 0 25px rgba(212,169,106,.10),
+        0 12px 30px rgba(0,0,0,.35);
+}
+
+/* AKCIJA KARTICA */
+
+.theme-kelt-irish-ultra .card.promo{
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(45,12,12,.95),
+            rgba(18,8,8,.95)
+        ) !important;
+
+    border:
+        1px solid rgba(220,70,70,.35);
+}
+
+/* ZLATNA CIJENA */
+
+.theme-kelt-irish-ultra .price-display{
+
+    color:#E5C189;
+
+    text-shadow:
+        0 0 15px rgba(212,169,106,.18);
+}
+
+/* KATEGORIJE */
+
+.theme-kelt-irish-ultra .category-nav{
+
+    box-shadow:
+        0 10px 35px rgba(0,0,0,.35);
+}
+
+/* KARTICE */
+
+.theme-kelt-irish-ultra .card{
+
+    backdrop-filter:blur(12px);
+
+    border-radius:26px;
+}
+
+/* KORPA */
+
+.theme-kelt-irish-ultra .cart-btn{
+
+    border-radius:999px;
+
+    box-shadow:
+        0 8px 20px rgba(212,169,106,.20);
+}
+
+/* KORPA IKONICA */
+
+.theme-kelt-irish-ultra .cart-icon{
+
+    box-shadow:
+        0 0 30px rgba(212,169,106,.25),
+        0 8px 25px rgba(0,0,0,.35);
+}
+
+/* NASLOV KATEGORIJE */
+
+.theme-kelt-irish-ultra .category-title{
+
+    text-align:center;
+    font-size:34px;
+}
+
+.theme-kelt-irish-ultra .category-title::before{
+
+    content:"☘";
+    margin-right:14px;
+    opacity:.75;
+}
+
+.theme-kelt-irish-ultra .category-title::after{
+
+    content:"☘";
+    margin-left:14px;
+    opacity:.75;
+}
+/* ==========================================
+   KELT PREMIUM UI FIX PACK
+   ========================================== */
+
+/* X DUGME */
+
+.theme-kelt-irish-ultra .close-cart,
+.theme-kelt-irish-ultra .close-order{
+
+    width:42px;
+    height:42px;
+
+    border-radius:50%;
+
+    background:rgba(212,169,106,.12);
+
+    color:#D4A96A;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:22px;
+
+    border:none;
+
+    float:right;
+}
+
+/* WELCOME DUGMAD */
+
+.theme-kelt-irish-ultra .welcome-msg button{
+
+    appearance:none;
+    -webkit-appearance:none;
+
+    background:
+        linear-gradient(
+            135deg,
+            #B88A45,
+            #D4A96A
+        ) !important;
+
+    color:#08110C !important;
+
+    border:none !important;
+
+    border-radius:18px;
+
+    padding:10px 16px;
+
+    font-weight:700;
+
+    box-shadow:
+        0 4px 12px rgba(212,169,106,.18);
+}
+
+/* INPUT POLJA */
+
+.theme-kelt-irish-ultra input,
+.theme-kelt-irish-ultra textarea,
+.theme-kelt-irish-ultra select{
+
+    background:#07100B;
+
+    border:
+        1px solid rgba(212,169,106,.15);
+
+    color:#F8F3EA;
+
+    border-radius:14px;
+}
+
+.theme-kelt-irish-ultra input:focus,
+.theme-kelt-irish-ultra textarea:focus{
+
+    outline:none;
+
+    border-color:#D4A96A;
+
+    box-shadow:
+        0 0 15px rgba(212,169,106,.15);
+}
+
+/* STATUS NARUDŽBE */
+
+.theme-kelt-irish-ultra .order-status.pending{
+
+    background:#D4A96A;
+
+    color:#08110C;
+
+    font-weight:700;
+}
+
+.theme-kelt-irish-ultra .order-status.accepted{
+
+    background:#1E7A46;
+
+    color:white;
+}
+
+.theme-kelt-irish-ultra .order-status.completed{
+
+    background:#2A9D5B;
+
+    color:white;
+}
+
+/* KORPA STAVKE */
+
+.theme-kelt-irish-ultra .cart-item,
+.theme-kelt-irish-ultra .order-item{
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(20,35,26,.95),
+            rgba(10,18,12,.95)
+        );
+
+    border:
+        1px solid rgba(212,169,106,.08);
+
+    border-radius:20px;
+}
+
+/* UKUPNO */
+
+.theme-kelt-irish-ultra .cart-total,
+.theme-kelt-irish-ultra .order-total{
+
+    color:#F8F3EA;
+
+    font-size:20px;
+
+    font-weight:800;
+}
+
+/* ISPRAZNI KORPU */
+
+.theme-kelt-irish-ultra #clearCartBtn{
+
+    width:100%;
+
+    padding:12px;
+
+    margin:12px 0;
+
+    border:none;
+
+    border-radius:18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #7A1D1D,
+            #B22222
+        );
+
+    color:white;
+
+    font-weight:700;
+
+    font-size:15px;
+}
+
+/* POŠALJI NARUDŽBU */
+
+.theme-kelt-irish-ultra .send-order-btn{
+
+    background:
+        linear-gradient(
+            135deg,
+            #B88A45,
+            #D4A96A
+        );
+
+    color:#08110C;
+
+    border:none;
+
+    font-weight:800;
+
+    border-radius:999px;
+
+    box-shadow:
+        0 8px 20px rgba(212,169,106,.20);
+}
+
+/* MODAL */
+
+.theme-kelt-irish-ultra .modal-content,
+.theme-kelt-irish-ultra .cart-content,
+.theme-kelt-irish-ultra .order-content{
+
+    border-radius:28px;
+
+    box-shadow:
+        0 25px 60px rgba(0,0,0,.55),
+        0 0 35px rgba(212,169,106,.08);
+}
+
+/* TABELE */
+
+.theme-kelt-irish-ultra .history-table th{
+
+    background:#132019;
+
+    color:#D4A96A;
+}
+
+.theme-kelt-irish-ultra .history-table td{
+
+    color:#F8F3EA;
+}
+
+/* SCROLLBAR */
+
+/* ==========================================
+   KELT IRISH ULTRA FINAL POLISH PACK
+   ========================================== */
+
+/* PREMIUM KARTICE */
+
+.theme-kelt-irish-ultra .card{
+    position:relative;
+    overflow:hidden;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18,32,24,.98),
+            rgba(10,18,12,.98)
+        ) !important;
+}
+
+.theme-kelt-irish-ultra .card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.02),
+            transparent 45%
+        );
+
+    pointer-events:none;
+}
+
+/* FEATURED KARTICE */
+
+.theme-kelt-irish-ultra .card.featured{
+    border-color:rgba(212,169,106,.35);
+
+    box-shadow:
+        0 0 24px rgba(212,169,106,.15),
+        0 12px 30px rgba(0,0,0,.35);
+}
+
+/* AKCIJA KARTICE */
+
+.theme-kelt-irish-ultra .card.promo{
+    border-color:rgba(214,59,59,.28);
+
+    box-shadow:
+        0 0 15px rgba(214,59,59,.10),
+        0 10px 25px rgba(0,0,0,.35);
+}
+
+/* NAVIGACIJA KATEGORIJA */
+
+.theme-kelt-irish-ultra .category-nav{
+    position:relative;
+}
+
+.theme-kelt-irish-ultra .category-nav::after{
+    content:"";
+
+    position:absolute;
+    top:0;
+    right:0;
+
+    width:40px;
+    height:100%;
+
+    background:
+        linear-gradient(
+            to left,
+            rgba(12,18,14,1),
+            transparent
+        );
+
+    pointer-events:none;
+}
+
+.theme-kelt-irish-ultra .category-nav button{
+    min-height:44px;
+    padding:10px 18px;
+}
+
+/* AKTIVNA KATEGORIJA */
+
+.theme-kelt-irish-ultra .category-nav button.active{
+    box-shadow:
+        0 0 20px rgba(212,169,106,.25),
+        0 6px 15px rgba(0,0,0,.25);
+}
+
+/* KORPA STAVKE */
+
+.theme-kelt-irish-ultra .cart-item,
+.theme-kelt-irish-ultra .order-item{
+    background:
+        linear-gradient(
+            145deg,
+            rgba(20,35,26,.95),
+            rgba(10,18,12,.95)
+        );
+
+    border:
+        1px solid rgba(212,169,106,.08);
+
+    border-radius:20px;
+}
+
+/* X DUGME */
+
+.theme-kelt-irish-ultra .close-cart,
+.theme-kelt-irish-ultra .close-order{
+    width:36px;
+    height:36px;
+
+    font-size:18px;
+
+    border-radius:50%;
+
+    background:rgba(212,169,106,.12);
+
+    color:#D4A96A;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:none;
+}
+
+/* INPUT POLJA */
+
+.theme-kelt-irish-ultra input,
+.theme-kelt-irish-ultra textarea,
+.theme-kelt-irish-ultra select{
+    background:#07100B;
+
+    border:
+        1px solid rgba(212,169,106,.15);
+
+    color:#F8F3EA;
+
+    border-radius:14px;
+}
+
+.theme-kelt-irish-ultra input:focus,
+.theme-kelt-irish-ultra textarea:focus{
+    outline:none;
+
+    border-color:#D4A96A;
+
+    box-shadow:
+        0 0 15px rgba(212,169,106,.15);
+}
+
+/* ISPRAZNI KORPU */
+
+.theme-kelt-irish-ultra #clearCartBtn{
+    background:
+        linear-gradient(
+            135deg,
+            #9B2020,
+            #C52A2A
+        );
+
+    color:white;
+
+    font-weight:700;
+
+    border:none;
+
+    border-radius:18px;
+}
+
+/* POŠALJI NARUDŽBU */
+
+.theme-kelt-irish-ultra .send-order-btn{
+    background:
+        linear-gradient(
+            135deg,
+            #B88A45,
+            #D4A96A
+        );
+
+    color:#08110C;
+
+    border:none;
+
+    font-weight:800;
+
+    border-radius:999px;
+
+    box-shadow:
+        0 0 25px rgba(212,169,106,.20),
+        0 10px 25px rgba(212,169,106,.18);
+}
+
+/* UKUPNO */
+
+.theme-kelt-irish-ultra .cart-total,
+.theme-kelt-irish-ultra .order-total{
+    color:#F8F3EA;
+
+    font-weight:800;
+
+    text-shadow:
+        0 0 10px rgba(212,169,106,.10);
+}
+
+/* MODALI */
+
+.theme-kelt-irish-ultra .modal-content,
+.theme-kelt-irish-ultra .cart-content,
+.theme-kelt-irish-ultra .order-content{
+    border-radius:28px;
+
+    box-shadow:
+        0 25px 60px rgba(0,0,0,.55),
+        0 0 35px rgba(212,169,106,.08);
+}
+
+/* SCROLLBAR */
+
+.theme-kelt-irish-ultra ::-webkit-scrollbar{
+    width:8px;
+}
+
+.theme-kelt-irish-ultra ::-webkit-scrollbar-thumb{
+    background:#D4A96A;
+    border-radius:999px;
+}
+    width:8px;
+}
+
+.theme-kelt-irish-ultra ::-webkit-scrollbar-thumb{
+
+    background:#D4A96A;
+
+    border-radius:999px;
+}
+/* ==========================================
+   ULTRA FINAL MICRO FIX PACK
+   ========================================== */
+
+/* MANJE PRAZNOG PROSTORA U MODALIMA */
+
+.theme-kelt-irish-ultra .cart-content,
+.theme-kelt-irish-ultra .order-content{
+    padding-top:20px !important;
+}
+
+/* X DUGME */
+
+.theme-kelt-irish-ultra .close-cart,
+.theme-kelt-irish-ultra .close-order{
+
+    width:38px;
+    height:38px;
+
+    top:18px;
+    right:18px;
+
+    font-size:18px;
+
+    box-shadow:
+        0 4px 12px rgba(0,0,0,.25);
+}
+
+/* UKUPNO - PREMIUM NAGLASAK */
+
+.theme-kelt-irish-ultra .cart-total,
+.theme-kelt-irish-ultra .order-total{
+
+    color:#D4A96A !important;
+
+    font-size:22px;
+
+    font-weight:800;
+
+    text-shadow:
+        0 0 12px rgba(212,169,106,.15);
+}
+
+/* UKUPNO ZA PLATITI */
+
+.theme-kelt-irish-ultra .order-total-final,
+.theme-kelt-irish-ultra .payment-total,
+.theme-kelt-irish-ultra .final-total{
+
+    color:#F5EFE4;
+
+    font-size:24px;
+
+    font-weight:900;
+
+    text-align:center;
+}
+
+/* SCROLLBAR TANJI */
+
+.theme-kelt-irish-ultra ::-webkit-scrollbar{
+    width:6px;
+}
+
+.theme-kelt-irish-ultra ::-webkit-scrollbar-thumb{
+
+    background:#D4A96A;
+
+    border-radius:999px;
+
+    border:1px solid rgba(255,255,255,.08);
+}
+
+/* KORPA STAVKE */
+
+.theme-kelt-irish-ultra .cart-item,
+.theme-kelt-irish-ultra .order-item{
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+
+.theme-kelt-irish-ultra .cart-item:hover,
+.theme-kelt-irish-ultra .order-item:hover{
+
+    border-color:
+        rgba(212,169,106,.18);
+
+    box-shadow:
+        0 0 15px rgba(212,169,106,.08);
+}
+
+/* DUGME ZA SLANJE NARUDŽBE */
+
+.theme-kelt-irish-ultra .send-order-btn{
+
+    min-height:58px;
+
+    font-size:20px;
+
+    letter-spacing:.2px;
+}
+
+/* ISPRAZNI KORPU */
+
+.theme-kelt-irish-ultra #clearCartBtn{
+
+    min-height:58px;
+
+    font-size:18px;
+}
