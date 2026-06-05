@@ -482,3 +482,106 @@
 
     padding-top:12px;
 }
+/* ==========================================
+   FINAL MODAL & FLOATING X FIX
+   ========================================== */
+
+/* MODALI */
+
+.theme-kelt-irish-ultra .cart-content,
+.theme-kelt-irish-ultra .order-content{
+
+    position:relative;
+
+    max-height:85vh !important;
+
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+
+    padding-right:8px;
+
+    box-sizing:border-box;
+}
+
+/* VANJSKI MODAL */
+
+.theme-kelt-irish-ultra .cart-modal,
+.theme-kelt-irish-ultra .orders-modal,
+.theme-kelt-irish-ultra .modal{
+
+    overflow:hidden !important;
+}
+
+/* FLOATING X */
+
+.theme-kelt-irish-ultra .close-cart,
+.theme-kelt-irish-ultra .close-order{
+
+    position:absolute;
+
+    top:-16px !important;
+    right:12px !important;
+
+    width:56px;
+    height:56px;
+
+    border-radius:50%;
+
+    background:#233126 !important;
+
+    border:3px solid #D4A96A;
+
+    color:#D4A96A;
+
+    font-size:26px;
+    font-weight:700;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    z-index:9999;
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,.35);
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+.theme-kelt-irish-ultra .close-cart:hover,
+.theme-kelt-irish-ultra .close-order:hover{
+
+    transform:scale(1.08);
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.45);
+}
+
+/* KORPA STAVKE */
+
+.theme-kelt-irish-ultra .cart-item{
+    margin-bottom:16px;
+}
+
+/* NARUDŽBE STAVKE */
+
+.theme-kelt-irish-ultra .order-item{
+    margin-bottom:18px;
+}
+
+/* UKUPNO */
+
+.theme-kelt-irish-ultra .cart-total,
+.theme-kelt-irish-ultra .order-total,
+.theme-kelt-irish-ultra .payment-total,
+.theme-kelt-irish-ultra .grand-total{
+
+    color:#D4A96A;
+
+    font-weight:900;
+
+    text-shadow:
+        0 0 12px rgba(212,169,106,.15);
+}
