@@ -585,3 +585,16 @@
     text-shadow:
         0 0 12px rgba(212,169,106,.15);
 }
+.theme-kelt-irish-ultra .close-cart,
+.theme-kelt-irish-ultra .close-order{
+
+    width:48px !important;
+    height:48px !important;
+
+    font-size:22px !important;
+
+    top:-12px !important;
+    right:14px !important;
+
+    border-width:2px !important;
+}
