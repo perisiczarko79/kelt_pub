@@ -363,3 +363,57 @@
             rgba(10,18,12,.98)
         ) !important;
 }
+/* MODAL MORA BITI REFERENCA */
+
+.theme-kelt-irish-ultra .cart-content,
+.theme-kelt-irish-ultra .order-content{
+    position:relative;
+    overflow:visible !important;
+}
+
+/* X DUGME */
+
+.theme-kelt-irish-ultra .close-cart,
+.theme-kelt-irish-ultra .close-order{
+
+    position:absolute;
+
+    top:-22px !important;
+    right:-22px !important;
+
+    width:64px;
+    height:64px;
+
+    border-radius:50%;
+
+    background:#233126 !important;
+
+    border:3px solid #D4A96A;
+
+    color:#D4A96A;
+
+    font-size:32px;
+    font-weight:700;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    z-index:9999;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,.45),
+        0 0 20px rgba(212,169,106,.15);
+
+    transition:.2s ease;
+}
+
+.theme-kelt-irish-ultra .close-cart:hover,
+.theme-kelt-irish-ultra .close-order:hover{
+
+    transform:scale(1.08);
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.55),
+        0 0 30px rgba(212,169,106,.25);
+}
