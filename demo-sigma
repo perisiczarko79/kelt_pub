@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sigma Shop Demo | KlikHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* ============================
+           KLIKHUB IDENTITET
+           ============================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color .25s ease,
+                        border-color .25s ease,
+                        color .25s ease,
+                        transform .25s ease,
+                        box-shadow .25s ease;
+        }
+        
+        :root {
+            --bg-dark: #0A0C10;
+            --bg-secondary: #14161C;
+            --bg-card: #1A1D25;
+            --bg-elevated: #22252E;
+            --accent-primary: #E85D04;
+            --accent-secondary: #FFBA08;
+            --accent-glow: rgba(232, 93, 4, 0.2);
+            --success: #2E7D32;
+            --warning: #F59E0B;
+            --danger: #DC2626;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0A5B5;
+            --text-tertiary: #6B7280;
+            --border-light: rgba(255,255,255,0.08);
+            --border-medium: rgba(255,255,255,0.12);
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+            --shadow-glow: 0 0 20px rgba(232, 93, 4, 0.3);
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            padding: 24px;
+            background-image: radial-gradient(circle at 25% 0%, rgba(232, 93, 4, 0.05) 0%, transparent 50%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+            padding: 20px 32px;
+            border-radius: var(--radius-xl);
+            margin-bottom: 24px;
+            border: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .brand-icon {
+            font-size: 2rem;
+        }
+        
+        .brand h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFFFFF 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .brand span {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-base);
+            border: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #F48C06 100%);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-medium);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-color: var(--accent-primary);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        /* KlikHub Contact Bar */
+        .contact-bar {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+            border-radius: var(--radius-lg);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-light);
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+        
+        .contact-item i {
+            color: var(--accent-primary);
+            font-size: 1.1rem;
+        }
+        
+        .contact-item a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: var(--transition-base);
+        }
+        
+        .contact-item a:hover {
+            color: var(--accent-primary);
+        }
+        
+        /* Tab navigacija */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 4px;
+            border: 1px solid var(--border-light);
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: var(--transition-base);
+            background: transparent;
+            border: none;
+            font-size: 0.9rem;
+        }
+        
+        .tab:hover {
+            color: var(--text-primary);
+        }
+        
+        .tab.active {
+            background: var(--bg-elevated);
+            color: var(--accent-primary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        /* Paneli */
+        .panel {
+            display: none;
+        }
+        
+        .panel.active {
+            display: block;
+        }
+        
+        /* Shop grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .product-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            padding: 20px;
+            transition: var(--transition-base);
+            cursor: pointer;
+        }
+        
+        .product-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-glow);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 180px;
+            background: var(--bg-elevated);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+        
+        .product-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        
+        .product-price {
+            color: var(--accent-primary);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .product-stock {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .product-actions button {
+            flex: 1;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-base);
+            font-size: 0.8rem;
+        }
+        
+        .btn-add {
+            background: var(--accent-primary);
+            color: white;
+        }
+        
+        .btn-add:hover {
+            background: #F48C06;
+            transform: translateY(-2px);
+        }
+        
+        .btn-edit {
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-light);
+        }
+        
+        .btn-edit:hover {
+            border-color: var(--accent-primary);
+            color: var(--text-primary);
+        }
+        
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            filter: brightness(1.1);
+        }
+        
+        /* Admin panel */
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            border: 1px solid var(--border-light);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        
+        /* Admin table */
+        .table-wrapper {
+            overflow-x: auto;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            padding: 16px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        th {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            color: var(--text-primary);
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+        
+        .status-shipped {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3B82F6;
+        }
+        
+        .status-delivered {
+            background: rgba(46, 125, 50, 0.2);
+            color: #4CAF50;
+        }
+        
+        .status-cancelled {
+            background: rgba(220, 38, 38, 0.2);
+            color: var(--danger);
+        }
+        
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: var(--bg-secondary);
+            max-width: 500px;
+            width: 100%;
+            padding: 28px;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-medium);
+            animation: modalSlideIn 0.3s ease;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-content h3 {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .modal-content .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .modal-content label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .modal-content input,
+        .modal-content select,
+        .modal-content textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-medium);
+            font-size: 0.95rem;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            transition: var(--transition-fast);
+        }
+        
+        .modal-content input:focus,
+        .modal-content select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-elevated);
+            color: var(--accent-primary);
+            padding: 14px 28px;
+            border-radius: 50px;
+            z-index: 3000;
+            font-weight: 500;
+            border: 1px solid var(--accent-primary);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideUp 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        
+        @keyframes fadeOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+        
+        /* Footer */
+        .footer {
+            margin-top: 32px;
+            padding: 20px 32px;
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-dark) 100%);
+            border-top: 1px solid var(--border-light);
+            text-align: center;
+            border-radius: var(--radius-xl);
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .copyright {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: var(--transition-base);
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent-primary);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            .header { flex-direction: column; text-align: center; }
+            .products-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+            .admin-stats { grid-template-columns: 1fr 1fr; }
+            .tab { padding: 10px 16px; font-size: 0.8rem; }
+            .contact-bar { flex-direction: column; gap: 12px; }
+            .footer-content { flex-direction: column; text-align: center; }
+        }
+        
+        @media (max-width: 480px) {
+            .products-grid { grid-template-columns: 1fr; }
+            .admin-stats { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="brand">
+            <span class="brand-icon">🛒</span>
+            <div>
+                <h1>Sigma Shop</h1>
+                <span>Demo | KlikHub sistem</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="showToast('Demo mod: prikaz korpe')">
+                <i class="fas fa-shopping-cart"></i> Korpa (0)
+            </button>
+            <button class="btn btn-primary" onclick="showToast('Demo mod: prijava korisnika')">
+                <i class="fas fa-user"></i> Prijava
+            </button>
+        </div>
+    </div>
+
+    <!-- CONTACT BAR -->
+    <div class="contact-bar">
+        <div class="contact-item">
+            <i class="fas fa-phone-alt"></i>
+            <a href="tel:+38758211078">+387 58 211 078</a>
+        </div>
+        <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <a href="mailto:info@sigmafoca.net">info@sigmafoca.net</a>
+        </div>
+        <div class="contact-item">
+            <i class="fas fa-clock"></i>
+            <span>Pon - Pet: 08-16h</span>
+        </div>
+        <div class="contact-item">
+            <i class="fas fa-truck"></i>
+            <span>Besplatna dostava preko 200 KM</span>
+        </div>
+    </div>
+
+    <!-- TABOVI -->
+    <div class="tabs">
+        <button class="tab active" data-tab="shop" onclick="switchTab('shop')">
+            <i class="fas fa-store"></i> Webshop
+        </button>
+        <button class="tab" data-tab="admin" onclick="switchTab('admin')">
+            <i class="fas fa-cog"></i> Admin panel
+        </button>
+    </div>
+
+    <!-- SHOP PANEL -->
+    <div id="panel-shop" class="panel active">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+            <h2 style="color: var(--accent-primary);"><i class="fas fa-tag"></i> Proizvodi</h2>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <input type="text" placeholder="Pretraži proizvode..." style="padding: 8px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-medium); background: var(--bg-card); color: var(--text-primary);">
+                <button class="btn btn-primary" onclick="showAddProductModal()"><i class="fas fa-plus"></i> Dodaj proizvod</button>
+            </div>
+        </div>
+        <div id="productsContainer" class="products-grid">
+            <!-- Proizvodi se učitavaju iz JS -->
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="panel-admin" class="panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+            <h2 style="color: var(--accent-primary);"><i class="fas fa-chart-line"></i> Dashboard</h2>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" onclick="showToast('Demo: Izvještaj generisan')"><i class="fas fa-file-export"></i> Izvještaj</button>
+                <button class="btn btn-secondary" onclick="showToast('Demo: Postavke otvorene')"><i class="fas fa-cog"></i> Postavke</button>
+            </div>
+        </div>
+
+        <div class="admin-stats">
+            <div class="stat-card">
+                <div class="stat-number" id="statProducts">0</div>
+                <div class="stat-label">Proizvoda</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statOrders">12</div>
+                <div class="stat-label">Narudžbi (danas)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statRevenue">1.450</div>
+                <div class="stat-label">Prihod (KM)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statCustomers">28</div>
+                <div class="stat-label">Korisnika</div>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <h3 style="margin-bottom: 12px; color: var(--text-secondary);"><i class="fas fa-list"></i> Nedavne narudžbe</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Br.</th>
+                        <th>Kupac</th>
+                        <th>Iznos</th>
+                        <th>Status</th>
+                        <th>Datum</th>
+                        <th>Akcija</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#1001</td>
+                        <td>Marko Marković</td>
+                        <td>450 KM</td>
+                        <td><span class="status-badge status-pending">Na čekanju</span></td>
+                        <td>22.06.2024</td>
+                        <td><button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.75rem;">Detalji</button></td>
+                    </tr>
+                    <tr>
+                        <td>#1002</td>
+                        <td>Jelena Jelenić</td>
+                        <td>220 KM</td>
+                        <td><span class="status-badge status-shipped">Poslano</span></td>
+                        <td>21.06.2024</td>
+                        <td><button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.75rem;">Detalji</button></td>
+                    </tr>
+                    <tr>
+                        <td>#1003</td>
+                        <td>Petar Petrović</td>
+                        <td>1.200 KM</td>
+                        <td><span class="status-badge status-delivered">Isporučeno</span></td>
+                        <td>20.06.2024</td>
+                        <td><button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.75rem;">Detalji</button></td>
+                    </tr>
+                    <tr>
+                        <td>#1004</td>
+                        <td>Ana Anić</td>
+                        <td>85 KM</td>
+                        <td><span class="status-badge status-cancelled">Otkazano</span></td>
+                        <td>19.06.2024</td>
+                        <td><button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.75rem;">Detalji</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 16px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
+            <p style="color: var(--text-secondary); font-size: 0.85rem;">
+                <i class="fas fa-info-circle"></i> 
+                <strong>Demo napomena:</strong> Ovo je prikaz admin panela. U produkciji možete upravljati proizvodima, narudžbama, korisnicima i postavkama.
+            </p>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <div class="footer-content">
+            <div class="copyright">
+                <i class="far fa-copyright"></i> 2024 Sigma Elektronik. Sva prava zadržana.
+            </div>
+            <div class="footer-links">
+                <a href="#"><i class="fas fa-envelope"></i> info@sigmafoca.net</a>
+                <a href="#"><i class="fas fa-phone"></i> +387 58 211 078</a>
+                <a href="#"><i class="fab fa-facebook"></i> Facebook</a>
+                <a href="#"><i class="fab fa-instagram"></i> Instagram</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ZA DODAVANJE PROIZVODA -->
+<div id="productModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h3><i class="fas fa-plus-circle" style="color: var(--accent-primary);"></i> Dodaj proizvod</h3>
+        <div class="form-group">
+            <label>Naziv proizvoda</label>
+            <input type="text" id="prodName" placeholder="Npr. Dahua kamera">
+        </div>
+        <div class="form-group">
+            <label>Cijena (KM)</label>
+            <input type="number" id="prodPrice" placeholder="99.90" step="0.01">
+        </div>
+        <div class="form-group">
+            <label>Kategorija</label>
+            <select id="prodCategory">
+                <option value="Dahua">Dahua</option>
+                <option value="Telefoni">Telefoni</option>
+                <option value="Top brendovi">Top brendovi</option>
+                <option value="Ostalo">Ostalo</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Stanje zaliha</label>
+            <input type="number" id="prodStock" placeholder="10" value="5">
+        </div>
+        <div class="form-group">
+            <label>Opis</label>
+            <textarea id="prodDesc" rows="3" placeholder="Kratak opis proizvoda..."></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeModal()">Odustani</button>
+            <button class="btn btn-primary" onclick="addProduct()"><i class="fas fa-save"></i> Sačuvaj</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================
+    // DEMO PODACI
+    // ============================
+    let products = [
+        {
+            id: 1,
+            name: "Dahua 4MP IP kamera",
+            price: 189.90,
+            category: "Dahua",
+            stock: 8,
+            description: "4MP IP kamera sa noćnim vidom i AI detekcijom"
+        },
+        {
+            id: 2,
+            name: "Samsung Galaxy A55",
+            price: 349.90,
+            category: "Telefoni",
+            stock: 5,
+            description: "6.6\" AMOLED, 128GB, 50MP kamera"
+        },
+        {
+            id: 3,
+            name: "TP-Link Wi-Fi 6 router",
+            price: 129.90,
+            category: "Top brendovi",
+            stock: 12,
+            description: "AX3000 Dual-band Gigabit router"
+        },
+        {
+            id: 4,
+            name: "Dahua 8 kanalni DVR",
+            price: 449.90,
+            category: "Dahua",
+            stock: 3,
+            description: "8-kanalni DVR sa 2TB hard diskom"
+        },
+        {
+            id: 5,
+            name: "Apple iPhone 15",
+            price: 1249.90,
+            category: "Telefoni",
+            stock: 2,
+            description: "6.1\" OLED, 128GB, 48MP kamera"
+        },
+        {
+            id: 6,
+            name: "Logitech MX Master 3S",
+            price: 89.90,
+            category: "Top brendovi",
+            stock: 15,
+            description: "Bežični miš, 8K DPI, USB-C punjenje"
+        }
+    ];
+
+    let nextId = 7;
+    let editingId = null;
+
+    // ============================
+    // RENDER PROIZVODA
+    // ============================
+    function renderProducts() {
+        const container = document.getElementById('productsContainer');
+        if (!container) return;
+        
+        if (products.length === 0) {
+            container.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-tertiary);">
+                    <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>
+                    <p>Nema proizvoda. Dodajte prvi proizvod!</p>
+                </div>
+            `;
+        } else {
+            container.innerHTML = products.map(p => `
+                <div class="product-card">
+                    <div class="product-image">${getCategoryIcon(p.category)}</div>
+                    <div class="product-name">${p.name}</div>
+                    <div class="product-price">${p.price.toFixed(2)} KM</div>
+                    <div class="product-stock">Stanje: ${p.stock} kom</div>
+                    <div class="product-actions">
+                        <button class="btn-add" onclick="addToCart(${p.id})"><i class="fas fa-cart-plus"></i> Dodaj</button>
+                        <button class="btn-edit" onclick="editProduct(${p.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn-delete" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Ažuriraj statistiku
+        document.getElementById('statProducts').textContent = products.length;
+    }
+
+    function getCategoryIcon(category) {
+        const icons = {
+            'Dahua': '📹',
+            'Telefoni': '📱',
+            'Top brendovi': '⭐'
+        };
+        return icons[category] || '📦';
+    }
+
+    // ============================
+    // KORPA
+    // ============================
+    let cart = [];
+
+    function addToCart(productId) {
+        const product = products.find(p => p.id === productId);
+        if (!product) return;
+        
+        const existing = cart.find(item => item.id === productId);
+        if (existing) {
+            existing.quantity += 1;
+        } else {
+            cart.push({ ...product, quantity: 1 });
+        }
+        
+        showToast(`✅ ${product.name} dodato u korpu`);
+        updateCartBadge();
+    }
+
+    function updateCartBadge() {
+        const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const btn = document.querySelector('.header-actions .btn-secondary');
+        if (btn) {
+            btn.innerHTML = `<i class="fas fa-shopping-cart"></i> Korpa (${total})`;
+        }
+    }
+
+    // ============================
+    // PROIZVODI - CRUD
+    // ============================
+    function showAddProductModal() {
+        editingId = null;
+        document.getElementById('prodName').value = '';
+        document.getElementById('prodPrice').value = '';
+        document.getElementById('prodCategory').value = 'Dahua';
+        document.getElementById('prodStock').value = '5';
+        document.getElementById('prodDesc').value = '';
+        document.getElementById('productModal').style.display = 'flex';
+        document.querySelector('#productModal .modal-content h3').innerHTML = 
+            '<i class="fas fa-plus-circle" style="color: var(--accent-primary);"></i> Dodaj proizvod';
+    }
+
+    function editProduct(id) {
+        const product = products.find(p => p.id === id);
+        if (!product) return;
+        
+        editingId = id;
+        document.getElementById('prodName').value = product.name;
+        document.getElementById('prodPrice').value = product.price;
+        document.getElementById('prodCategory').value = product.category;
+        document.getElementById('prodStock').value = product.stock;
+        document.getElementById('prodDesc').value = product.description || '';
+        document.getElementById('productModal').style.display = 'flex';
+        document.querySelector('#productModal .modal-content h3').innerHTML = 
+            '<i class="fas fa-edit" style="color: var(--accent-primary);"></i> Uredi proizvod';
+    }
+
+    function addProduct() {
+        const name = document.getElementById('prodName').value.trim();
+        const price = parseFloat(document.getElementById('prodPrice').value);
+        const category = document.getElementById('prodCategory').value;
+        const stock = parseInt(document.getElementById('prodStock').value) || 0;
+        const description = document.getElementById('prodDesc').value.trim();
+        
+        if (!name) {
+            showToast('⚠️ Unesite naziv proizvoda');
+            return;
+        }
+        if (isNaN(price) || price <= 0) {
+            showToast('⚠️ Unesite ispravnu cijenu');
+            return;
+        }
+        
+        if (editingId) {
+            // EDIT
+            const index = products.findIndex(p => p.id === editingId);
+            if (index !== -1) {
+                products[index] = { ...products[index], name, price, category, stock, description };
+                showToast('✅ Proizvod ažuriran');
+            }
+            editingId = null;
+        } else {
+            // ADD
+            products.push({ id: nextId++, name, price, category, stock, description });
+            showToast('✅ Proizvod dodan');
+        }
+        
+        closeModal();
+        renderProducts();
+    }
+
+    function deleteProduct(id) {
+        if (confirm('Jeste li sigurni da želite obrisati ovaj proizvod?')) {
+            products = products.filter(p => p.id !== id);
+            showToast('🗑️ Proizvod obrisan');
+            renderProducts();
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('productModal').style.display = 'none';
+        editingId = null;
+    }
+
+    // ============================
+    // TABOVI
+    // ============================
+    function switchTab(tab) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        
+        document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+        document.getElementById(`panel-${tab}`).classList.add('active');
+    }
+
+    // ============================
+    // TOAST
+    // ============================
+    function showToast(msg) {
+        const existing = document.querySelector('.toast');
+        if (existing) existing.remove();
+        
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // ============================
+    // INIT
+    // ============================
+    renderProducts();
+    updateCartBadge();
+
+    // Escape za zatvaranje modala
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+    });
+    
+    // Klik van modala za zatvaranje
+    document.getElementById('productModal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeModal();
+    });
+
+    // Console info
+    console.log('🛒 Sigma Shop Demo | KlikHub sistem');
+    console.log('📦 Proizvodi:', products.length);
+    console.log('🔧 Admin panel dostupan na tabu "Admin panel"');
+</script>
+
+</body>
+</html>
