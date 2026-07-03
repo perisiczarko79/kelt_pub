@@ -1,1 +1,908 @@
 
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>KlikPub - Digitalni meni</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link id="themeStylesheet" rel="stylesheet" href="">
+    <style>
+        /* SVI STILOVI OSTAJU ISTI KAO U TVOM FAJLU */
+        /* ... (ovdje ide sav tvoj CSS) ... */
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+                "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+            }
+        }
+    </script>
+</head>
+<body>
+<!-- SAV HTML OSTAJE ISTI KAO U TVOM FAJLU -->
+<!-- ... -->
+
+<script type="module">
+    import { initializeApp } from 'firebase/app';
+    import { getDatabase, ref, onValue, off, push, set, remove, update, get } from 'firebase/database';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyALY3oKvPW_mDZiaBl0EdFCkTjd6fqwisQ",
+        authDomain: "kelt-pub-menu-2df61.firebaseapp.com",
+        databaseURL: "https://kelt-pub-menu-2df61-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "kelt-pub-menu-2df61",
+        storageBucket: "kelt-pub-menu-2df61.firebasestorage.app"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let cafeId = null;
+    function getCafeIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        let id = params.get('cafe');
+        if (!id) {
+            id = prompt('Unesite ID kafića (npr. gradski_pub):');
+            if (id) window.history.replaceState({}, '', `?cafe=${encodeURIComponent(id)}`);
+            else throw new Error('Missing cafe ID');
+        }
+        return id;
+    }
+    try { cafeId = getCafeIdFromUrl(); }
+    catch(e) { document.body.innerHTML = '<div style="text-align:center;margin-top:50px;">Greška: nedostaje ID kafića.</div>'; throw e; }
+
+    let sessionId = sessionStorage.getItem('sessionId');
+    if (!sessionId) {
+        sessionId = Date.now() + '-' + Math.random().toString(36).substr(2, 8);
+        sessionStorage.setItem('sessionId', sessionId);
+    }
+
+    const categoriesRef = ref(db, `${cafeId}/categories`);
+    const itemsRef = ref(db, `${cafeId}/menuItems`);
+    const settingsRef = ref(db, `${cafeId}/settings`);
+    const ordersRef = ref(db, `${cafeId}/orders/pending`);
+    const historyRef = ref(db, `${cafeId}/orders/history`);
+    const masterPasswordRef = ref(db, 'masterPassword');
+
+    let categories = [], items = [], settings = { primaryColor: '#F97316', backgroundColor: '#0F172A', pubName: 'KELT PUB', logoBase64: '', adminPassword: 'kelt2026', themeFile: '' };
+    let isAdminMode = false, adminClickCount = 0, guestName = null, tableNumber = null;
+    let cart = [], generalNote = '';
+    let activeOrderListeners = new Map();
+    let categoriesUnsub = null, itemsUnsub = null, settingsUnsub = null;
+    let adminTimeout = null;
+    let userIsActive = false;
+
+    const themeStylesheet = document.getElementById('themeStylesheet');
+    
+    function applyThemeFromFile(themeFile) {
+        document.body.classList.remove('theme-pub-green', 'theme-klikhub-light');
+        if (themeFile && themeFile !== '') {
+            themeStylesheet.href = `themes/${themeFile}`;
+            const themeName = themeFile.replace('.css', '');
+            document.body.classList.add(`theme-${themeName}`);
+        } else {
+            themeStylesheet.href = '';
+        }
+    }
+    
+    const THEMES_CACHE_KEY = 'klikhub_themes_cache';
+    const THEMES_CACHE_TTL = 6 * 60 * 60 * 1000;
+
+    async function fetchAvailableThemes() {
+        try {
+            const cachedRaw = sessionStorage.getItem(THEMES_CACHE_KEY);
+            if (cachedRaw) {
+                const cached = JSON.parse(cachedRaw);
+                if (cached.timestamp && (Date.now() - cached.timestamp) < THEMES_CACHE_TTL && Array.isArray(cached.themes)) {
+                    return cached.themes;
+                }
+            }
+        } catch(e) {}
+
+        try {
+            const repoOwner = 'perisiczarko79';
+            const repoName = 'kelt_pub';
+            const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/themes`;
+            const response = await fetch(apiUrl);
+            if (!response.ok) {
+                console.warn('Ne mogu dohvatiti listu tema');
+                try {
+                    const cachedRaw = sessionStorage.getItem(THEMES_CACHE_KEY);
+                    if (cachedRaw) return JSON.parse(cachedRaw).themes || [];
+                } catch(e) {}
+                return [];
+            }
+            const files = await response.json();
+            const cssFiles = files.filter(file => file.name.endsWith('.css') && file.name !== '.gitkeep');
+            const themes = cssFiles.map(file => ({
+                name: file.name.replace('.css', '').replace(/-/g, ' '),
+                file: file.name
+            }));
+            try {
+                sessionStorage.setItem(THEMES_CACHE_KEY, JSON.stringify({ timestamp: Date.now(), themes }));
+            } catch(e) {}
+            return themes;
+        } catch (error) {
+            console.error('Greška pri dohvatanju tema:', error);
+            try {
+                const cachedRaw = sessionStorage.getItem(THEMES_CACHE_KEY);
+                if (cachedRaw) return JSON.parse(cachedRaw).themes || [];
+            } catch(e) {}
+            return [];
+        }
+    }
+
+    function showToast(msg, dur = 4000) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), dur);
+    }
+    function escapeHtml(str) { return str ? String(str).replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])) : ''; }
+    function getTableFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        let table = params.get('table');
+        if (table && !isNaN(parseInt(table))) {
+            table = parseInt(table);
+            sessionStorage.setItem(`pub_table_${cafeId}`, table);
+            return table;
+        }
+        const stored = sessionStorage.getItem(`pub_table_${cafeId}`);
+        if (stored && !isNaN(parseInt(stored))) return parseInt(stored);
+        return null;
+    }
+    function saveCartToStorage() { sessionStorage.setItem(`cart_${cafeId}`, JSON.stringify({ cart, generalNote })); }
+    function loadCartFromStorage() {
+        const saved = sessionStorage.getItem(`cart_${cafeId}`);
+        if (saved) { try { const data = JSON.parse(saved); cart = data.cart || []; generalNote = data.generalNote || ''; } catch(e) {} }
+        updateCartUI();
+    }
+    
+    function aggregateItems(itemsArray) {
+        const map = new Map();
+        for (let it of itemsArray) {
+            const key = `${it.itemName}|${it.size || ''}`;
+            if (map.has(key)) {
+                const existing = map.get(key);
+                existing.quantity += 1;
+                existing.totalPrice += parseFloat(it.price);
+            } else {
+                map.set(key, {
+                    itemName: it.itemName,
+                    size: it.size || null,
+                    quantity: 1,
+                    totalPrice: parseFloat(it.price),
+                    note: it.note || null
+                });
+            }
+        }
+        return Array.from(map.values());
+    }
+
+    // ============================================================
+    // ISPRAVLJENE FUNKCIJE SA PUNOM PUTANJOM cafes/
+    // ============================================================
+    async function isFeatureEnabled(featureName) {
+        try {
+            const snap = await get(ref(db, `cafes/${cafeId}/settings/features/${featureName}/enabled`));
+            return snap.val() === true;
+        } catch(e) {
+            return false;
+        }
+    }
+
+    async function getGrebaThreshold() {
+        try {
+            const snap = await get(ref(db, `cafes/${cafeId}/settings/greba/threshold`));
+            return snap.val() || 20;
+        } catch(e) {
+            return 20;
+        }
+    }
+
+    // ============================================================
+    // GREBA FUNKCIJE
+    // ============================================================
+    function showGrebaModal(orderId, total) {
+        const prizes = [
+            { icon: '🥤', name: 'Besplatan sok', value: '2.50 KM' },
+            { icon: '🧀', name: 'Dodatni preliv', value: '1.50 KM' },
+            { icon: '🥞', name: 'Palačinke', value: '4.00 KM' },
+            { icon: '💰', name: '5% popusta', value: '5%' },
+            { icon: '🍕', name: 'Besplatna pizza', value: '10.00 KM' }
+        ];
+        const prize = prizes[Math.floor(Math.random() * prizes.length)];
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 450px; text-align: center;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h2>🎉 Čestitamo!</h2>
+                    <button class="close-cart" onclick="this.closest('.modal').remove()">✖</button>
+                </div>
+                <p style="color: var(--text-secondary);">Naručili ste ${total.toFixed(2)} KM i osvojili grebu!</p>
+                <div class="scratch-wrapper" style="position: relative; margin: 16px 0; border-radius: 16px; overflow: hidden; aspect-ratio: 400/220; background: #1a2a1f;">
+                    <div class="prize-reveal" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; background: linear-gradient(145deg, #1a2a1f, #2d4a2f); z-index: 1; opacity: 0; transition: opacity 0.6s ease;">
+                        <div style="font-size: 4rem;">${prize.icon}</div>
+                        <div style="font-size: 1.6rem; font-weight: 700; color: #fff;">${prize.name}</div>
+                        <div style="color: #aaccaa;">💎 ${prize.value}</div>
+                    </div>
+                    <canvas id="scratchCanvas_${orderId}" style="position: relative; z-index: 2; width: 100%; height: 100%; cursor: pointer; touch-action: none;"></canvas>
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: center; margin-top: 16px;">
+                    <button class="btn btn-success" onclick="this.closest('.modal').remove(); showToast('✅ Nagrada iskorištena!')">✅ Iskoristi odmah</button>
+                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove(); showToast('🔁 Nagrada sačuvana za kasnije!')">🔁 Sačuvaj</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        setTimeout(() => {
+            const canvas = document.getElementById(`scratchCanvas_${orderId}`);
+            if (canvas) initScratchCanvas(canvas);
+        }, 200);
+    }
+
+    function initScratchCanvas(canvas) {
+        const wrapper = canvas.closest('.scratch-wrapper');
+        if (!wrapper) return;
+        const rect = wrapper.getBoundingClientRect();
+        const width = 400;
+        const height = 220;
+        canvas.width = width;
+        canvas.height = height;
+        canvas.style.width = rect.width + 'px';
+        canvas.style.height = (rect.width * (220/400)) + 'px';
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#8a8a8a';
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.font = 'bold 24px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🖐️ GREBAJ', width/2, height/2 - 14);
+        ctx.font = '16px Inter, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.fillText('prevuci prstom', width/2, height/2 + 30);
+        const prizeReveal = wrapper.querySelector('.prize-reveal');
+        let isRevealed = false;
+        let isDrawing = false;
+        function getCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let cx, cy;
+            if (e.touches) {
+                cx = e.touches[0].clientX;
+                cy = e.touches[0].clientY;
+                e.preventDefault();
+            } else {
+                cx = e.clientX;
+                cy = e.clientY;
+            }
+            return {
+                x: Math.min(width, Math.max(0, (cx - rect.left) * scaleX)),
+                y: Math.min(height, Math.max(0, (cy - rect.top) * scaleY))
+            };
+        }
+        function startDraw(e) {
+            if (isRevealed) return;
+            isDrawing = true;
+            draw(e);
+        }
+        function draw(e) {
+            if (!isDrawing || isRevealed) return;
+            e.preventDefault();
+            const { x, y } = getCoords(e);
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 26, 0, Math.PI * 2);
+            ctx.fill();
+            for (let i = 0; i < 6; i++) {
+                const a = Math.random() * Math.PI * 2;
+                const d = Math.random() * 12;
+                ctx.beginPath();
+                ctx.arc(x + Math.cos(a) * d, y + Math.sin(a) * d, 12, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            updateProgress();
+        }
+        function endDraw() { isDrawing = false; }
+        function updateProgress() {
+            const imgData = ctx.getImageData(0, 0, width, height);
+            let transparent = 0;
+            for (let i = 3; i < imgData.data.length; i += 4) {
+                if (imgData.data[i] === 0) transparent++;
+            }
+            const percent = (transparent / (width * height)) * 100;
+            if (percent >= 50 && !isRevealed) {
+                isRevealed = true;
+                prizeReveal.style.opacity = '1';
+                showToast('🎊 Osvojili ste nagradu!');
+            }
+        }
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', endDraw);
+        canvas.addEventListener('mouseleave', endDraw);
+        canvas.addEventListener('touchstart', startDraw, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', endDraw, { passive: false });
+    }
+
+    let addToCartLock = false;
+    function addToCart(item, selectedSize, price, sizeIndex) {
+        if (!guestName) { showToast('Unesite svoje ime.'); return; }
+        if (!tableNumber) { showToast('Unesite broj stola.'); return; }
+        if (addToCartLock) return;
+        addToCartLock = true;
+        setTimeout(() => { addToCartLock = false; }, 400);
+        let finalPrice = price;
+        if (item.promo && item.promoPrices && item.promoPrices[sizeIndex] !== null && item.promoPrices[sizeIndex] !== undefined && item.promoPrices[sizeIndex] !== '') {
+            finalPrice = parseFloat(item.promoPrices[sizeIndex]);
+        }
+        cart.push({ id: Date.now() + Math.random(), itemName: item.name, size: selectedSize?.name || null, price: finalPrice, note: '' });
+        saveCartToStorage(); updateCartUI(); showToast(`${item.name} dodato u korpu.`, 1500);
+    }
+    
+    function updateCartUI() {
+        document.getElementById('cartCount').innerText = cart.length;
+        document.getElementById('cartIcon').style.display = (cart.length > 0 && guestName && !isAdminMode) ? 'flex' : 'none';
+    }
+    function clearCart() { cart = []; generalNote = ''; saveCartToStorage(); updateCartUI(); }
+    function stopAllOrderListeners() { for (const unsub of activeOrderListeners.values()) unsub(); activeOrderListeners.clear(); }
+    function startOrderListener(orderId) {
+        if (activeOrderListeners.has(orderId)) return;
+        const statusRef = ref(db, `${cafeId}/orders/pending/${orderId}/status`);
+        const unsub = onValue(statusRef, (snap) => {
+            const status = snap.val();
+            if (status === 'accepted') showToast('✅ Konobar je primio vašu narudžbu.');
+            else if (status === 'completed') { showToast('🎉 Narudžba realizovana. Prijatno!'); cleanupOrderListener(orderId); }
+        });
+        activeOrderListeners.set(orderId, unsub);
+    }
+    function cleanupOrderListener(orderId) { const unsub = activeOrderListeners.get(orderId); if (unsub) { unsub(); activeOrderListeners.delete(orderId); } }
+    function stopAllFirebaseListeners() {
+        if (categoriesUnsub) categoriesUnsub();
+        if (itemsUnsub) itemsUnsub();
+        if (settingsUnsub) settingsUnsub();
+        categoriesUnsub = itemsUnsub = settingsUnsub = null;
+        stopAllOrderListeners();
+    }
+    function startFirebaseListeners() {
+        stopAllFirebaseListeners();
+        categoriesUnsub = onValue(categoriesRef, (snap) => {
+            categories = snap.val() ? Object.entries(snap.val()).map(([id, val]) => ({ id, ...val })).sort((a,b) => (a.order||0)-(b.order||0)) : [];
+            renderNav(); renderMenu();
+        });
+        itemsUnsub = onValue(itemsRef, (snap) => {
+            items = snap.val() ? Object.entries(snap.val()).map(([id, val]) => ({ id, ...val })) : [];
+            renderMenu();
+        });
+        settingsUnsub = onValue(settingsRef, (snap) => {
+            if (snap.val()) settings = { ...settings, ...snap.val() };
+            applySettings();
+        });
+    }
+    function applySettings() {
+        document.documentElement.style.setProperty('--bg-dark', settings.backgroundColor);
+        document.getElementById('pubName').textContent = settings.pubName;
+        document.title = `${settings.pubName} - Digitalni meni`;
+        const logoImg = document.getElementById('pubLogo');
+        if (settings.logoBase64) { logoImg.src = settings.logoBase64; logoImg.style.display = 'block'; }
+        else { logoImg.style.display = 'none'; logoImg.src = ''; }
+        if (settings.themeFile) {
+            applyThemeFromFile(settings.themeFile);
+        } else {
+            applyThemeFromFile('');
+        }
+    }
+    
+    function renderMenu() {
+        const container = document.getElementById('menuContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        for (const cat of categories) {
+            const catItems = items.filter(i => i.categoryId === cat.id);
+            if (catItems.length === 0 && !isAdminMode) continue;
+            const section = document.createElement('div');
+            section.className = 'category-section';
+            section.id = `cat-${cat.id}`;
+            section.innerHTML = `<h2 class="category-title">${escapeHtml(cat.name)}</h2><div class="cards-grid"></div>`;
+            const grid = section.querySelector('.cards-grid');
+            for (const item of catItems) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                if (item.featured) card.classList.add('featured');
+                if (item.promo) card.classList.add('promo');
+                let badgeHtml = '';
+                if (item.featured) badgeHtml = '<div class="badge">⭐ Preporuka</div>';
+                else if (item.promo) badgeHtml = '<div class="badge promo">🔥 Akcija</div>';
+                const hasSizes = item.sizes?.length > 0;
+                let sizesHtml = '', priceHtml = '';
+                if (hasSizes) {
+                    sizesHtml = '<div class="sizes">' + item.sizes.map((size, idx) => `<button class="size-btn" data-item-id="${item.id}" data-size-index="${idx}">${escapeHtml(size.name)}</button>`).join('') + '</div>';
+                    const first = item.sizes[0];
+                    const hasPromoForFirst = item.promo && item.promoPrices && item.promoPrices[0] && item.promoPrices[0] !== '';
+                    if (hasPromoForFirst) {
+                        priceHtml = `<span class="old-price">${first.price} KM</span> <span style="color:var(--red-light);">${item.promoPrices[0]} KM</span>`;
+                    } else {
+                        priceHtml = `${first.price} KM`;
+                    }
+                } else {
+                    const sp = item.singlePrice || '0.00';
+                    const hasPromo = item.promo && item.promoPrice && item.promoPrice !== '';
+                    if (hasPromo) {
+                        priceHtml = `<span class="old-price">${sp} KM</span> <span style="color:var(--red-light);">${item.promoPrice} KM</span>`;
+                    } else {
+                        priceHtml = `${sp} KM`;
+                    }
+                }
+                const cartBtnHtml = (!isAdminMode && guestName) ? `<button class="cart-btn" data-item-id="${item.id}">🛒 Dodaj u korpu</button>` : '';
+                const adminBtns = isAdminMode ? `<div class="admin-controls"><button class="admin-btn edit-item" data-id="${item.id}">✏️ Uredi</button><button class="admin-btn danger delete-item" data-id="${item.id}">🗑️ Obriši</button><button class="admin-btn toggle-feat" data-id="${item.id}">${item.featured ? '⭐ Ukloni preporuku' : '⭐ Preporuka'}</button><button class="admin-btn toggle-promo" data-id="${item.id}">${item.promo ? '🔥 Ukloni akciju' : '🔥 Akcija'}</button></div>` : '';
+                card.innerHTML = `${badgeHtml}<div class="card-header"><div class="item-name">${escapeHtml(item.name)}</div><div class="price-display" data-price-for="${item.id}">${priceHtml}</div></div>${sizesHtml}<div class="description">${escapeHtml(item.description || '')}</div>${cartBtnHtml}${adminBtns}`;
+                grid.appendChild(card);
+            }
+            container.appendChild(section);
+        }
+        document.querySelectorAll('.sizes').forEach(div => { const first = div.querySelector('.size-btn'); if(first) first.classList.add('active'); });
+        initCategoryObserver();
+    }
+    
+    function initCategoryObserver() {
+        const observer = new IntersectionObserver(
+            entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        document.querySelectorAll('.category-nav button').forEach(btn => btn.classList.remove('active'));
+                        document.querySelector(`.category-nav button[data-cat="${entry.target.id}"]`)?.classList.add('active');
+                    }
+                });
+            },
+            { threshold: 0.3 }
+        );
+        document.querySelectorAll('.category-section').forEach(section => observer.observe(section));
+    }
+    
+    document.getElementById('menuContainer')?.addEventListener('click', (e) => {
+        const target = e.target;
+        if (target.classList.contains('size-btn')) {
+            const container = target.closest('.sizes');
+            if (container) {
+                container.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
+                target.classList.add('active');
+                const itemId = target.dataset.itemId;
+                const idx = parseInt(target.dataset.sizeIndex);
+                const item = items.find(i => i.id === itemId);
+                if (item && item.sizes && item.sizes[idx]) {
+                    const size = item.sizes[idx];
+                    const priceDiv = document.querySelector(`.price-display[data-price-for="${itemId}"]`);
+                    if (priceDiv) {
+                        const hasPromoForSize = item.promo && item.promoPrices && item.promoPrices[idx] && item.promoPrices[idx] !== '';
+                        if (hasPromoForSize) {
+                            priceDiv.innerHTML = `<span class="old-price">${size.price} KM</span> <span style="color:var(--red-light);">${item.promoPrices[idx]} KM</span>`;
+                        } else {
+                            priceDiv.innerHTML = `${size.price} KM`;
+                        }
+                    }
+                }
+            }
+        } else if (target.classList.contains('cart-btn')) {
+            const itemId = target.dataset.itemId;
+            const item = items.find(i => i.id === itemId);
+            if (!item) return;
+            const card = target.closest('.card');
+            let selectedSize = null, price = null, sizeIndex = 0;
+            if (item.sizes?.length) {
+                const activeSizeBtn = card.querySelector('.size-btn.active');
+                sizeIndex = activeSizeBtn ? parseInt(activeSizeBtn.dataset.sizeIndex) : 0;
+                selectedSize = item.sizes[sizeIndex];
+                price = parseFloat(selectedSize.price);
+            } else {
+                price = parseFloat(item.singlePrice);
+            }
+            addToCart(item, selectedSize, price, sizeIndex);
+        } else if (target.classList.contains('edit-item')) { const i = items.find(i => i.id === target.dataset.id); if(i) showItemModal(i); }
+        else if (target.classList.contains('delete-item')) { if(confirm('Obrisati?')) remove(ref(db, `${cafeId}/menuItems/${target.dataset.id}`)); }
+        else if (target.classList.contains('toggle-feat')) { const id = target.dataset.id; const it = items.find(i => i.id === id); if(it) update(ref(db, `${cafeId}/menuItems/${id}`), { featured: !it.featured, promo: false, promoPrices: null, promoPrice: null }); }
+        else if (target.classList.contains('toggle-promo')) { 
+            const id = target.dataset.id; 
+            const it = items.find(i => i.id === id); 
+            if(it) {
+                if(!it.promo) {
+                    if (it.sizes && it.sizes.length > 0) {
+                        const promoPrices = [];
+                        for (let i = 0; i < it.sizes.length; i++) {
+                            let val = prompt(`Unesite akcijsku cijenu za veličinu "${it.sizes[i].name}" (ostavi prazno ako nema akcije za ovu veličinu):`);
+                            if (val === null) { promoPrices.push(null); continue; }
+                            val = val.trim();
+                            if (val === '') promoPrices.push(null);
+                            else {
+                                const num = parseFloat(val.replace(',', '.'));
+                                promoPrices.push(isNaN(num) ? null : num);
+                            }
+                        }
+                        update(ref(db, `${cafeId}/menuItems/${id}`), { promo: true, featured: false, promoPrices: promoPrices, promoPrice: null });
+                    } else {
+                        const promoPrice = prompt('Promotivna cijena (KM):');
+                        if (promoPrice === null) return;
+                        const num = parseFloat(promoPrice.replace(',', '.'));
+                        update(ref(db, `${cafeId}/menuItems/${id}`), { promo: true, featured: false, promoPrice: isNaN(num) ? '' : num, promoPrices: null });
+                    }
+                } else {
+                    update(ref(db, `${cafeId}/menuItems/${id}`), { promo: false, promoPrices: null, promoPrice: null });
+                }
+            }
+        }
+    });
+    
+    function renderNav() {
+        const nav = document.getElementById('categoryNav');
+        nav.innerHTML = '';
+        categories.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.textContent = cat.name;
+            btn.dataset.cat = `cat-${cat.id}`;
+            btn.onclick = () => document.getElementById(`cat-${cat.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            nav.appendChild(btn);
+        });
+    }
+    
+    function resetAdminTimer() { if (adminTimeout) clearTimeout(adminTimeout); if (isAdminMode) adminTimeout = setTimeout(() => { if (isAdminMode) exitAdminMode(); }, 30 * 60 * 1000); }
+    function adminActivity() { if (isAdminMode) { userIsActive = true; } }
+    ['click', 'mousemove', 'keydown'].forEach(ev => window.addEventListener(ev, adminActivity));
+    async function enterAdminMode() {
+        isAdminMode = true;
+        document.getElementById('adminBar').style.display = 'flex';
+        document.getElementById('adminFooter').style.display = 'flex';
+        renderMenu();
+        resetAdminTimer();
+    }
+    function exitAdminMode() {
+        isAdminMode = false;
+        document.getElementById('adminBar').style.display = 'none';
+        document.getElementById('adminFooter').style.display = 'none';
+        if (adminTimeout) clearTimeout(adminTimeout);
+        renderMenu();
+    }
+    window.adminTriggerClick = () => { adminClickCount++; if (adminClickCount >= 5) { adminClickCount = 0; const pass = prompt('Admin šifra:'); if (pass === settings.adminPassword) enterAdminMode(); else if (pass === 'master2026') enterAdminMode(); else alert('Pogrešna šifra!'); } };
+    async function showCategoryManager() { 
+        const modal = document.createElement('div'); modal.className='modal'; 
+        modal.innerHTML=`<div class="modal-content"><h3>Kategorije</h3><div id="catList"></div><button id="newCatBtn">+ Nova</button><button class="close-modal">Zatvori</button></div>`; 
+        document.body.appendChild(modal); 
+        const refresh=()=>{const list=modal.querySelector('#catList'); list.innerHTML=''; categories.forEach(c=>{const div=document.createElement('div'); div.innerHTML=`<span>${escapeHtml(c.name)}</span> <button class="editCat">✏️</button> <button class="delCat">🗑️</button>`; div.querySelector('.editCat').onclick=()=>{const n=prompt('Novi naziv:',c.name); if(n) update(ref(db,`${cafeId}/categories/${c.id}`),{name:n});}; div.querySelector('.delCat').onclick=async()=>{if(items.some(i=>i.categoryId===c.id)){alert('Kategorija nije prazna');return;} if(confirm('Obrisati?')) await remove(ref(db,`${cafeId}/categories/${c.id}`));}; list.appendChild(div);});}; refresh(); 
+        modal.querySelector('#newCatBtn').onclick=async()=>{const name=prompt('Naziv:'); if(name) await push(categoriesRef,{name,order:categories.length}); modal.remove();}; 
+        modal.querySelector('.close-modal').onclick=()=>modal.remove(); 
+    }
+    
+    function showItemModal(item=null) { 
+        const modal=document.createElement('div'); modal.className='modal'; 
+        const catOpts=categories.map(c=>`<option value="${c.id}" ${item?.categoryId===c.id?'selected':''}>${escapeHtml(c.name)}</option>`).join(''); 
+        const hasSizes=!!item?.sizes?.length; 
+        let sizesHtml = '';
+        if (hasSizes) {
+            sizesHtml = item.sizes.map((s, idx) => {
+                const promoVal = (item.promoPrices && item.promoPrices[idx]) ? item.promoPrices[idx] : '';
+                return `<div class="size-group"><input class="size-name" placeholder="Naziv" value="${escapeHtml(s.name)}"><input class="size-price" placeholder="Cijena" value="${s.price}"><input class="size-promo" placeholder="Akcijska cijena (opciono)" value="${promoVal}"><button class="remove-size">🗑️</button></div>`;
+            }).join('');
+        }
+        modal.innerHTML=`<div class="modal-content"><h3>${item?'Uredi':'Dodaj'}</h3><select id="catSel">${catOpts}</select><input id="itemName" placeholder="Naziv" value="${item?escapeHtml(item.name):''}"><textarea id="itemDesc" placeholder="Opis">${item?escapeHtml(item.description||''):''}</textarea><label><input type="checkbox" id="hasSizes" ${hasSizes||!item?'checked':''}> Veličine</label><div id="sizesContainer">${hasSizes?`<div id="sizesList">${sizesHtml}</div><button id="addSize">+ Dodaj veličinu</button>`:`<div><label>Jedna cijena (KM):</label><input id="singlePrice" value="${item?.singlePrice||'0.00'}"><label>Akcijska cijena (opciono):</label><input id="singlePromoPrice" value="${item?.promoPrice||''}"></div>`}</div><button id="saveItem">Sačuvaj</button><button class="close-modal">Odustani</button></div>`; 
+        document.body.appendChild(modal); 
+        const hasCheck=modal.querySelector('#hasSizes'); const szCont=modal.querySelector('#sizesContainer'); 
+        function updateSizeUI(){
+            if(hasCheck.checked){
+                szCont.innerHTML=`<div id="sizesList"><div class="size-group"><input class="size-name" placeholder="Naziv" value="0.33l"><input class="size-price" placeholder="Cijena" value="0.00"><input class="size-promo" placeholder="Akcijska cijena (opciono)" value=""><button class="remove-size">🗑️</button></div></div><button id="addSize">+ Dodaj veličinu</button>`;
+                szCont.querySelector('#addSize')?.addEventListener('click',()=>{const list=szCont.querySelector('#sizesList'); const div=document.createElement('div'); div.className='size-group'; div.innerHTML=`<input class="size-name" placeholder="Naziv" value="0.5l"><input class="size-price" placeholder="Cijena" value="0.00"><input class="size-promo" placeholder="Akcijska cijena (opciono)" value=""><button class="remove-size">🗑️</button>`; list.appendChild(div); div.querySelector('.remove-size').onclick=()=>div.remove();});
+                szCont.querySelectorAll('.remove-size').forEach(btn=>btn.onclick=()=>btn.closest('.size-group').remove());
+            } else { 
+                szCont.innerHTML=`<div><label>Jedna cijena (KM):</label><input id="singlePrice" value="0.00"><label>Akcijska cijena (opciono):</label><input id="singlePromoPrice" value=""></div>`; 
+            } 
+        } 
+        hasCheck.onchange=updateSizeUI; if(!hasSizes && !item) updateSizeUI(); 
+        modal.querySelector('#saveItem').onclick=async()=>{
+            const categoryId=modal.querySelector('#catSel').value; 
+            const name=modal.querySelector('#itemName').value.trim(); 
+            if(!name){alert('Naziv obavezan');return;} 
+            const desc=modal.querySelector('#itemDesc').value; 
+            let data={categoryId,name,description:desc,featured:false,promo:false,promoPrice:null,promoPrices:null};
+            if(hasCheck.checked){
+                const sizes=[], promoPrices=[];
+                const groups=szCont.querySelectorAll('.size-group'); 
+                for(const g of groups){
+                    const sname=g.querySelector('.size-name')?.value.trim(); 
+                    const sprice=g.querySelector('.size-price')?.value.trim().replace(',','.'); 
+                    const spromo=g.querySelector('.size-promo')?.value.trim().replace(',','.');
+                    if(sname&&sprice&&!isNaN(parseFloat(sprice))){
+                        sizes.push({name:sname,price:sprice});
+                        if(spromo && !isNaN(parseFloat(spromo))) promoPrices.push(parseFloat(spromo));
+                        else promoPrices.push(null);
+                    }
+                }
+                if(!sizes.length){alert('Dodajte barem jednu veličinu');return;}
+                data.sizes=sizes;
+                data.promoPrices=promoPrices;
+                data.singlePrice=null;
+                const hasAnyPromo = promoPrices.some(p => p !== null && p !== '');
+                data.promo = hasAnyPromo;
+            } else {
+                const sp=szCont.querySelector('#singlePrice')?.value.trim().replace(',','.'); 
+                const spromo=szCont.querySelector('#singlePromoPrice')?.value.trim().replace(',','.');
+                if(!sp||isNaN(parseFloat(sp))){alert('Unesite cijenu');return;} 
+                data.singlePrice=sp;
+                data.sizes=null;
+                if(spromo && !isNaN(parseFloat(spromo))) {
+                    data.promoPrice=parseFloat(spromo);
+                    data.promo=true;
+                } else {
+                    data.promoPrice=null;
+                    data.promo=false;
+                }
+            }
+            if(item) await update(ref(db,`${cafeId}/menuItems/${item.id}`),data);
+            else await push(itemsRef,data);
+            modal.remove();
+        }; 
+        modal.querySelector('.close-modal').onclick=()=>modal.remove(); 
+    }
+    
+    async function showHistory() { 
+        if(!isAdminMode) return; const snap=await get(historyRef); const hist=snap.val()||{}; const modal=document.createElement('div'); modal.className='modal'; let rows=''; for(const[id,rec] of Object.entries(hist).sort((a,b)=>b[1].closedAt-a[1].closedAt)){const d=new Date(rec.closedAt); rows += `
+            <tr>
+                <td>${d.toLocaleString()}</td>
+                <td>${rec.tableNumber || '?'}</td>
+                <td>${rec.totalAmount.toFixed(2)} KM</td>
+                <td>${rec.items?.length || 0}</td>
+                <td><button class="detail-btn" data-id="${id}">🔍</button></td>
+                <td><button class="del-history" data-id="${id}">🗑️</button></td>
+            </tr>`;} modal.innerHTML=`<div class="modal-content"><h3>Istorija računa</h3><table class="history-table"><thead><tr><th>Datum</th><th>Sto</th><th>Ukupno</th><th>Stavki</th><th></th><th></th></tr></thead><tbody>${rows||'<tr><td colspan="6">Nema podataka</td></tr>'}</tbody></table><button id="deleteAllHistory">Obriši sve</button><button class="close-modal">Zatvori</button></div>`; document.body.appendChild(modal); modal.querySelectorAll('.detail-btn').forEach(btn=>btn.onclick=async()=>{const snap=await get(ref(db,`${cafeId}/orders/history/${btn.dataset.id}`)); const rec=snap.val(); if(rec) alert(`Sto ${rec.tableNumber}\nUkupno: ${rec.totalAmount} KM\nStavke: ${rec.items?.map(i=>`${i.itemName} ${i.size?`(${i.size})`:''} - ${i.price} KM`).join('\n')}`);}); modal.querySelectorAll('.del-history').forEach(btn=>btn.onclick=async()=>{if(confirm('Obrisati?')) await remove(ref(db,`${cafeId}/orders/history/${btn.dataset.id}`)); modal.remove(); showHistory();}); modal.querySelector('#deleteAllHistory').onclick=async()=>{if(confirm('Obrisati SVE?')){await set(historyRef,null); modal.remove(); showToast('Sve obrisano');}}; modal.querySelector('.close-modal').onclick=()=>modal.remove(); 
+    }
+    function showChangePasswordModal(){const modal=document.createElement('div'); modal.className='modal'; modal.innerHTML=`<div class="modal-content"><h3>Promjena šifre</h3><input type="password" id="newPass" placeholder="Nova šifra"><input type="password" id="confirmPass" placeholder="Potvrdi"><button id="savePass">Sačuvaj</button><button class="close-modal">Odustani</button></div>`; document.body.appendChild(modal); modal.querySelector('#savePass').onclick=async()=>{const p=modal.querySelector('#newPass').value.trim(); const c=modal.querySelector('#confirmPass').value.trim(); if(!p){alert('Šifra ne smije biti prazna');return;} if(p!==c){alert('Šifre se ne poklapaju');return;} await update(settingsRef,{adminPassword:p}); showToast('Šifra promijenjena'); modal.remove();}; modal.querySelector('.close-modal').onclick=()=>modal.remove();}
+    
+    async function showBrandingModal() {
+        const themes = await fetchAvailableThemes();
+        const themeOptionsHtml = themes.map(theme => 
+            `<option value="${theme.file}" ${settings.themeFile === theme.file ? 'selected' : ''}>${escapeHtml(theme.name)}</option>`
+        ).join('');
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>Prilagodi izgled</h3>
+                <label>Naziv lokala:</label>
+                <input id="pubNameInput" value="${escapeHtml(settings.pubName)}">
+                <label>Logo (PNG, JPG):</label>
+                <input type="file" id="logoUpload" accept="image/*">
+                <div id="logoPrev">${settings.logoBase64 ? `<img src="${settings.logoBase64}" style="max-width:100px">` : ''}</div>
+                <label>Primarna boja (ako tema ne definiše):</label>
+                <input type="color" id="primColor" value="${settings.primaryColor}">
+                <label>Pozadinska boja (ako tema ne definiše):</label>
+                <input type="color" id="bgColor" value="${settings.backgroundColor}">
+                <label>Tema (čitaj iz foldera themes/):</label>
+                <select id="themeSelect">
+                    <option value="">--- Bez teme (koristi boje iznad) ---</option>
+                    ${themeOptionsHtml}
+                </select>
+                <div style="margin-top:12px;display:flex;gap:8px;">
+                    <button id="saveBrandingBtn">Sačuvaj</button>
+                    <button id="resetBrandingBtn">Reset</button>
+                    <button id="closeBrandingBtn">Zatvori</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        let pendingLogo = settings.logoBase64;
+        modal.querySelector('#logoUpload').onchange = (e) => {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    modal.querySelector('#logoPrev').innerHTML = `<img src="${ev.target.result}" style="max-width:100px">`;
+                    pendingLogo = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        modal.querySelector('#saveBrandingBtn').onclick = async () => {
+            const selectedThemeFile = modal.querySelector('#themeSelect').value;
+            await update(settingsRef, {
+                pubName: modal.querySelector('#pubNameInput').value.trim(),
+                primaryColor: modal.querySelector('#primColor').value,
+                backgroundColor: modal.querySelector('#bgColor').value,
+                logoBase64: pendingLogo,
+                themeFile: selectedThemeFile
+            });
+            showToast('Postavke sačuvane');
+            modal.remove();
+        };
+        modal.querySelector('#resetBrandingBtn').onclick = async () => {
+            await set(settingsRef, { 
+                pubName: 'KELT PUB', 
+                primaryColor: '#F97316', 
+                backgroundColor: '#0F172A', 
+                logoBase64: '', 
+                adminPassword: settings.adminPassword, 
+                themeFile: '' 
+            });
+            showToast('Resetovano na fabrička podešavanja');
+            modal.remove();
+        };
+        modal.querySelector('#closeBrandingBtn').onclick = () => modal.remove();
+    }
+    
+    function initPersonalization() {
+        const zone=document.getElementById('personalizationZone');
+        const savedName=sessionStorage.getItem(`pub_guest_name_${cafeId}`);
+        if(savedName){
+            guestName=savedName;
+            tableNumber=getTableFromUrl();
+            zone.innerHTML=`<div class="welcome-msg">🍻 ${escapeHtml(guestName)} ${tableNumber?`(sto ${tableNumber})`:''}, dobrodošli! <button id="changeNameBtn">Promijeni ime</button> ${tableNumber?`<button id="changeTableBtn">🔄 Promijeni sto</button>`:''}</div>`;
+            document.getElementById('changeNameBtn')?.addEventListener('click',()=>{sessionStorage.removeItem(`pub_guest_name_${cafeId}`); sessionStorage.removeItem(`pub_table_${cafeId}`); guestName=null; tableNumber=null; stopAllOrderListeners(); initPersonalization(); renderMenu();});
+            document.getElementById('changeTableBtn')?.addEventListener('click',()=>{const nt=prompt('Novi broj stola:',tableNumber); if(nt&&!isNaN(parseInt(nt))){tableNumber=parseInt(nt); sessionStorage.setItem(`pub_table_${cafeId}`,tableNumber); initPersonalization(); renderMenu();}});
+        } else {
+            zone.innerHTML=`<div class="welcome-msg">Unesite ime: <input id="guestNameInput" placeholder="Vaše ime" maxlength="20"> ${!tableNumber?`Sto: <input type="number" id="tableNumberInput" placeholder="Broj stola">`:''}<button id="saveNameBtn">Sačuvaj</button><button id="skipNameBtn">Preskoči</button></div>`;
+            document.getElementById('saveNameBtn').onclick=()=>{const name=document.getElementById('guestNameInput')?.value.trim(); let tbl=tableNumber; if(!tbl){const inp=document.getElementById('tableNumberInput'); if(inp) tbl=parseInt(inp.value);} if(name&&tbl&&!isNaN(tbl)){guestName=name; tableNumber=tbl; sessionStorage.setItem(`pub_guest_name_${cafeId}`,name); sessionStorage.setItem(`pub_table_${cafeId}`,tableNumber); initPersonalization(); renderMenu();} else showToast('Ime i broj stola su obavezni');};
+            document.getElementById('skipNameBtn').onclick=()=>zone.style.display='none';
+        }
+        document.getElementById('callWaiterBtn').style.display=(guestName&&!isAdminMode)?'block':'none';
+        document.getElementById('orderHistoryFloat').style.display=(guestName&&!isAdminMode)?'flex':'none';
+        document.getElementById('cartIcon').style.display=(cart.length>0&&guestName&&!isAdminMode)?'flex':'none';
+    }
+    
+    function renderCartModal() {
+        const modalDiv=document.createElement('div'); modalDiv.className='cart-modal';
+        let itemsHtml='', total=0;
+        cart.forEach((ci,idx)=>{total+=ci.price; itemsHtml+=`<div class="cart-item"><button class="remove-item" data-idx="${idx}">🗑️</button><div class="cart-item-name">${escapeHtml(ci.itemName)}</div><div>${ci.size||''}</div><div class="cart-item-price">${ci.price} KM</div><div class="cart-item-note"><input type="text" placeholder="Napomena" value="${escapeHtml(ci.note)}" data-idx="${idx}" class="item-note-input"></div></div>`;});
+        modalDiv.innerHTML=`<div class="cart-content"><button class="close-cart">✖</button><h3>Vaša korpa</h3>${itemsHtml||'<p>Prazna</p>'}<div class="cart-total">Ukupno: ${total.toFixed(2)} KM</div><div class="general-note"><textarea id="generalNoteCart" placeholder="Opća napomena">${escapeHtml(generalNote)}</textarea></div><button id="clearCartBtn" style="background:#DC2626; margin-bottom:8px;">🗑️ Isprazni korpu</button><button id="sendOrderBtn" class="send-order-btn">📦 Pošalji narudžbu</button></div>`;
+        document.body.appendChild(modalDiv);
+        modalDiv.querySelector('.close-cart').onclick=()=>modalDiv.remove();
+        modalDiv.querySelectorAll('.remove-item').forEach(btn=>btn.onclick=()=>{cart.splice(parseInt(btn.dataset.idx),1); saveCartToStorage(); updateCartUI(); renderCartModal();});
+        modalDiv.querySelectorAll('.item-note-input').forEach(inp=>inp.onchange=e=>{cart[parseInt(inp.dataset.idx)].note=e.target.value; saveCartToStorage();});
+        modalDiv.querySelector('#generalNoteCart').onchange=e=>{generalNote=e.target.value; saveCartToStorage();};
+        modalDiv.querySelector('#clearCartBtn').onclick=()=>{clearCart(); renderCartModal();};
+        
+        modalDiv.querySelector('#sendOrderBtn').onclick = async (e) => {
+            if (!cart.length) return;
+            const btn = e.currentTarget;
+            if (btn.disabled) return;
+            btn.disabled = true;
+            
+            const total = cart.reduce((sum, ci) => sum + ci.price, 0);
+            
+            const orderData = {
+                sessionId, guestName, tableNumber,
+                timestamp: Date.now(), status: 'pending', generalNote,
+                items: cart.map(ci => ({ itemName: ci.itemName, size: ci.size, price: ci.price, note: ci.note }))
+            };
+            
+            try {
+                const newRef = push(ordersRef);
+                await set(newRef, orderData);
+                startOrderListener(newRef.key);
+                
+                const grebaEnabled = await isFeatureEnabled('greba');
+                const threshold = await getGrebaThreshold();
+                
+                if (grebaEnabled && total >= threshold) {
+                    setTimeout(() => showGrebaModal(newRef.key, total), 500);
+                }
+                
+                cart = []; generalNote = '';
+                saveCartToStorage(); updateCartUI();
+                modalDiv.remove();
+                showToast('Narudžba poslana. Čekamo potvrdu...');
+            } catch(e) {
+                console.error(e);
+                showToast('Greška pri slanju: ' + e.message);
+                btn.disabled = false;
+            }
+        };
+    }
+    
+    document.getElementById('cartIcon')?.addEventListener('click',()=>{if(cart.length)renderCartModal();});
+    
+    document.getElementById('orderHistoryFloat')?.addEventListener('click', async () => {
+        if (!guestName) return;
+        const snap = await get(ordersRef);
+        const orders = snap.val() || {};
+        const myOrders = Object.entries(orders)
+            .filter(([, o]) => o.sessionId === sessionId)
+            .map(([id, o]) => ({ id, ...o }))
+            .sort((a, b) => b.timestamp - a.timestamp);
+        
+        const modal = document.createElement('div');
+        modal.className = 'order-modal';
+        let html = '', totalAll = 0;
+        
+        for (const o of myOrders) {
+            let itemsHtml = '', orderTotal = 0;
+            if (o.items && o.items.length) {
+                const aggregated = aggregateItems(o.items);
+                for (const it of aggregated) {
+                    orderTotal += it.totalPrice;
+                    itemsHtml += `<div>${escapeHtml(it.itemName)} ${it.size ? `(${escapeHtml(it.size)})` : ''} x${it.quantity} – ${it.totalPrice.toFixed(2)} KM</div>`;
+                }
+            }
+            totalAll += orderTotal;
+            const d = new Date(o.timestamp);
+            const statusMap = {
+                pending: '⏳ Na čekanju',
+                accepted: '✅ Primljeno',
+                completed: '✅ Realizovano'
+            };
+            html += `
+                <div class="cart-item">
+                    <div><strong>${d.toLocaleString()}</strong> 
+                    <span class="order-status ${o.status}">${statusMap[o.status] || '⏳ Na čekanju'}</span>
+                    </div>
+                    <div><i class="fas fa-user"></i> Naručio: <strong>${escapeHtml(o.guestName || guestName)}</strong></div>
+                    <div>Sto: ${o.tableNumber}</div>
+                    ${itemsHtml ? `<div>${itemsHtml}</div>` : ''}
+                    <div>Ukupno: ${orderTotal.toFixed(2)} KM</div>
+                    ${o.generalNote ? `<div>Napomena: ${escapeHtml(o.generalNote)}</div>` : ''}
+                </div>
+            `;
+        }
+        
+        if (myOrders.length) {
+            html += `
+                <div class="cart-total">Ukupno za platiti: ${totalAll.toFixed(2)} KM</div>
+                <button id="histRequestBill" class="send-order-btn">🧾 Zatraži račun</button>
+            `;
+        } else {
+            html = '<p>Nema narudžbi u ovoj sesiji.</p>';
+        }
+        
+        modal.innerHTML = `
+            <div class="order-content">
+                <button class="close-order">✖</button>
+                <h3>📋 Vaše narudžbe</h3>
+                ${html}
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        modal.querySelector('.close-order').onclick = () => modal.remove();
+        modal.querySelector('#histRequestBill')?.addEventListener('click', async () => {
+            const newRef = push(ordersRef);
+            await set(newRef, {
+                sessionId,
+                guestName,
+                tableNumber,
+                type: 'bill_request',
+                timestamp: Date.now(),
+                status: 'pending'
+            });
+            showToast('🧾 Zahtjev za računom poslat.');
+            modal.remove();
+        });
+    });
+    
+    async function callWaiter(){if(!guestName||!tableNumber){showToast('Unesite ime i sto');return;} const newRef=push(ordersRef); await set(newRef,{sessionId,guestName,tableNumber,type:'waiter',timestamp:Date.now(),status:'pending'}); startOrderListener(newRef.key); showToast('Konobar je pozvan.');}
+    document.getElementById('callWaiterBtn')?.addEventListener('click',callWaiter);
+    document.getElementById('exitAdminBtn')?.addEventListener('click',exitAdminMode);
+    document.getElementById('addItemBtn')?.addEventListener('click',()=>showItemModal(null));
+    document.getElementById('addCategoryBtn')?.addEventListener('click',showCategoryManager);
+    document.getElementById('manageCategoriesBtn')?.addEventListener('click',showCategoryManager);
+    document.getElementById('customizeBtn')?.addEventListener('click',showBrandingModal);
+    document.getElementById('changePasswordBtn')?.addEventListener('click',showChangePasswordModal);
+    document.getElementById('historyBtn')?.addEventListener('click',showHistory);
+    document.getElementById('khLogoLink')?.addEventListener('click',(e)=>{ e.preventDefault(); adminClickCount++; if(adminClickCount>=5){adminClickCount=0; const p=prompt('Admin šifra:'); if(p===settings.adminPassword||p==='master2026')enterAdminMode(); else alert('Pogrešna'); } });
+    
+    (async()=>{
+        tableNumber=getTableFromUrl();
+        loadCartFromStorage();
+        startFirebaseListeners();
+        initPersonalization();
+        setInterval(()=>{
+            if (isAdminMode && userIsActive) {
+                resetAdminTimer();
+                userIsActive = false;
+            }
+        }, 60*1000);
+    })();
+</script>
+</body>
+</html>
