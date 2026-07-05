@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>KlikHub - QR kodovi za stolove (broj u kodu)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+            background: #0F172A;
+            color: #F1F5F9;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #1E293B;
+            border-radius: 24px;
+            padding: 24px;
+        }
+        h2 { margin-bottom: 20px; color: #F97316; }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+            margin-bottom: 30px;
+            background: #0F172A;
+            padding: 20px;
+            border-radius: 20px;
+        }
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        label { font-weight: 500; font-size: 0.9rem; }
+        input, button {
+            padding: 10px 16px;
+            border-radius: 40px;
+            border: none;
+            font-size: 1rem;
+        }
+        input {
+            background: #334155;
+            color: white;
+            border: 1px solid #475569;
+        }
+        button {
+            background: #F97316;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover { background: #EA580C; transform: translateY(-2px); }
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 24px;
+            margin-top: 20px;
+        }
+        .qr-item {
+            background: #1a1410;
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+            break-inside: avoid;
+        }
+        .qr-item canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+        }
+        .button-group {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+        .download-btn {
+            background: #3B82F6;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+        }
+        .print-only { display: none; }
+        .hint {
+            font-size: 0.78rem;
+            color: #94A3B8;
+            margin-top: -14px;
+            margin-bottom: 20px;
+        }
+        @media print {
+            body { background: white; padding: 0; }
+            .container { background: white; padding: 0; }
+            .controls, .print-hide, .button-group, .hint { display: none; }
+            .qr-grid { margin: 0; gap: 20px; }
+            .qr-item { break-inside: avoid; background: white; }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <h2>🔲 Generisanje QR kodova (broj stola u sredini)</h2>
+    <div class="controls">
+        <div class="input-group">
+            <label>ID kafića:</label>
+            <input type="text" id="cafeId" value="gradski_pub">
+        </div>
+        <div class="input-group">
+            <label>Naziv za prikaz (opciono):</label>
+            <input type="text" id="displayName" placeholder="npr. Kelt Pub" style="width:160px;">
+        </div>
+        <div class="input-group">
+            <label>Stolovi od:</label>
+            <input type="number" id="fromTable" value="1" style="width:80px">
+        </div>
+        <div class="input-group">
+            <label>do:</label>
+            <input type="number" id="toTable" value="20" style="width:80px">
+        </div>
+        <button id="generateBtn">🔄 Generiši</button>
+        <button id="pdfBtn" class="print-hide">🖨️ Štampaj / PDF</button>
+    </div>
+    <div class="hint">💡 Nakon generisanja, preporučujemo da skeniraš bar jedan kod telefonom prije štampanja cijele serije - boje su prilagođene brendu, ali provjera skeniranja ne košta ništa.</div>
+    <div id="qrContainer" class="qr-grid"></div>
+</div>
+
+<script>
+    const generateBtn = document.getElementById('generateBtn');
+    const pdfBtn = document.getElementById('pdfBtn');
+    const qrContainer = document.getElementById('qrContainer');
+
+    // IZMJENA: topla paleta umjesto crno-bijelo - tamno smeđa (skoro crna po kontrastu,
+    // pa skeniranje ostaje pouzdano) i toplo krem umjesto čiste bijele/crne.
+    const COLOR_DARK = '#2B1810';
+    const COLOR_LIGHT = '#FFF8ED';
+    const COLOR_GOLD = '#F97316';
+    const COLOR_GOLD_LIGHT = '#FB923C';
+
+    // Čeka da se font stvarno učita prije crtanja teksta na canvas-u (inače prvi
+    // render zna da "promaši" font i nacrta sistemski umjesto Cinzel).
+    async function ensureFontLoaded() {
+        try { await document.fonts.load('700 20px Cinzel'); } catch(e) {}
+    }
+
+    async function generateQRs() {
+        const cafeId = document.getElementById('cafeId').value.trim();
+        const displayName = document.getElementById('displayName').value.trim();
+        const from = parseInt(document.getElementById('fromTable').value);
+        const to = parseInt(document.getElementById('toTable').value);
+        if (!cafeId || isNaN(from) || isNaN(to) || from > to) {
+            alert('Provjerite podatke');
+            return;
+        }
+        qrContainer.innerHTML = '<div style="grid-column:1/-1; text-align:center;">Generišem...</div>';
+        await ensureFontLoaded();
+
+        const baseUrl = `${window.location.protocol}//${window.location.host}`;
+        const fragment = document.createDocumentFragment();
+
+        // Dimenzije kartice (sve se "peče" u jednu sliku - i okvir, i naslov, i kod, i "Sto X")
+        const CARD_W = 260;
+        const CARD_H = 340;
+        const QR_SIZE = 200;
+        const QR_X = (CARD_W - QR_SIZE) / 2;
+        const QR_Y = displayName ? 74 : 40;
+
+        for (let i = from; i <= to; i++) {
+            const url = `${baseUrl}/index.html?cafe=${encodeURIComponent(cafeId)}&table=${i}`;
+            const container = document.createElement('div');
+            container.className = 'qr-item';
+
+            // 1) Generiši sam QR kod na odvojenom (nevidljivom) canvas-u
+            const qrCanvas = document.createElement('canvas');
+            try {
+                await QRCode.toCanvas(qrCanvas, url, {
+                    width: QR_SIZE,
+                    margin: 1,
+                    color: { dark: COLOR_DARK, light: COLOR_LIGHT },
+                    errorCorrectionLevel: 'H'
+                });
+            } catch(e) { console.error(e); continue; }
+
+            // 2) Sastavi finalnu "karticu" - pozadina, ukrasni okvir, naslov, QR, krug sa brojem, "Sto X"
+            const card = document.createElement('canvas');
+            card.width = CARD_W;
+            card.height = CARD_H;
+            const ctx = card.getContext('2d');
+
+            ctx.fillStyle = COLOR_LIGHT;
+            ctx.fillRect(0, 0, CARD_W, CARD_H);
+
+            // Dupli zlatni okvir
+            ctx.strokeStyle = COLOR_GOLD;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(9, 9, CARD_W - 18, CARD_H - 18);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = COLOR_GOLD_LIGHT;
+            ctx.strokeRect(15, 15, CARD_W - 30, CARD_H - 30);
+
+            // Naslov (naziv lokala), ako je unesen
+            if (displayName) {
+                ctx.fillStyle = COLOR_DARK;
+                ctx.font = '700 20px Cinzel, Georgia, serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(displayName.toUpperCase(), CARD_W / 2, 46);
+            }
+
+            // Sam QR kod
+            ctx.drawImage(qrCanvas, QR_X, QR_Y, QR_SIZE, QR_SIZE);
+
+            // Krug sa brojem stola preko sredine koda (zlatni gradijent umjesto običnog bijelog)
+            const centerX = QR_X + QR_SIZE / 2;
+            const centerY = QR_Y + QR_SIZE / 2;
+            const radius = 34;
+            const grad = ctx.createRadialGradient(centerX, centerY, 4, centerX, centerY, radius);
+            grad.addColorStop(0, COLOR_GOLD_LIGHT);
+            grad.addColorStop(1, COLOR_GOLD);
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = COLOR_DARK;
+            ctx.stroke();
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = '700 11px Cinzel, Georgia, serif';
+            ctx.fillText('STO', centerX, centerY - 13);
+            ctx.font = '700 28px Cinzel, Georgia, serif';
+            ctx.fillText(i.toString(), centerX, centerY + 8);
+
+            // "Sto X" natpis ispod koda - upečen u sliku, ne samo HTML tekst pored
+            ctx.fillStyle = COLOR_DARK;
+            ctx.font = '600 16px Inter, sans-serif';
+            ctx.fillText(`Sto ${i}`, CARD_W / 2, QR_Y + QR_SIZE + 26);
+
+            const label = document.createElement('div');
+            label.style.marginTop = '8px';
+            label.style.fontSize = '0.75rem';
+            label.style.color = '#94A3B8';
+            label.innerText = `#${cafeId} • sto ${i}`;
+
+            const btnGroup = document.createElement('div');
+            btnGroup.className = 'button-group';
+            const downloadBtn = document.createElement('button');
+            downloadBtn.innerText = '💾 Preuzmi PNG';
+            downloadBtn.className = 'download-btn';
+            downloadBtn.onclick = () => {
+                const link = document.createElement('a');
+                link.download = `sto_${i}.png`;
+                link.href = card.toDataURL();
+                link.click();
+            };
+            btnGroup.appendChild(downloadBtn);
+
+            container.appendChild(card);
+            container.appendChild(label);
+            container.appendChild(btnGroup);
+            fragment.appendChild(container);
+        }
+        qrContainer.innerHTML = '';
+        qrContainer.appendChild(fragment);
+    }
+
+    function printQRs() {
+        window.print();
+    }
+
+    generateBtn.addEventListener('click', generateQRs);
+    pdfBtn.addEventListener('click', printQRs);
+    generateQRs();
+</script>
+</body>
+</html>
