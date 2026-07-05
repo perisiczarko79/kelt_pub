@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>KlikHub - QR kodovi za stolove (broj u kodu)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+            background: #0F172A;
+            color: #F1F5F9;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #1E293B;
+            border-radius: 24px;
+            padding: 24px;
+        }
+        h2 { margin-bottom: 20px; color: #F97316; }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            background: #0F172A;
+            padding: 20px;
+            border-radius: 20px;
+        }
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        label { font-weight: 500; font-size: 0.9rem; }
+        input, button {
+            padding: 10px 16px;
+            border-radius: 40px;
+            border: none;
+            font-size: 1rem;
+        }
+        input {
+            background: #334155;
+            color: white;
+            border: 1px solid #475569;
+        }
+        button {
+            background: #F97316;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover { background: #EA580C; transform: translateY(-2px); }
+        button.secondary { background: #334155; }
+        button.secondary:hover { background: #475569; }
+        .current-style-note {
+            font-size: 0.8rem;
+            color: #94A3B8;
+            margin-bottom: 20px;
+        }
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 24px;
+            margin-top: 20px;
+        }
+        .qr-item {
+            background: #1a1410;
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+            break-inside: avoid;
+        }
+        .qr-item canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+        }
+        .button-group {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+        .download-btn {
+            background: #3B82F6;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+        }
+        .empty-hint {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748B;
+        }
+        @media print {
+            body { background: white; padding: 0; }
+            .container { background: white; padding: 0; }
+            .controls, .print-hide, .button-group, .current-style-note { display: none; }
+            .qr-grid { margin: 0; gap: 20px; }
+            .qr-item { break-inside: avoid; background: white; }
+        }
+
+        /* MODAL ZA IZBOR IZGLEDA */
+        .modal {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center;
+            z-index: 1000; padding: 20px;
+        }
+        .modal-content {
+            background: #1E293B; max-width: 600px; width: 100%; max-height: 85vh;
+            overflow-y: auto; padding: 24px; border-radius: 20px; border: 1px solid #F97316;
+        }
+        .style-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 14px;
+            margin: 16px 0;
+        }
+        .style-card {
+            border-radius: 14px;
+            padding: 14px 10px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.15s;
+        }
+        .style-card:hover { transform: translateY(-2px); }
+        .style-card.selected { border-color: #F97316; }
+        .style-swatch {
+            width: 100%;
+            height: 60px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+        .style-card-name { font-size: 0.8rem; font-weight: 600; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <h2>🔲 Generisanje QR kodova (broj stola u sredini)</h2>
+    <div class="controls">
+        <div class="input-group">
+            <label>ID kafića:</label>
+            <input type="text" id="cafeId" value="gradski_pub">
+        </div>
+        <div class="input-group">
+            <label>Naziv za prikaz (opciono):</label>
+            <input type="text" id="displayName" placeholder="npr. Kelt Pub" style="width:160px;">
+        </div>
+        <div class="input-group">
+            <label>Stolovi od:</label>
+            <input type="number" id="fromTable" value="1" style="width:80px">
+        </div>
+        <div class="input-group">
+            <label>do:</label>
+            <input type="number" id="toTable" value="20" style="width:80px">
+        </div>
+        <button id="styleBtn" class="secondary">🎨 Izgled</button>
+        <button id="generateBtn">🔄 Generiši</button>
+        <button id="pdfBtn" class="print-hide">🖨️ Štampaj / PDF</button>
+    </div>
+    <div class="current-style-note" id="currentStyleNote"></div>
+    <div id="qrContainer" class="qr-grid">
+        <div class="empty-hint">Podesi polja iznad i klikni "🔄 Generiši" da napraviš QR kodove.</div>
+    </div>
+</div>
+
+<script>
+    const generateBtn = document.getElementById('generateBtn');
+    const pdfBtn = document.getElementById('pdfBtn');
+    const styleBtn = document.getElementById('styleBtn');
+    const qrContainer = document.getElementById('qrContainer');
+    const currentStyleNote = document.getElementById('currentStyleNote');
+
+    // ============================================================
+    // IZGLEDI - svaki definiše boje, font, tip okvira i opcione ukrase.
+    // Lako se dodaju novi stilovi ubuduće - samo novi unos u ovom objektu.
+    // ============================================================
+    const STYLE_PRESETS = {
+        warm: {
+            name: '🟠 Toplo / Zlatno',
+            preview: '#F97316',
+            cardBg: '#FFF8ED',
+            qrDark: '#2B1810',
+            qrLight: '#FFF8ED',
+            accent: '#F97316',
+            accentLight: '#FB923C',
+            textColor: '#2B1810',
+            circleTextColor: '#FFFFFF',
+            font: "Cinzel, Georgia, serif",
+            border: 'double',
+            ornament: null
+        },
+        klikhub: {
+            name: '⚡ KlikHub identitet',
+            preview: '#0F172A',
+            cardBg: '#0F172A',
+            qrDark: '#0B1120',
+            qrLight: '#F1F5F9',
+            accent: '#F97316',
+            accentLight: '#FB923C',
+            textColor: '#F1F5F9',
+            circleTextColor: '#0F172A',
+            font: "Inter, sans-serif",
+            border: 'single',
+            ornament: null
+        },
+        kelt: {
+            name: '☘ Kelt Irski Ultra',
+            preview: '#123A22',
+            cardBg: '#0F1B12',
+            qrDark: '#12210F',
+            qrLight: '#FBF3DE',
+            accent: '#D4AF37',
+            accentLight: '#E8C766',
+            textColor: '#FBF3DE',
+            circleTextColor: '#12210F',
+            font: "Cinzel, Georgia, serif",
+            border: 'double',
+            ornament: '☘'
+        },
+        mono: {
+            name: '⬛ Minimalno crno-bijelo',
+            preview: '#111111',
+            cardBg: '#FFFFFF',
+            qrDark: '#000000',
+            qrLight: '#FFFFFF',
+            accent: '#000000',
+            accentLight: '#333333',
+            textColor: '#000000',
+            circleTextColor: '#FFFFFF',
+            font: "Inter, sans-serif",
+            border: 'single',
+            ornament: null
+        },
+        silver: {
+            name: '🌙 Elegantno tamno',
+            preview: '#1a1a1a',
+            cardBg: '#111111',
+            qrDark: '#000000',
+            qrLight: '#FFFFFF',
+            accent: '#C0C0C0',
+            accentLight: '#E5E5E5',
+            textColor: '#F1F5F9',
+            circleTextColor: '#111111',
+            font: "Inter, sans-serif",
+            border: 'single',
+            ornament: null
+        }
+    };
+    let selectedStyleKey = 'warm';
+
+    function updateStyleNote() {
+        currentStyleNote.textContent = `Trenutni izgled: ${STYLE_PRESETS[selectedStyleKey].name}`;
+    }
+    updateStyleNote();
+
+    // ============================================================
+    // MODAL ZA IZBOR IZGLEDA
+    // ============================================================
+    function showStyleModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3 style="color:#F97316; margin-bottom:8px;">🎨 Odaberi izgled QR koda</h3>
+                <p style="color:#94A3B8; font-size:0.85rem;">Boje su uvijek biraju tako da kod ostane pouzdano skenirljiv.</p>
+                <div class="style-grid" id="styleGrid"></div>
+                <div style="text-align:right; margin-top:12px;">
+                    <button class="secondary" id="closeStyleModal">Zatvori</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        const grid = modal.querySelector('#styleGrid');
+        Object.entries(STYLE_PRESETS).forEach(([key, style]) => {
+            const card = document.createElement('div');
+            card.className = 'style-card' + (key === selectedStyleKey ? ' selected' : '');
+            card.innerHTML = `
+                <div class="style-swatch" style="background:${style.preview};">${style.ornament || '▦'}</div>
+                <div class="style-card-name">${style.name}</div>
+            `;
+            card.onclick = () => {
+                selectedStyleKey = key;
+                updateStyleNote();
+                modal.remove();
+                if (!qrContainer.querySelector('.empty-hint')) generateQRs();
+            };
+            grid.appendChild(card);
+        });
+        modal.querySelector('#closeStyleModal').onclick = () => modal.remove();
+    }
+    styleBtn.addEventListener('click', showStyleModal);
+
+    // Čeka da se font stvarno učita prije crtanja teksta na canvas-u
+    async function ensureFontLoaded() {
+        try {
+            await document.fonts.load('700 20px Cinzel');
+            await document.fonts.load('700 20px Inter');
+        } catch(e) {}
+    }
+
+    // IZMJENA: povećana rezolucija (SCALE=3) - kod na ekranu izgleda isto (CSS ga
+    // svejedno smanji preko max-width:100%), ali preuzeta PNG slika je mnogo oštrija
+    // za štampu, jer se sve crta na 3x više piksela nego prije.
+    const SCALE = 3;
+    const s = (n) => n * SCALE;
+
+    async function generateQRs() {
+        const cafeId = document.getElementById('cafeId').value.trim();
+        const displayName = document.getElementById('displayName').value.trim();
+        const from = parseInt(document.getElementById('fromTable').value);
+        const to = parseInt(document.getElementById('toTable').value);
+        if (!cafeId || isNaN(from) || isNaN(to) || from > to) {
+            alert('Provjerite podatke');
+            return;
+        }
+        const style = STYLE_PRESETS[selectedStyleKey];
+        qrContainer.innerHTML = '<div class="empty-hint">Generišem...</div>';
+        await ensureFontLoaded();
+
+        const baseUrl = `${window.location.protocol}//${window.location.host}`;
+        const fragment = document.createDocumentFragment();
+
+        const CARD_W = s(260);
+        const CARD_H = s(340);
+        const QR_SIZE = s(200);
+        const QR_X = (CARD_W - QR_SIZE) / 2;
+        const QR_Y = displayName ? s(74) : s(40);
+
+        for (let i = from; i <= to; i++) {
+            const url = `${baseUrl}/index.html?cafe=${encodeURIComponent(cafeId)}&table=${i}`;
+            const container = document.createElement('div');
+            container.className = 'qr-item';
+            container.style.background = style.cardBg;
+
+            const qrCanvas = document.createElement('canvas');
+            try {
+                await QRCode.toCanvas(qrCanvas, url, {
+                    width: QR_SIZE,
+                    margin: 1,
+                    color: { dark: style.qrDark, light: style.qrLight },
+                    errorCorrectionLevel: 'H'
+                });
+            } catch(e) { console.error(e); continue; }
+
+            const card = document.createElement('canvas');
+            card.width = CARD_W;
+            card.height = CARD_H;
+            const ctx = card.getContext('2d');
+
+            ctx.fillStyle = style.cardBg;
+            ctx.fillRect(0, 0, CARD_W, CARD_H);
+
+            // Okvir (jednostruki ili dvostruki, zavisno od stila)
+            ctx.strokeStyle = style.accent;
+            ctx.lineWidth = s(3);
+            ctx.strokeRect(s(9), s(9), CARD_W - s(18), CARD_H - s(18));
+            if (style.border === 'double') {
+                ctx.lineWidth = s(1);
+                ctx.strokeStyle = style.accentLight;
+                ctx.strokeRect(s(15), s(15), CARD_W - s(30), CARD_H - s(30));
+            }
+
+            // Ukrasni simboli u gornjim uglovima (ako stil ima ornament, npr. djetelina)
+            if (style.ornament) {
+                ctx.fillStyle = style.accent;
+                ctx.font = `${s(18)}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(style.ornament, s(28), s(28));
+                ctx.fillText(style.ornament, CARD_W - s(28), s(28));
+            }
+
+            // Naslov (naziv lokala), ako je unesen
+            if (displayName) {
+                ctx.fillStyle = style.textColor;
+                ctx.font = `700 ${s(20)}px ${style.font}`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(displayName.toUpperCase(), CARD_W / 2, s(46));
+            }
+
+            // Sam QR kod
+            ctx.drawImage(qrCanvas, QR_X, QR_Y, QR_SIZE, QR_SIZE);
+
+            // Krug sa brojem stola preko sredine koda
+            const centerX = QR_X + QR_SIZE / 2;
+            const centerY = QR_Y + QR_SIZE / 2;
+            const radius = s(34);
+            const grad = ctx.createRadialGradient(centerX, centerY, s(4), centerX, centerY, radius);
+            grad.addColorStop(0, style.accentLight);
+            grad.addColorStop(1, style.accent);
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+            ctx.lineWidth = s(2.5);
+            ctx.strokeStyle = style.textColor;
+            ctx.stroke();
+
+            ctx.fillStyle = style.circleTextColor;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = `700 ${s(11)}px ${style.font}`;
+            ctx.fillText('STO', centerX, centerY - s(13));
+            ctx.font = `700 ${s(28)}px ${style.font}`;
+            ctx.fillText(i.toString(), centerX, centerY + s(8));
+
+            // "Sto X" natpis ispod koda
+            ctx.fillStyle = style.textColor;
+            ctx.font = `600 ${s(16)}px Inter, sans-serif`;
+            ctx.fillText(`Sto ${i}`, CARD_W / 2, QR_Y + QR_SIZE + s(26));
+
+            const label = document.createElement('div');
+            label.style.marginTop = '8px';
+            label.style.fontSize = '0.75rem';
+            label.style.color = '#94A3B8';
+            label.innerText = `#${cafeId} • sto ${i}`;
+
+            const btnGroup = document.createElement('div');
+            btnGroup.className = 'button-group';
+            const downloadBtn = document.createElement('button');
+            downloadBtn.innerText = '💾 Preuzmi PNG';
+            downloadBtn.className = 'download-btn';
+            downloadBtn.onclick = () => {
+                const link = document.createElement('a');
+                link.download = `sto_${i}.png`;
+                link.href = card.toDataURL();
+                link.click();
+            };
+            btnGroup.appendChild(downloadBtn);
+
+            container.appendChild(card);
+            container.appendChild(label);
+            container.appendChild(btnGroup);
+            fragment.appendChild(container);
+        }
+        qrContainer.innerHTML = '';
+        qrContainer.appendChild(fragment);
+    }
+
+    function printQRs() {
+        window.print();
+    }
+
+    generateBtn.addEventListener('click', generateQRs);
+    pdfBtn.addEventListener('click', printQRs);
+    // IZMJENA: više se NE generiše automatski pri otvaranju stranice - čeka se
+    // eksplicitan klik na "Generiši", da se izbjegne slučajno preuzimanje/štampanje
+    // kodova za pogrešan ("gradski_pub" placeholder) ID prije nego neko podesi polja.
+</script>
+</body>
+</html>
