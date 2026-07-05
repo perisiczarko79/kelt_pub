@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>KlikHub - Frizerski salon | Zakaži termin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #0A0C10;
+            --bg-secondary: #14161C;
+            --bg-card: #1A1D25;
+            --bg-elevated: #22252E;
+            --accent-primary: #E85D04;
+            --accent-secondary: #FFBA08;
+            --accent-glow: rgba(232, 93, 4, 0.2);
+            --success: #2E7D32;
+            --danger: #DC2626;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0A5B5;
+            --text-tertiary: #6B7280;
+            --border-light: rgba(255, 255, 255, 0.08);
+            --border-medium: rgba(255, 255, 255, 0.12);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+            --shadow-glow: 0 0 20px rgba(232, 93, 4, 0.3);
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 20px;
+            background-image: radial-gradient(circle at 25% 0%, rgba(232, 93, 4, 0.06) 0%, transparent 50%);
+        }
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-light);
+        }
+        .brand-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #0A0C10 0%, #14161C 100%);
+            border-bottom: 2px solid var(--accent-primary);
+        }
+        .klikhub-logo img { height: 42px; width: auto; }
+        .salon-header-center { text-align: center; flex: 1; }
+        .salon-logo { max-height: 70px; width: auto; margin: 0 auto 4px; display: none; object-fit: contain; }
+        .salon-name { font-size: 22px; font-weight: 700; color: var(--accent-primary); }
+        .salon-sub { font-size: 12px; color: var(--text-secondary); }
+        .spacer-right { width: 42px; flex-shrink: 0; }
+
+        .steps-bar {
+            display: flex;
+            padding: 16px 20px 0;
+            gap: 6px;
+        }
+        .step-dot {
+            flex: 1;
+            height: 4px;
+            border-radius: 4px;
+            background: var(--border-medium);
+            transition: 0.3s;
+        }
+        .step-dot.done, .step-dot.active { background: var(--accent-primary); }
+
+        .panel { padding: 24px 20px; }
+        .step-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .step-title i { color: var(--accent-primary); }
+        .step-sub { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 18px; }
+
+        .service-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .service-option:hover { border-color: var(--accent-primary); }
+        .service-option.checked { border-color: var(--accent-primary); background: rgba(232,93,4,0.08); }
+        .service-option input { width: 20px; height: 20px; accent-color: var(--accent-primary); flex-shrink: 0; }
+        .service-option .svc-info { flex: 1; }
+        .service-option .svc-name { font-weight: 600; }
+        .service-option .svc-meta { font-size: 0.8rem; color: var(--text-secondary); }
+        .service-option .svc-price { font-weight: 700; color: var(--accent-secondary); }
+
+        .staff-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .staff-option.selected { border-color: var(--accent-primary); background: rgba(232,93,4,0.08); }
+        .staff-option i.avatar { font-size: 1.4rem; color: var(--accent-primary); }
+
+        .running-total {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            margin: 16px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+        .running-total .rt-price { color: var(--accent-secondary); font-size: 1.1rem; }
+
+        label { display: block; font-weight: 500; margin-bottom: 8px; font-size: 0.85rem; color: var(--text-secondary); }
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-medium);
+            font-size: 0.95rem;
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+        input:focus, select:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 3px var(--accent-glow); }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor: pointer; }
+        .form-group { margin-bottom: 18px; }
+
+        .time-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 8px; margin-top: 10px; }
+        .time-btn {
+            padding: 10px 4px;
+            border-radius: var(--radius-md);
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-align: center;
+        }
+        .time-btn:hover { border-color: var(--accent-primary); }
+        .time-btn.selected { background: var(--accent-primary); border-color: var(--accent-primary); }
+        .time-btn.taken { opacity: 0.35; cursor: not-allowed; text-decoration: line-through; }
+
+        .welcome-back {
+            background: rgba(46,125,50,0.15);
+            border: 1px solid var(--success);
+            border-radius: var(--radius-md);
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            margin-top: -8px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .btn-primary, .btn-secondary {
+            width: 100%;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #F48C06 100%);
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-glow); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-medium);
+        }
+        .step-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .step-actions .btn-secondary { flex: 1; }
+        .step-actions .btn-primary { flex: 2; }
+
+        .policy-note {
+            font-size: 0.78rem;
+            color: var(--text-tertiary);
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 10px 14px;
+            margin-top: 14px;
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .my-res-link {
+            text-align: center;
+            padding: 14px 20px 0;
+        }
+        .my-res-link a { color: var(--text-secondary); font-size: 0.85rem; text-decoration: underline; cursor: pointer; }
+
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px;
+        }
+        .modal-content {
+            background: var(--bg-secondary); max-width: 480px; width: 100%; padding: 24px;
+            border-radius: var(--radius-xl); border: 1px solid var(--border-medium); max-height: 85vh; overflow-y: auto;
+        }
+        .my-res-card {
+            background: var(--bg-card); border-radius: var(--radius-md); padding: 14px; margin-bottom: 10px;
+            border-left: 4px solid var(--accent-primary);
+        }
+        .status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
+        .status-pending { background: rgba(245,158,11,0.2); color: #F59E0B; }
+        .status-confirmed { background: rgba(46,125,50,0.2); color: #4CAF50; }
+        .status-completed { background: rgba(59,130,246,0.2); color: #3B82F6; }
+        .status-canceled { background: rgba(220,38,38,0.2); color: #EF4444; }
+        .status-no-show { background: rgba(220,38,38,0.3); color: #EF4444; }
+
+        .toast {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            background: var(--bg-elevated); color: var(--accent-primary); padding: 14px 24px;
+            border-radius: 50px; z-index: 3000; font-weight: 500; border: 1px solid var(--accent-primary);
+            box-shadow: var(--shadow-md); animation: slideUp 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+
+        .empty-state { text-align: center; padding: 30px; color: var(--text-tertiary); }
+    </style>
+    <script type="importmap">
+        { "imports": {
+            "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+            "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+        } }
+    </script>
+</head>
+<body>
+<div class="container" id="app">
+    <div class="brand-header">
+        <div class="klikhub-logo"><a href="/klikhub.html" target="_blank"><img src="kh-logo.png" alt="KlikHub"></a></div>
+        <div class="salon-header-center">
+            <img id="salonLogoImg" class="salon-logo" src="" alt="Logo">
+            <div id="salonName" class="salon-name">Frizerski salon</div>
+            <div class="salon-sub">Online zakazivanje</div>
+        </div>
+        <div class="spacer-right"></div>
+    </div>
+
+    <div class="steps-bar">
+        <div class="step-dot active" data-step="1"></div>
+        <div class="step-dot" data-step="2"></div>
+        <div class="step-dot" data-step="3"></div>
+        <div class="step-dot" data-step="4"></div>
+    </div>
+
+    <div class="my-res-link"><a id="myReservationsLink">📋 Imam rezervaciju - pregledaj/otkaži</a></div>
+
+    <!-- KORAK 1: USLUGE -->
+    <div class="panel" id="step1" style="display:block;">
+        <div class="step-title"><i class="fas fa-cut"></i> Odaberi usluge</div>
+        <div class="step-sub">Možeš izabrati i više usluga odjednom.</div>
+        <div id="servicesList"></div>
+        <div class="running-total">
+            <span id="rtSummary">Nijedna usluga odabrana</span>
+            <span class="rt-price" id="rtPrice">0.00 KM</span>
+        </div>
+        <div class="step-actions">
+            <button class="btn-primary" id="toStep2Btn" style="flex:1;" disabled>Dalje <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <!-- KORAK 2: FRIZER (prikazuje se samo ako je uključeno) -->
+    <div class="panel" id="step2" style="display:none;">
+        <div class="step-title"><i class="fas fa-user-tie"></i> Odaberi frizera</div>
+        <div class="step-sub">Ili prepusti nama da odaberemo prvog slobodnog.</div>
+        <div id="staffList"></div>
+        <div class="step-actions">
+            <button class="btn-secondary" id="back1Btn"><i class="fas fa-arrow-left"></i> Nazad</button>
+            <button class="btn-primary" id="toStep3Btn">Dalje <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <!-- KORAK 3: TERMIN -->
+    <div class="panel" id="step3" style="display:none;">
+        <div class="step-title"><i class="fas fa-calendar-alt"></i> Odaberi termin</div>
+        <div class="step-sub">Trajanje odabranih usluga: <strong id="step3Duration">0 min</strong></div>
+        <div class="form-group">
+            <label>Datum</label>
+            <input type="date" id="datePicker">
+        </div>
+        <div id="timeSlots" class="time-slots"></div>
+        <div class="step-actions">
+            <button class="btn-secondary" id="back2Btn"><i class="fas fa-arrow-left"></i> Nazad</button>
+            <button class="btn-primary" id="toStep4Btn" disabled>Dalje <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <!-- KORAK 4: PODACI -->
+    <div class="panel" id="step4" style="display:none;">
+        <div class="step-title"><i class="fas fa-user"></i> Tvoji podaci</div>
+        <div class="step-sub">Da znamo kome i gdje da potvrdimo termin.</div>
+        <div class="form-group">
+            <label>📞 Broj telefona</label>
+            <input type="tel" id="clientPhone" placeholder="061 123 456">
+        </div>
+        <div class="welcome-back" id="welcomeBack"></div>
+        <div class="form-group">
+            <label>👤 Ime i prezime</label>
+            <input type="text" id="clientName" placeholder="npr. Marko Marković">
+        </div>
+        <div class="policy-note" id="cancellationNote" style="display:none;"></div>
+        <div class="step-actions">
+            <button class="btn-secondary" id="back3Btn"><i class="fas fa-arrow-left"></i> Nazad</button>
+            <button class="btn-primary" id="submitBtn"><i class="fas fa-check"></i> Potvrdi rezervaciju</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from 'firebase/app';
+    import { getDatabase, ref, get, set, push, update } from 'firebase/database';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyALY3oKvPW_mDZiaBl0EdFCkTjd6fqwisQ",
+        authDomain: "kelt-pub-menu-2df61.firebaseapp.com",
+        databaseURL: "https://kelt-pub-menu-2df61-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "kelt-pub-menu-2df61",
+        storageBucket: "kelt-pub-menu-2df61.firebasestorage.app"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let salonId = null;
+    function getSalonIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        let id = params.get('salon');
+        if (!id) {
+            id = prompt('Unesite ID salona (npr. gradski_salon):');
+            if (id) window.history.replaceState({}, '', `?salon=${encodeURIComponent(id)}`);
+            else throw new Error('Missing salon ID');
+        }
+        return id;
+    }
+    try { salonId = getSalonIdFromUrl(); }
+    catch(e) { document.body.innerHTML = '<div style="text-align:center;margin-top:50px;">Greška: nedostaje ID salona.</div>'; throw e; }
+
+    const reservationsRef = ref(db, `hairSalons/${salonId}/reservations`);
+    const settingsRef = ref(db, `hairSalons/${salonId}/settings`);
+    const servicesRef = ref(db, `hairSalons/${salonId}/services`);
+    const workingHoursRef = ref(db, `hairSalons/${salonId}/settings/workingHours`);
+    const staffRef = ref(db, `hairSalons/${salonId}/staff`);
+    const clientsRef = ref(db, `hairSalons/${salonId}/clients`);
+
+    let servicesList = [];
+    let staffList = [];
+    let multiStaffEnabled = false;
+    let workingHours = {};
+    let slotInterval = 30;
+    let cancellationHours = 4;
+
+    let selectedServiceIndexes = new Set();
+    let selectedStaffId = null; // null = "svejedno"
+    let selectedTime = null;
+
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    function escapeHtml(str) { return str ? String(str).replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])) : ''; }
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const [y, m, d] = dateStr.split('-');
+        return `${d}.${m}.${y}.`;
+    }
+
+    async function loadServices() {
+        const snap = await get(servicesRef);
+        if (snap.exists() && Array.isArray(snap.val())) {
+            servicesList = snap.val();
+        } else {
+            servicesList = [
+                { name: "Muško šišanje", duration: 30, price: 10 },
+                { name: "Žensko šišanje", duration: 30, price: 15 },
+                { name: "Šišanje + brada", duration: 45, price: 15 },
+                { name: "Feniranje", duration: 30, price: 10 }
+            ];
+            await set(servicesRef, servicesList);
+        }
+    }
+
+    async function loadStaff() {
+        const featSnap = await get(ref(db, `hairSalons/${salonId}/settings/features/multiStaff/enabled`));
+        multiStaffEnabled = featSnap.val() === true;
+        if (multiStaffEnabled) {
+            const snap = await get(staffRef);
+            const data = snap.val() || {};
+            staffList = Object.entries(data)
+                .map(([id, s]) => ({ id, ...s }))
+                .filter(s => s.active !== false);
+        }
+    }
+
+    async function loadWorkingHours() {
+        const snap = await get(workingHoursRef);
+        if (snap.exists()) {
+            workingHours = snap.val();
+        } else {
+            workingHours = {
+                monday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                tuesday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                wednesday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                thursday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                friday: { enabled: true, intervals: [{ start: "09:00", end: "20:00" }] },
+                saturday: { enabled: true, intervals: [{ start: "09:00", end: "15:00" }] },
+                sunday: { enabled: false, intervals: [] }
+            };
+            await set(workingHoursRef, workingHours);
+        }
+    }
+
+    async function loadSettings() {
+        const snap = await get(settingsRef);
+        if (snap.exists()) {
+            const v = snap.val();
+            if (v.slotInterval) slotInterval = v.slotInterval;
+            if (typeof v.cancellationHours === 'number') cancellationHours = v.cancellationHours;
+            if (v.name) document.getElementById('salonName').textContent = v.name;
+            if (v.logoBase64) {
+                const img = document.getElementById('salonLogoImg');
+                img.src = v.logoBase64;
+                img.style.display = 'block';
+            }
+        }
+        document.getElementById('cancellationNote').innerHTML = `<i class="fas fa-info-circle"></i> Otkazivanje je moguće najkasnije ${cancellationHours}h prije termina.`;
+        document.getElementById('cancellationNote').style.display = 'block';
+    }
+
+    // IZMJENA: lokalni datum umjesto UTC (toISOString) - izbjegava pogrešan "danas" oko ponoći
+    function getLocalTodayStr() {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    }
+
+    function getTimeSlotsForDate(date) {
+        const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+        const dayOfWeek = dayNames[new Date(date + 'T00:00:00').getDay()];
+        const dayData = workingHours[dayOfWeek];
+        if (!dayData || !dayData.enabled) return [];
+        const slots = [];
+        for (const interval of dayData.intervals) {
+            let [sh, sm] = interval.start.split(':').map(Number);
+            let [eh, em] = interval.end.split(':').map(Number);
+            let start = sh * 60 + sm, end = eh * 60 + em;
+            for (let t = start; t < end; t += slotInterval) {
+                slots.push(`${Math.floor(t/60).toString().padStart(2,'0')}:${(t%60).toString().padStart(2,'0')}`);
+            }
+        }
+        return slots;
+    }
+
+    function getSlotsOccupied(startTime, durationMinutes) {
+        const slots = [];
+        let [h, m] = startTime.split(':').map(Number);
+        let total = h * 60 + m;
+        let remaining = durationMinutes;
+        while (remaining > 0) {
+            slots.push(`${Math.floor(total/60).toString().padStart(2,'0')}:${(total%60).toString().padStart(2,'0')}`);
+            total += slotInterval;
+            remaining -= slotInterval;
+        }
+        return slots;
+    }
+
+    function totalDurationOf(indexes) {
+        return [...indexes].reduce((sum, i) => sum + (servicesList[i]?.duration || 0), 0);
+    }
+    function totalPriceOf(indexes) {
+        return [...indexes].reduce((sum, i) => sum + (parseFloat(servicesList[i]?.price) || 0), 0);
+    }
+
+    // ============================================================
+    // KORAK 1: USLUGE
+    // ============================================================
+    function renderServices() {
+        const container = document.getElementById('servicesList');
+        container.innerHTML = '';
+        servicesList.forEach((s, idx) => {
+            const div = document.createElement('div');
+            div.className = 'service-option';
+            div.innerHTML = `
+                <input type="checkbox" data-idx="${idx}">
+                <div class="svc-info">
+                    <div class="svc-name">${escapeHtml(s.name)}</div>
+                    <div class="svc-meta">${s.duration} min</div>
+                </div>
+                <div class="svc-price">${(parseFloat(s.price) || 0).toFixed(2)} KM</div>
+            `;
+            div.onclick = (e) => {
+                if (e.target.tagName !== 'INPUT') {
+                    const cb = div.querySelector('input');
+                    cb.checked = !cb.checked;
+                }
+                const cb = div.querySelector('input');
+                if (cb.checked) { selectedServiceIndexes.add(idx); div.classList.add('checked'); }
+                else { selectedServiceIndexes.delete(idx); div.classList.remove('checked'); }
+                updateRunningTotal();
+            };
+            container.appendChild(div);
+        });
+    }
+
+    function updateRunningTotal() {
+        const count = selectedServiceIndexes.size;
+        const dur = totalDurationOf(selectedServiceIndexes);
+        const price = totalPriceOf(selectedServiceIndexes);
+        document.getElementById('rtSummary').textContent = count === 0 ? 'Nijedna usluga odabrana' : `${count} usluga(e) • ${dur} min`;
+        document.getElementById('rtPrice').textContent = `${price.toFixed(2)} KM`;
+        document.getElementById('toStep2Btn').disabled = count === 0;
+    }
+
+    // ============================================================
+    // KORAK 2: FRIZER
+    // ============================================================
+    function renderStaff() {
+        const container = document.getElementById('staffList');
+        container.innerHTML = '';
+        const anyDiv = document.createElement('div');
+        anyDiv.className = 'staff-option selected';
+        anyDiv.innerHTML = `<i class="fas fa-random avatar"></i><div><strong>Svejedno mi je</strong><div style="font-size:0.8rem;color:var(--text-secondary);">Prvi slobodan termin</div></div>`;
+        anyDiv.onclick = () => selectStaff(null, anyDiv);
+        container.appendChild(anyDiv);
+        staffList.forEach(s => {
+            const div = document.createElement('div');
+            div.className = 'staff-option';
+            div.innerHTML = `<i class="fas fa-user-circle avatar"></i><div><strong>${escapeHtml(s.name)}</strong></div>`;
+            div.onclick = () => selectStaff(s.id, div);
+            container.appendChild(div);
+        });
+    }
+    function selectStaff(staffId, el) {
+        selectedStaffId = staffId;
+        document.querySelectorAll('.staff-option').forEach(d => d.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    // ============================================================
+    // KORAK 3: TERMIN
+    // ============================================================
+    async function loadReservationsForDate(date) {
+        const snap = await get(reservationsRef);
+        const all = snap.val() || {};
+        return Object.entries(all)
+            .filter(([, res]) => res.date === date && res.status !== 'canceled' && res.status !== 'no-show')
+            .map(([id, res]) => ({ id, ...res }));
+    }
+    async function loadBlockedSlotsForDate(date, staffId) {
+        const key = staffId || '_all';
+        const snap = await get(ref(db, `hairSalons/${salonId}/blockedSlots/${date}/${key}`));
+        return snap.exists() ? Object.keys(snap.val()) : [];
+    }
+
+    async function renderTimeSlots() {
+        const date = document.getElementById('datePicker').value;
+        const container = document.getElementById('timeSlots');
+        selectedTime = null;
+        document.getElementById('toStep4Btn').disabled = true;
+        if (!date) { container.innerHTML = '<div class="empty-state">Odaberite datum</div>'; return; }
+
+        const duration = totalDurationOf(selectedServiceIndexes);
+        const allSlots = getTimeSlotsForDate(date);
+        if (allSlots.length === 0) {
+            container.innerHTML = '<div class="empty-state">Nema radnih termina za ovaj datum</div>';
+            return;
+        }
+
+        const reservations = await loadReservationsForDate(date);
+        // Ako je "svejedno" (selectedStaffId === null) i multiStaff je uključen, slot je slobodan
+        // ako je slobodan kod BAREM JEDNOG frizera. Ako nije uključen multiStaff ili je odabran
+        // konkretan frizer, gleda se samo taj jedan raspored.
+        const relevantStaffIds = multiStaffEnabled
+            ? (selectedStaffId ? [selectedStaffId] : staffList.map(s => s.id))
+            : ['_all'];
+
+        const freeSlots = [];
+        for (const slot of allSlots) {
+            const neededSlots = getSlotsOccupied(slot, duration);
+            if (neededSlots.some(s => !allSlots.includes(s))) continue; // ide van radnog vremena
+            let isFreeForAnyStaff = false;
+            for (const staffKey of relevantStaffIds) {
+                const blocked = await loadBlockedSlotsForDate(date, staffKey === '_all' ? null : staffKey);
+                const occupiedSet = new Set(blocked);
+                for (const res of reservations) {
+                    const resStaffKey = multiStaffEnabled ? (res.staffId || '_all') : '_all';
+                    if (resStaffKey !== staffKey) continue;
+                    const dur = res.totalDuration || 30;
+                    for (const s of getSlotsOccupied(res.time, dur)) occupiedSet.add(s);
+                }
+                if (!neededSlots.some(s => occupiedSet.has(s))) { isFreeForAnyStaff = true; break; }
+            }
+            if (isFreeForAnyStaff) freeSlots.push(slot);
+        }
+
+        container.innerHTML = '';
+        allSlots.forEach(slot => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'time-btn';
+            btn.textContent = slot;
+            if (!freeSlots.includes(slot)) {
+                btn.classList.add('taken');
+                btn.disabled = true;
+            } else {
+                btn.onclick = () => {
+                    document.querySelectorAll('.time-btn.selected').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedTime = slot;
+                    document.getElementById('toStep4Btn').disabled = false;
+                };
+            }
+            container.appendChild(btn);
+        });
+    }
+
+    // ============================================================
+    // KORAK 4: PODACI + CRM prepoznavanje po telefonu
+    // ============================================================
+    document.getElementById('clientPhone').addEventListener('blur', async (e) => {
+        const phone = e.target.value.trim();
+        if (!phone) return;
+        const snap = await get(ref(db, `hairSalons/${salonId}/clients/${phone.replace(/[.#$\[\]\/]/g, '_')}`));
+        const wb = document.getElementById('welcomeBack');
+        if (snap.exists() && snap.val().name) {
+            document.getElementById('clientName').value = snap.val().name;
+            wb.innerHTML = `<i class="fas fa-hand-sparkles"></i> Dobrodošli nazad, ${escapeHtml(snap.val().name)}!`;
+            wb.style.display = 'block';
+        } else {
+            wb.style.display = 'none';
+        }
+    });
+
+    // ============================================================
+    // NAVIGACIJA KROZ KORAKE
+    // ============================================================
+    function goToStep(n) {
+        [1,2,3,4].forEach(i => {
+            document.getElementById(`step${i}`).style.display = (i === n) ? 'block' : 'none';
+        });
+        document.querySelectorAll('.step-dot').forEach(dot => {
+            const s = parseInt(dot.dataset.step);
+            dot.classList.toggle('active', s === n);
+            dot.classList.toggle('done', s < n);
+        });
+    }
+
+    document.getElementById('toStep2Btn').onclick = () => {
+        if (multiStaffEnabled && staffList.length > 0) {
+            renderStaff();
+            goToStep(2);
+        } else {
+            selectedStaffId = null;
+            goToStep(3);
+            document.getElementById('datePicker').value = getLocalTodayStr();
+            document.getElementById('datePicker').min = getLocalTodayStr();
+            renderTimeSlots();
+        }
+    };
+    document.getElementById('back1Btn').onclick = () => goToStep(1);
+    document.getElementById('toStep3Btn').onclick = () => {
+        goToStep(3);
+        document.getElementById('datePicker').value = getLocalTodayStr();
+        document.getElementById('datePicker').min = getLocalTodayStr();
+        document.getElementById('step3Duration').textContent = `${totalDurationOf(selectedServiceIndexes)} min`;
+        renderTimeSlots();
+    };
+    document.getElementById('back2Btn').onclick = () => {
+        if (multiStaffEnabled && staffList.length > 0) goToStep(2);
+        else goToStep(1);
+    };
+    document.getElementById('datePicker').addEventListener('change', renderTimeSlots);
+    document.getElementById('toStep4Btn').onclick = () => goToStep(4);
+    document.getElementById('back3Btn').onclick = () => goToStep(3);
+
+    // ============================================================
+    // SLANJE REZERVACIJE
+    // ============================================================
+    document.getElementById('submitBtn').onclick = async () => {
+        const btn = document.getElementById('submitBtn');
+        const phone = document.getElementById('clientPhone').value.trim();
+        const name = document.getElementById('clientName').value.trim();
+        if (!phone || !name) { showToast('Unesite ime i broj telefona'); return; }
+        if (!selectedTime) { showToast('Odaberite termin'); return; }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Slanje...';
+
+        const date = document.getElementById('datePicker').value;
+        const services = [...selectedServiceIndexes].map(i => ({
+            name: servicesList[i].name,
+            duration: servicesList[i].duration,
+            price: parseFloat(servicesList[i].price) || 0
+        }));
+        const totalDuration = totalDurationOf(selectedServiceIndexes);
+        const totalPrice = totalPriceOf(selectedServiceIndexes);
+
+        // Re-provjera da termin nije u međuvremenu zauzet (best-effort, ne potpuno atomarno)
+        const reservations = await loadReservationsForDate(date);
+        const staffKeyForCheck = multiStaffEnabled ? (selectedStaffId || '_all') : '_all';
+        const blocked = await loadBlockedSlotsForDate(date, selectedStaffId);
+        const occupiedSet = new Set(blocked);
+        for (const res of reservations) {
+            const resStaffKey = multiStaffEnabled ? (res.staffId || '_all') : '_all';
+            if (resStaffKey !== staffKeyForCheck && selectedStaffId !== null) continue;
+            const dur = res.totalDuration || 30;
+            for (const s of getSlotsOccupied(res.time, dur)) occupiedSet.add(s);
+        }
+        const neededSlots = getSlotsOccupied(selectedTime, totalDuration);
+        if (neededSlots.some(s => occupiedSet.has(s))) {
+            showToast('Nažalost, taj termin je upravo zauzet. Odaberite drugi.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check"></i> Potvrdi rezervaciju';
+            goToStep(3);
+            renderTimeSlots();
+            return;
+        }
+
+        try {
+            await push(reservationsRef, {
+                date, time: selectedTime,
+                services, totalDuration, totalPrice,
+                staffId: selectedStaffId,
+                clientName: name, clientPhone: phone,
+                status: 'pending', createdAt: Date.now()
+            });
+            const clientKey = phone.replace(/[.#$\[\]\/]/g, '_');
+            const clientSnap = await get(ref(db, `hairSalons/${salonId}/clients/${clientKey}`));
+            const existing = clientSnap.val() || { visits: 0, noShows: 0 };
+            await set(ref(db, `hairSalons/${salonId}/clients/${clientKey}`), {
+                name, phone, visits: existing.visits || 0, noShows: existing.noShows || 0, lastRequestAt: Date.now()
+            });
+            showToast('✅ Rezervacija poslana! Čekamo potvrdu salona.');
+            setTimeout(() => location.reload(), 1800);
+        } catch(e) {
+            showToast('Greška: ' + e.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check"></i> Potvrdi rezervaciju';
+        }
+    };
+
+    // ============================================================
+    // MOJE REZERVACIJE (pregled/otkazivanje preko telefona)
+    // ============================================================
+    document.getElementById('myReservationsLink').onclick = () => {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3 style="margin-bottom:16px;"><i class="fas fa-phone"></i> Unesite broj telefona</h3>
+                <input type="tel" id="lookupPhone" placeholder="061 123 456" style="margin-bottom:14px;">
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-secondary" id="lookupCancel" style="flex:1;">Zatvori</button>
+                    <button class="btn-primary" id="lookupSubmit" style="flex:1;">Pretraži</button>
+                </div>
+                <div id="lookupResults" style="margin-top:16px;"></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.querySelector('#lookupCancel').onclick = () => modal.remove();
+        modal.querySelector('#lookupSubmit').onclick = async () => {
+            const phone = modal.querySelector('#lookupPhone').value.trim();
+            if (!phone) return;
+            const snap = await get(reservationsRef);
+            const all = snap.val() || {};
+            const mine = Object.entries(all)
+                .filter(([, r]) => r.clientPhone === phone && (r.status === 'pending' || r.status === 'confirmed'))
+                .map(([id, r]) => ({ id, ...r }))
+                .sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
+            const results = modal.querySelector('#lookupResults');
+            if (mine.length === 0) {
+                results.innerHTML = '<div class="empty-state">Nema aktivnih rezervacija za ovaj broj.</div>';
+                return;
+            }
+            results.innerHTML = mine.map(r => {
+                const svcNames = (r.services || []).map(s => s.name).join(', ');
+                const statusMap = { pending: ['status-pending','Na čekanju'], confirmed: ['status-confirmed','Potvrđeno'] };
+                const [cls, label] = statusMap[r.status] || ['status-pending','Na čekanju'];
+                return `
+                    <div class="my-res-card">
+                        <div><strong>${formatDate(r.date)} ${r.time}</strong> <span class="status-badge ${cls}">${label}</span></div>
+                        <div style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">${escapeHtml(svcNames)}</div>
+                        <button class="btn-secondary cancel-my-res" data-id="${r.id}" style="margin-top:10px;padding:8px;font-size:0.8rem;">❌ Otkaži rezervaciju</button>
+                    </div>
+                `;
+            }).join('');
+            results.querySelectorAll('.cancel-my-res').forEach(btn => {
+                btn.onclick = async () => {
+                    if (!confirm('Sigurno želite otkazati ovu rezervaciju?')) return;
+                    await update(ref(db, `hairSalons/${salonId}/reservations/${btn.dataset.id}`), { status: 'canceled', canceledAt: Date.now() });
+                    showToast('Rezervacija otkazana.');
+                    modal.remove();
+                };
+            });
+        };
+    };
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    (async () => {
+        await Promise.all([loadServices(), loadStaff(), loadWorkingHours(), loadSettings()]);
+        renderServices();
+        updateRunningTotal();
+    })();
+</script>
+</body>
+</html>
