@@ -1,0 +1,24 @@
+{
+  "cleanUrls": false,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/klikhub.html", "destination": "/klikhub.html" },
+    { "source": "/hair-salon.html", "destination": "/hair-salon.html" },
+    { "source": "/hair-salon-internal.html", "destination": "/hair-salon-internal.html" },
+    { "source": "/catalog.html", "destination": "/catalog.html" },
+    { "source": "/katalog.html", "destination": "/katalog.html" },
+    { "source": "/migrate-fishing-catalog.html", "destination": "/migrate-fishing-catalog.html" },
+    { "source": "/admin-cafes.html", "destination": "/admin-cafes.html" },
+    { "source": "/bar-panel.html", "destination": "/bar-panel.html" },
+    { "source": "/bar-panel-manifest.json", "destination": "/bar-panel-manifest.json" },
+    { "source": "/bar-panel-sw.js", "destination": "/bar-panel-sw.js" },
+    { "source": "/generate-qr.html", "destination": "/generate-qr.html" },
+    { "source": "/index.html", "destination": "/index.html" },
+    { "source": "/test.html", "destination": "/test.html" },
+    { "source": "/kh-logo.png", "destination": "/kh-logo.png" },
+    { "source": "/og-katalog-image.png", "destination": "/og-katalog-image.png" },
+    { "source": "/logo.png", "destination": "/logo.png" },
+    { "source": "/", "destination": "/klikhub.html" },
+    { "source": "/:cafeId", "destination": "/index.html?cafe=:cafeId" }
+  ]
+}
