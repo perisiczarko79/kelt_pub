@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zahtjev za slobodan dan</title>
+<style>
+  :root{
+    --bg: #0f0d0b;
+    --bg-panel: #16130f;
+    --line: rgba(212,175,110,0.16);
+    --gold: #c9a15a;
+    --gold-bright: #e6c17a;
+    --text: #ece5d8;
+    --text-dim: #9c9184;
+    --radius: 10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(201,161,90,0.08), transparent 40%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Georgia','Iowan Old Style',serif;
+    padding:28px 18px 60px;
+  }
+  .wrap{max-width:480px;margin:0 auto;}
+  header{border-bottom:1px solid var(--line); padding-bottom:16px; margin-bottom:24px;}
+  h1{font-size:1.4rem;margin:0;color:var(--gold-bright);font-weight:600;}
+  h1 .sub{
+    display:block;font-family:-apple-system, sans-serif;font-size:0.7rem;
+    letter-spacing:0.16em;text-transform:uppercase;color:var(--text-dim);
+    margin-top:4px;font-weight:400;
+  }
+  .card{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:var(--radius);
+    padding:20px 18px;
+  }
+  label{
+    display:block; font-family:-apple-system, sans-serif; font-size:0.75rem;
+    text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim);
+    margin-bottom:6px; margin-top:18px;
+  }
+  label:first-of-type{margin-top:0;}
+  select, input[type=date], textarea{
+    width:100%; background:#1c1712; border:1px solid var(--line); color:var(--text);
+    padding:11px 12px; border-radius:8px; font-family:-apple-system, sans-serif;
+    font-size:0.95rem; outline:none;
+  }
+  select:focus, input:focus, textarea:focus{border-color:var(--gold);}
+  textarea{resize:vertical; min-height:70px; font-family:inherit;}
+  .btn{
+    width:100%; margin-top:22px; background:linear-gradient(135deg, #6b4f27, #4a3618);
+    border:1px solid var(--gold); color:var(--gold-bright); padding:13px;
+    border-radius:8px; font-family:-apple-system, sans-serif; font-size:0.95rem;
+    font-weight:600; cursor:pointer;
+  }
+  .btn:disabled{opacity:0.5;cursor:default;}
+  .status{
+    font-family:-apple-system, sans-serif; font-size:0.8rem; color:var(--text-dim);
+    margin-top:14px; text-align:center; min-height:18px;
+  }
+  .success{
+    text-align:center; padding:20px 10px;
+  }
+  .success .check{font-size:2.4rem; margin-bottom:10px;}
+  .success h2{color:var(--gold-bright); font-size:1.2rem; margin:0 0 8px;}
+  .success p{font-family:-apple-system, sans-serif; font-size:0.85rem; color:var(--text-dim); margin:0 0 20px; line-height:1.5;}
+  .btn.secondary{
+    background:none; border:1px solid var(--line); color:var(--text);
+  }
+  .my-requests{margin-top:20px;}
+  .my-requests-title{
+    font-family:-apple-system, sans-serif; font-size:0.75rem; text-transform:uppercase;
+    letter-spacing:0.08em; color:var(--text-dim); margin-bottom:10px;
+  }
+  .req-item{
+    background:#1c1712; border:1px solid var(--line); border-radius:8px;
+    padding:10px 12px; margin-bottom:8px; font-family:-apple-system, sans-serif;
+  }
+  .req-item .req-top{display:flex; justify-content:space-between; align-items:center; gap:8px;}
+  .req-item .req-date{font-size:0.88rem; font-weight:600; color:var(--text);}
+  .req-item .req-note{font-size:0.78rem; color:var(--text-dim); margin-top:4px; line-height:1.4;}
+  .status-badge{
+    font-size:0.68rem; font-weight:700; padding:3px 9px; border-radius:20px;
+    white-space:nowrap; letter-spacing:0.02em;
+  }
+  .status-badge.pending{background:rgba(212,175,110,0.16); color:var(--gold-bright);}
+  .status-badge.approved{background:rgba(47,107,69,0.35); color:#8fd6a8;}
+  .status-badge.rejected{background:rgba(107,47,47,0.35); color:#e59d9d;}
+  .empty-note{font-family:-apple-system, sans-serif; font-size:0.8rem; color:var(--text-dim);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Zahtjev za slobodan dan<span class="sub" id="brandSub">KlikHub</span></h1>
+  </header>
+
+  <div class="card" id="formCard">
+    <label>Ime</label>
+    <select id="nameSelect"><option value="">Učitavanje...</option></select>
+
+    <label>Datum</label>
+    <input type="date" id="dateInput">
+
+    <label>Napomena (opciono)</label>
+    <textarea id="noteInput" placeholder="npr. porodično slavlje, ljekarski pregled..."></textarea>
+
+    <button class="btn" id="submitBtn">Pošalji zahtjev</button>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div class="card success" id="successCard" style="display:none;">
+    <div class="check">✓</div>
+    <h2>Zahtjev poslat</h2>
+    <p>Vlasnik će pregledati zahtjev i potvrditi ili odbiti. Nema potrebe da čekaš ovdje.</p>
+    <button class="btn secondary" id="anotherBtn">Pošalji još jedan zahtjev</button>
+  </div>
+
+  <div class="card my-requests" id="myRequests" style="display:none;">
+    <div class="my-requests-title">Moji zahtjevi</div>
+    <div id="myRequestsList"></div>
+  </div>
+</div>
+
+<script type="importmap">
+    {
+        "imports": {
+            "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+            "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+        }
+    }
+</script>
+<script type="module">
+import { initializeApp } from 'firebase/app';
+import { getDatabase, ref, get, push, set } from 'firebase/database';
+
+const firebaseConfig = {
+    apiKey: "AIzaSyALY3oKvPW_mDZiaBl0EdFCkTjd6fqwisQ",
+    authDomain: "kelt-pub-menu-2df61.firebaseapp.com",
+    databaseURL: "https://kelt-pub-menu-2df61-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "kelt-pub-menu-2df61",
+    storageBucket: "kelt-pub-menu-2df61.firebasestorage.app"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getDatabase(fbApp);
+
+const urlParams = new URLSearchParams(window.location.search);
+const tenantId = urlParams.get('tenant');
+
+if(!tenantId){
+  document.body.innerHTML = '<div style="padding:40px;font-family:sans-serif;color:#ece5d8;background:#0f0d0b;min-height:100vh;">Nedostaje <code>?tenant=ID</code> u linku. Zamoli vlasnika da ti pošalje ispravan link.</div>';
+  throw new Error('Missing tenant param');
+}
+
+function setStatus(msg){
+  document.getElementById('status').textContent = msg;
+}
+
+function fmtShort(d){
+  return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.`;
+}
+
+const statusLabel = { pending: '⏳ Na čekanju', approved: '✅ Odobreno', rejected: '❌ Odbijeno' };
+
+async function loadMyRequests(name){
+  const wrap = document.getElementById('myRequests');
+  const list = document.getElementById('myRequestsList');
+  if(!name){ wrap.style.display = 'none'; return; }
+
+  wrap.style.display = 'block';
+  list.innerHTML = '<div class="empty-note">Učitavanje...</div>';
+  try{
+    const snap = await get(ref(db, `shiftSchedules/${tenantId}/requests`));
+    const all = snap.val() || {};
+    const mine = Object.values(all)
+      .filter(r => r.name === name)
+      .sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+
+    if(mine.length === 0){
+      list.innerHTML = '<div class="empty-note">Još nisi slao/la zahtjeve.</div>';
+      return;
+    }
+    list.innerHTML = mine.map(r => `
+      <div class="req-item">
+        <div class="req-top">
+          <span class="req-date">${fmtShort(new Date(r.date+'T00:00:00'))}</span>
+          <span class="status-badge ${r.status}">${statusLabel[r.status] || r.status}</span>
+        </div>
+        ${r.note ? `<div class="req-note">${r.note}</div>` : ''}
+      </div>`).join('');
+  }catch(e){
+    console.error(e);
+    list.innerHTML = '<div class="empty-note">Greška pri učitavanju.</div>';
+  }
+}
+
+async function init(){
+  try{
+    const nameSnap = await get(ref(db, `klikhub/tenants/${tenantId}/name`));
+    if(nameSnap.exists() && nameSnap.val()){
+      document.getElementById('brandSub').textContent = `${nameSnap.val()} · KlikHub`;
+      document.title = `Zahtjev za slobodan dan — ${nameSnap.val()}`;
+    }
+  }catch(e){ /* branding je opcionalno, ne blokira formu */ }
+
+  try{
+    const staffSnap = await get(ref(db, `shiftSchedules/${tenantId}/staff`));
+    const staff = staffSnap.val() || [];
+    const sel = document.getElementById('nameSelect');
+    if(staff.length === 0){
+      sel.innerHTML = '<option value="">Nema konobara na listi</option>';
+    } else {
+      sel.innerHTML = '<option value="">— Izaberi ime —</option>' + staff.map(n => `<option value="${n}">${n}</option>`).join('');
+    }
+  }catch(e){
+    console.error(e);
+    setStatus('Greška pri učitavanju liste konobara.');
+  }
+
+  const todayStr = new Date().toISOString().slice(0,10);
+  document.getElementById('dateInput').min = todayStr;
+
+  document.getElementById('nameSelect').addEventListener('change', (e) => {
+    loadMyRequests(e.target.value);
+  });
+}
+
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  const name = document.getElementById('nameSelect').value;
+  const date = document.getElementById('dateInput').value;
+  const note = document.getElementById('noteInput').value.trim();
+
+  if(!name){ setStatus('Izaberi svoje ime.'); return; }
+  if(!date){ setStatus('Izaberi datum.'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  setStatus('Šaljem...');
+
+  try{
+    const reqRef = push(ref(db, `shiftSchedules/${tenantId}/requests`));
+    await set(reqRef, { name, date, note, status: 'pending', createdAt: Date.now() });
+    document.getElementById('formCard').style.display = 'none';
+    document.getElementById('successCard').style.display = 'block';
+    loadMyRequests(name);
+  }catch(e){
+    console.error(e);
+    setStatus('Greška pri slanju. Pokušaj ponovo.');
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('anotherBtn').addEventListener('click', () => {
+  document.getElementById('noteInput').value = '';
+  document.getElementById('dateInput').value = '';
+  document.getElementById('submitBtn').disabled = false;
+  setStatus('');
+  document.getElementById('successCard').style.display = 'none';
+  document.getElementById('formCard').style.display = 'block';
+});
+
+init();
+</script>
+</body>
+</html>
