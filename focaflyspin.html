@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foča Fly & Spin — Guided Fishing on the Drina</title>
+<meta name="description" content="Guided fly & spin fishing for grayling and trout on the Drina and Ćehotina rivers near Foča, Bosnia and Herzegovina.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --paper:#F7F9F8;
+  --spruce:#0E3B3A;
+  --river:#2E8B8B;
+  --copper:#C6531F;
+  --stone:#3A4744;
+  --line:#DCE5E2;
+  --card:#FFFFFF;
+  --shadow:0 8px 30px rgba(14,59,58,.08);
+  --shadow-lg:0 20px 50px rgba(14,59,58,.14);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  color:var(--stone);
+  background:var(--paper);
+  line-height:1.6;
+  overflow-x:hidden;
+}
+h1,h2,h3{font-family:'Fraunces',Georgia,serif;color:var(--spruce);font-weight:500;line-height:1.1}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+
+/* ---- NAV ---- */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(247,249,248,.85);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid transparent;
+  transition:border-color .3s, box-shadow .3s;
+}
+nav.scrolled{border-color:var(--line);box-shadow:0 2px 20px rgba(14,59,58,.05)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:68px}
+.logo{font-family:'Fraunces';font-weight:600;font-size:1.15rem;color:var(--spruce);letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
+.logo .dot{width:9px;height:9px;border-radius:50%;background:var(--copper);flex-shrink:0}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a.link{font-size:.9rem;font-weight:500;color:var(--stone);transition:color .2s}
+.nav-links a.link:hover{color:var(--river)}
+.lang{display:flex;border:1px solid var(--line);border-radius:20px;overflow:hidden;font-size:.78rem;font-weight:600}
+.lang button{border:none;background:transparent;padding:5px 12px;cursor:pointer;color:var(--stone);font-family:inherit;font-weight:600;transition:.2s}
+.lang button.active{background:var(--spruce);color:#fff}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--river);color:#fff;
+  padding:11px 22px;border-radius:24px;
+  font-weight:600;font-size:.9rem;cursor:pointer;border:none;font-family:inherit;
+  transition:transform .2s, box-shadow .2s, background .2s;
+}
+.btn:hover{background:var(--spruce);transform:translateY(-2px);box-shadow:var(--shadow)}
+.btn.copper{background:var(--copper)}
+.btn.copper:hover{background:#a8441a}
+.nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:6px}
+.nav-toggle span{display:block;width:22px;height:2px;background:var(--spruce);margin:4px 0;transition:.3s}
+
+/* ---- HERO ---- */
+.hero{position:relative;min-height:100vh;display:flex;align-items:flex-end;color:#fff;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:-2}
+.hero-bg img{width:100%;height:100%;object-fit:cover}
+.hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,59,58,.15) 0%,rgba(14,59,58,.35) 55%,rgba(14,59,58,.85) 100%)}
+.hero-content{padding-bottom:96px;padding-top:120px;max-width:720px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#cfe6e3;margin-bottom:20px}
+.eyebrow::before{content:'';width:26px;height:1px;background:var(--copper)}
+.hero h1{color:#fff;font-size:clamp(2.6rem,6vw,4.6rem);font-weight:500;letter-spacing:-.02em;margin-bottom:20px}
+.hero h1 em{font-style:italic;color:#a9dcd6}
+.hero p{font-size:clamp(1.05rem,2vw,1.25rem);color:#e4efed;max-width:540px;margin-bottom:34px;font-weight:400}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap}
+.hero .btn.ghost{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(4px)}
+.hero .btn.ghost:hover{background:rgba(255,255,255,.22)}
+.scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:#cfe6e3;opacity:.8;display:flex;flex-direction:column;align-items:center;gap:8px}
+.scroll-hint .mouse{width:22px;height:34px;border:1.5px solid #cfe6e3;border-radius:12px;position:relative}
+.scroll-hint .mouse::after{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:3px;height:6px;border-radius:2px;background:#cfe6e3;animation:scrolldot 1.6s infinite}
+@keyframes scrolldot{0%{opacity:0;transform:translate(-50%,0)}40%{opacity:1}80%{opacity:0;transform:translate(-50%,10px)}}
+
+/* ---- SECTION SHELL ---- */
+section{padding:96px 0;position:relative}
+.sec-eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:.8rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--river);margin-bottom:16px}
+.sec-eyebrow::before{content:'';width:24px;height:1px;background:var(--copper)}
+.sec-title{font-size:clamp(2rem,4vw,2.9rem);letter-spacing:-.02em;margin-bottom:18px;max-width:640px}
+.sec-lead{font-size:1.1rem;color:var(--stone);max-width:600px;margin-bottom:0}
+
+/* river divider line (signature) */
+.river-line{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden}
+.river-line svg{position:absolute;left:0;width:100%;height:100%}
+.river-line path{fill:none;stroke:var(--river);stroke-width:1.5;opacity:.16;stroke-dasharray:6 8}
+
+/* ---- ABOUT ---- */
+.about-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:56px;align-items:center;position:relative;z-index:1}
+.about-photo{position:relative}
+.about-photo img{border-radius:18px;box-shadow:var(--shadow-lg);aspect-ratio:4/5;object-fit:cover}
+.about-photo .tag{position:absolute;bottom:-18px;left:-18px;background:var(--card);border-radius:14px;padding:16px 20px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.about-photo .tag strong{font-family:'Fraunces';color:var(--spruce);font-size:1.6rem;display:block}
+.about-photo .tag span{font-size:.8rem;color:var(--river);font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.species{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap}
+.species-card{flex:1;min-width:150px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.species-card h3{font-size:1.15rem;margin-bottom:4px}
+.species-card p{font-size:.88rem;margin:0}
+.species-card .fin{width:34px;height:3px;border-radius:2px;background:var(--copper);margin-bottom:12px}
+
+/* ---- PACKAGES ---- */
+.pkg-section{background:linear-gradient(180deg,var(--paper) 0%,#EEF4F2 100%)}
+.pkg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:44px;position:relative;z-index:1}
+.pkg-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:30px 28px;display:flex;flex-direction:column;transition:transform .25s,box-shadow .25s,border-color .25s}
+.pkg-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);border-color:var(--river)}
+.pkg-type{display:inline-flex;align-items:center;gap:7px;font-size:.74rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:5px 11px;border-radius:20px;margin-bottom:18px;width:fit-content}
+.pkg-type.fly{background:rgba(46,139,139,.12);color:var(--river)}
+.pkg-type.spin{background:rgba(198,83,31,.12);color:var(--copper)}
+.pkg-type.combo{background:rgba(14,59,58,.1);color:var(--spruce)}
+.pkg-card h3{font-size:1.5rem;margin-bottom:10px}
+.pkg-desc{font-size:.92rem;margin-bottom:20px;flex-grow:1}
+.pkg-meta{display:flex;flex-direction:column;gap:8px;margin-bottom:22px;font-size:.88rem}
+.pkg-meta div{display:flex;align-items:center;gap:9px;color:var(--stone)}
+.pkg-meta svg{flex-shrink:0;color:var(--river)}
+.pkg-price{display:flex;align-items:baseline;gap:6px;margin-bottom:20px;padding-top:20px;border-top:1px solid var(--line)}
+.pkg-price .amount{font-family:'Fraunces';font-size:2rem;font-weight:600;color:var(--spruce)}
+.pkg-price .unit{font-size:.85rem;color:var(--stone)}
+.pkg-card .btn{width:100%;justify-content:center}
+.pkg-empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--stone);background:var(--card);border-radius:18px;border:1px dashed var(--line)}
+
+/* ---- GALLERY ---- */
+.gal-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:200px;gap:14px;margin-top:44px}
+.gal-item{overflow:hidden;border-radius:14px;cursor:pointer;position:relative}
+.gal-item img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.gal-item:hover img{transform:scale(1.06)}
+.gal-item.wide{grid-column:span 2}
+.gal-item.tall{grid-row:span 2}
+.gal-item::after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,rgba(14,59,58,.25),transparent 50%);opacity:0;transition:.3s}
+.gal-item:hover::after{opacity:1}
+
+/* ---- BOOKING ---- */
+.book-section{background:var(--spruce);color:#fff;position:relative;overflow:hidden}
+.book-section .sec-title,.book-section h3{color:#fff}
+.book-section .sec-eyebrow{color:#8fd4cd}
+.book-section .sec-lead{color:#cbe0dd}
+.book-grid{display:grid;grid-template-columns:1fr 1fr;gap:44px;margin-top:44px;position:relative;z-index:1}
+.cal-box,.form-box{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:28px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.cal-head h3{font-size:1.25rem}
+.cal-nav{display:flex;gap:8px}
+.cal-nav button{width:34px;height:34px;border-radius:9px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:.2s}
+.cal-nav button:hover{background:rgba(255,255,255,.12)}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px}
+.cal-weekdays span{text-align:center;font-size:.72rem;font-weight:600;color:#8fd4cd;text-transform:uppercase}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:.9rem;font-weight:500;cursor:pointer;transition:.15s;position:relative;border:1px solid transparent}
+.cal-day.empty{cursor:default}
+.cal-day.avail{background:rgba(143,212,205,.14);color:#fff}
+.cal-day.avail:hover{background:rgba(143,212,205,.3)}
+.cal-day.busy{background:rgba(255,255,255,.04);color:rgba(255,255,255,.28);cursor:not-allowed;text-decoration:line-through}
+.cal-day.past{color:rgba(255,255,255,.2);cursor:not-allowed}
+.cal-day.selected{background:var(--copper);color:#fff;font-weight:600}
+.cal-legend{display:flex;gap:18px;margin-top:18px;font-size:.78rem;color:#cbe0dd;flex-wrap:wrap}
+.cal-legend span{display:flex;align-items:center;gap:7px}
+.cal-legend .swatch{width:13px;height:13px;border-radius:4px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.82rem;font-weight:600;color:#cbe0dd;margin-bottom:7px}
+.field input,.field select,.field textarea{
+  width:100%;padding:12px 14px;border-radius:11px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.08);color:#fff;
+  font-family:inherit;font-size:.95rem;transition:.2s;
+}
+.field input::placeholder,.field textarea::placeholder{color:rgba(255,255,255,.4)}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--river);background:rgba(255,255,255,.12)}
+.field select option{color:#1a1a1a}
+.field textarea{resize:vertical;min-height:80px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.selected-date-pill{display:none;align-items:center;gap:9px;background:rgba(198,83,31,.18);border:1px solid rgba(198,83,31,.4);color:#fff;padding:10px 14px;border-radius:11px;font-size:.9rem;margin-bottom:16px}
+.selected-date-pill.show{display:flex}
+.form-box .btn{width:100%;justify-content:center;margin-top:6px}
+.form-note{font-size:.8rem;color:#9fc4c0;margin-top:14px;text-align:center}
+.form-success{display:none;text-align:center;padding:30px 10px}
+.form-success.show{display:block}
+.form-success .check{width:56px;height:56px;border-radius:50%;background:var(--river);display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+.form-success h3{margin-bottom:8px}
+.form-success p{color:#cbe0dd}
+
+/* ---- CONTACT / FOOTER ---- */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}
+.contact-info h3{font-size:1.3rem;margin-bottom:18px}
+.contact-list{list-style:none;display:flex;flex-direction:column;gap:16px}
+.contact-list li{display:flex;align-items:center;gap:14px;font-size:1rem}
+.contact-list .ico{width:42px;height:42px;border-radius:12px;background:rgba(46,139,139,.1);color:var(--river);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.contact-map{border-radius:18px;overflow:hidden;box-shadow:var(--shadow);aspect-ratio:4/3;border:1px solid var(--line)}
+.contact-map iframe{width:100%;height:100%;border:0}
+footer{background:var(--spruce);color:#cbe0dd;padding:40px 0;text-align:center}
+footer .logo{color:#fff;justify-content:center;margin-bottom:12px}
+footer p{font-size:.85rem;opacity:.8}
+footer .socials{display:flex;gap:16px;justify-content:center;margin:18px 0}
+footer .socials a{width:40px;height:40px;border-radius:11px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:#fff;transition:.2s}
+footer .socials a:hover{background:var(--river);transform:translateY(-3px)}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.2,.6,.2,1),transform .7s cubic-bezier(.2,.6,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* ---- RESPONSIVE ---- */
+@media(max-width:860px){
+  .nav-links{position:fixed;top:68px;left:0;right:0;background:var(--paper);flex-direction:column;align-items:stretch;gap:0;padding:10px 24px 24px;border-bottom:1px solid var(--line);transform:translateY(-140%);transition:transform .35s;box-shadow:var(--shadow)}
+  .nav-links.open{transform:translateY(0)}
+  .nav-links a.link{padding:14px 0;border-bottom:1px solid var(--line)}
+  .nav-links .lang{margin:14px 0 4px;align-self:flex-start}
+  .nav-links .btn{justify-content:center}
+  .nav-toggle{display:block}
+  .about-grid,.book-grid,.contact-grid{grid-template-columns:1fr;gap:36px}
+  .about-photo{max-width:420px;margin:0 auto}
+  .gal-grid{grid-template-columns:repeat(2,1fr);grid-auto-rows:160px}
+  .gal-item.wide{grid-column:span 1}
+  section{padding:72px 0}
+}
+@media(max-width:480px){
+  .field-row{grid-template-columns:1fr}
+  .hero-content{padding-bottom:70px}
+  .gal-grid{grid-auto-rows:130px}
+}
+@media(prefers-reduced-motion:reduce){
+  *{scroll-behavior:auto!important}
+  .reveal{opacity:1;transform:none;transition:none}
+  .scroll-hint .mouse::after{animation:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav id="nav">
+  <div class="wrap nav-inner">
+    <a href="#top" class="logo"><span class="dot"></span>Foča Fly&nbsp;&amp;&nbsp;Spin</a>
+    <div class="nav-links" id="navLinks">
+      <a class="link" href="#about" data-sr="Vođenje" data-en="Guiding">Vođenje</a>
+      <a class="link" href="#packages" data-sr="Paketi" data-en="Trips">Paketi</a>
+      <a class="link" href="#gallery" data-sr="Galerija" data-en="Gallery">Galerija</a>
+      <a class="link" href="#contact" data-sr="Kontakt" data-en="Contact">Kontakt</a>
+      <div class="lang">
+        <button id="langSr" class="active" onclick="setLang('sr')">SR</button>
+        <button id="langEn" onclick="setLang('en')">EN</button>
+      </div>
+      <a class="btn" href="#booking" data-sr="Rezerviši" data-en="Book now">Rezerviši</a>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <div class="hero-bg">
+    <!-- ZAMIJENI: hero fotografija (rijeka / akcija). Preporuka: pejzaž Drine ili ti u vodi. -->
+    <img src="https://images.unsplash.com/photo-1516132006923-6cf348e5dee2?auto=format&fit=crop&w=2000&q=80" alt="Drina river">
+  </div>
+  <div class="wrap hero-content">
+    <span class="eyebrow" data-sr="Drina &middot; Ćehotina &middot; Tara &middot; Sutjeska" data-en="Drina &middot; Ćehotina &middot; Tara &middot; Sutjeska">Drina &middot; Ćehotina &middot; Tara &middot; Sutjeska</span>
+    <h1 data-sr="Vođeni ribolov na<br><em>divljim planinskim rijekama</em>" data-en="Guided fishing on<br><em>wild mountain rivers</em>">Vođeni ribolov na<br><em>divljim planinskim rijekama</em></h1>
+    <p data-sr="Mušičarenje i varaličarenje za lipljena i pastrmku. Kristalno čiste rijeke, lokalno znanje i dan na vodi onako kako ribolov treba da izgleda." data-en="Fly and spin fishing for grayling and trout. Crystal-clear rivers, local knowledge, and a day on the water the way it's meant to be.">Mušičarenje i varaličarenje za lipljena i pastrmku. Kristalno čiste rijeke, lokalno znanje i dan na vodi onako kako ribolov treba da izgleda.</p>
+    <div class="hero-cta">
+      <a class="btn copper" href="#booking" data-sr="Rezerviši termin" data-en="Book a trip">Rezerviši termin</a>
+      <a class="btn ghost" href="#packages" data-sr="Pogledaj pakete" data-en="View trips">Pogledaj pakete</a>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="mouse"></div><span data-sr="Skroluj" data-en="Scroll">Skroluj</span></div>
+</header>
+
+<!-- ============ ABOUT ============ -->
+<section id="about">
+  <div class="wrap about-grid">
+    <div class="about-text reveal">
+      <span class="sec-eyebrow" data-sr="O vođenju" data-en="The guiding">O vođenju</span>
+      <h2 class="sec-title" data-sr="Rijeke koje poznajemo kao svoj džep" data-en="Rivers we know like the back of our hand">Rijeke koje poznajemo kao svoj džep</h2>
+      <p class="sec-lead" data-sr="Foča leži na ušću Ćehotine u Drinu — odrasli smo uz tu vodu. Drina i Ćehotina su naš svakodnevni teren: znamo gdje stoji lipljen, kad se diže pastrmka i da li tog dana bolje radi mušica ili varalica. Mušice često vežemo sami, prilagođene baš ovim rijekama, a za ljubitelje spina vodimo na varalicu — od nježnog lova lipljena do potrage za krupnom pastrmkom, a povremeno i za mladicom, kraljicom Drine. Za goste koji žele nešto posebno, tu su Tara i Sutjeska: kristalno čiste, divlje, u srcu najstarijeg nacionalnog parka u Bosni i Hercegovini. Vodimo male grupe, prilagođavamo tempo vama, i vodimo računa da odete s pričom vrijednom pričanja." data-en="Foča sits where the Ćehotina meets the Drina — we grew up on this water. The Drina and Ćehotina are our home rivers: we know where the grayling holds, when the trout rises, and whether the fly or the lure works better that day. We often tie our own flies, matched to these very rivers, and for spin anglers we guide with lures too — from delicate grayling fishing to chasing big trout, and now and then the huchen, the queen of the Drina. For guests after something special, there's the Tara and the Sutjeska: crystal-clear, wild, in the heart of the oldest national park in Bosnia and Herzegovina. We guide small groups, set the pace to you, and make sure you leave with a story worth telling.">Foča leži na ušću Ćehotine u Drinu — odrasli smo uz tu vodu. Drina i Ćehotina su naš svakodnevni teren: znamo gdje stoji lipljen, kad se diže pastrmka i da li tog dana bolje radi mušica ili varalica. Mušice često vežemo sami, prilagođene baš ovim rijekama, a za ljubitelje spina vodimo na varalicu — od nježnog lova lipljena do potrage za krupnom pastrmkom, a povremeno i za mladicom, kraljicom Drine. Za goste koji žele nešto posebno, tu su Tara i Sutjeska: kristalno čiste, divlje, u srcu najstarijeg nacionalnog parka u Bosni i Hercegovini. Vodimo male grupe, prilagođavamo tempo vama, i vodimo računa da odete s pričom vrijednom pričanja.</p>
+      <div class="species">
+        <div class="species-card">
+          <div class="fin"></div>
+          <h3 data-sr="Lipljen" data-en="Grayling">Lipljen</h3>
+          <p data-sr="Kralj brzaka. Mušičarenje na suvu i nimfu." data-en="King of the riffle. Dry fly and nymph.">Kralj brzaka. Mušičarenje na suvu i nimfu.</p>
+        </div>
+        <div class="species-card">
+          <div class="fin"></div>
+          <h3 data-sr="Pastrmka" data-en="Trout">Pastrmka</h3>
+          <p data-sr="Potočara u brzim vodama. Mušica i varalica." data-en="Wild brown in fast water. Fly and lure.">Potočara u brzim vodama. Mušica i varalica.</p>
+        </div>
+      </div>
+    </div>
+    <div class="about-photo reveal">
+      <!-- ZAMIJENI: tvoja fotka (ti s ulovom / u vodi). Portret 4:5. -->
+      <img src="https://images.unsplash.com/photo-1445307806294-bff7f67ff225?auto=format&fit=crop&w=900&q=80" alt="Fly fishing">
+      <div class="tag"><strong>C&amp;R</strong><span data-sr="Uhvati i pusti" data-en="Catch & release">Uhvati i pusti</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PACKAGES ============ -->
+<section id="packages" class="pkg-section">
+  <div class="river-line"><svg viewBox="0 0 1200 600" preserveAspectRatio="none"><path d="M-50,120 C200,60 300,220 550,180 S900,80 1250,200"/></svg></div>
+  <div class="wrap">
+    <span class="sec-eyebrow" data-sr="Ponuda" data-en="Trips">Ponuda</span>
+    <h2 class="sec-title" data-sr="Izaberi svoj dan na vodi" data-en="Pick your day on the water">Izaberi svoj dan na vodi</h2>
+    <p class="sec-lead" data-sr="Od kratkog jutarnjeg izlaska do cjelodnevnog vođenja s opremom i prevozom. Cijene su okvirne — javi se za tačan dogovor." data-en="From a short morning session to a full guided day with gear and transport. Prices are indicative — get in touch for the exact arrangement.">Od kratkog jutarnjeg izlaska do cjelodnevnog vođenja s opremom i prevozom.</p>
+    <div class="pkg-grid" id="pkgGrid">
+      <div class="pkg-empty" data-sr="Učitavam pakete…" data-en="Loading trips…">Učitavam pakete…</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GALLERY ============ -->
+<section id="gallery">
+  <div class="wrap">
+    <span class="sec-eyebrow" data-sr="Sa vode" data-en="From the water">Sa vode</span>
+    <h2 class="sec-title" data-sr="Galerija" data-en="Gallery">Galerija</h2>
+    <div class="gal-grid">
+      <!-- ZAMIJENI 8 fotki. Klase wide/tall mijenjaju veličinu polja u gridu. -->
+      <div class="gal-item wide"><img src="https://images.unsplash.com/photo-1534859108275-a3a6f52bb1d4?auto=format&fit=crop&w=1000&q=80" alt=""></div>
+      <div class="gal-item tall"><img src="https://images.unsplash.com/photo-1508246325515-244a5b146b17?auto=format&fit=crop&w=700&q=80" alt=""></div>
+      <div class="gal-item"><img src="https://images.unsplash.com/photo-1445307806294-bff7f67ff225?auto=format&fit=crop&w=600&q=80" alt=""></div>
+      <div class="gal-item"><img src="https://images.unsplash.com/photo-1499242611767-cf8b9be02854?auto=format&fit=crop&w=600&q=80" alt=""></div>
+      <div class="gal-item"><img src="https://images.unsplash.com/photo-1560716082-39395ef7d787?auto=format&fit=crop&w=600&q=80" alt=""></div>
+      <div class="gal-item wide"><img src="https://images.unsplash.com/photo-1516132006923-6cf348e5dee2?auto=format&fit=crop&w=1000&q=80" alt=""></div>
+      <div class="gal-item"><img src="https://images.unsplash.com/photo-1470114716159-e389f8712fda?auto=format&fit=crop&w=600&q=80" alt=""></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BOOKING ============ -->
+<section id="booking" class="book-section">
+  <div class="wrap">
+    <span class="sec-eyebrow" data-sr="Rezervacija" data-en="Booking">Rezervacija</span>
+    <h2 class="sec-title" data-sr="Provjeri slobodne dane i pošalji upit" data-en="Check the dates and send a request">Provjeri slobodne dane i pošalji upit</h2>
+    <p class="sec-lead" data-sr="Izaberi slobodan datum u kalendaru, popuni upit i javljam se s potvrdom u najkraćem roku." data-en="Pick an open date, fill in the request, and I'll get back to you with confirmation shortly.">Izaberi slobodan datum, popuni upit, javljam se s potvrdom.</p>
+    <div class="book-grid">
+      <!-- KALENDAR -->
+      <div class="cal-box reveal">
+        <div class="cal-head">
+          <h3 id="calMonth">—</h3>
+          <div class="cal-nav">
+            <button onclick="calShift(-1)" aria-label="Prev">‹</button>
+            <button onclick="calShift(1)" aria-label="Next">›</button>
+          </div>
+        </div>
+        <div class="cal-weekdays" id="calWeekdays"></div>
+        <div class="cal-days" id="calDays"></div>
+        <div class="cal-legend">
+          <span><span class="swatch" style="background:rgba(143,212,205,.4)"></span><span data-sr="Slobodno" data-en="Available">Slobodno</span></span>
+          <span><span class="swatch" style="background:rgba(255,255,255,.08)"></span><span data-sr="Zauzeto" data-en="Booked">Zauzeto</span></span>
+          <span><span class="swatch" style="background:var(--copper)"></span><span data-sr="Izabrano" data-en="Selected">Izabrano</span></span>
+        </div>
+      </div>
+      <!-- FORMA -->
+      <div class="form-box reveal">
+        <div id="formFields">
+          <div class="selected-date-pill" id="datePill">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span id="datePillText"></span>
+          </div>
+          <div class="field">
+            <label data-sr="Ime i prezime" data-en="Full name">Ime i prezime</label>
+            <input type="text" id="fName" placeholder="—">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label data-sr="Kontakt (tel / email)" data-en="Contact (phone / email)">Kontakt</label>
+              <input type="text" id="fContact" placeholder="—">
+            </div>
+            <div class="field">
+              <label data-sr="Broj osoba" data-en="Anglers">Broj osoba</label>
+              <input type="number" id="fPeople" min="1" max="8" value="1">
+            </div>
+          </div>
+          <div class="field">
+            <label data-sr="Paket" data-en="Trip">Paket</label>
+            <select id="fPackage"></select>
+          </div>
+          <div class="field">
+            <label data-sr="Poruka (opciono)" data-en="Message (optional)">Poruka (opciono)</label>
+            <textarea id="fMsg" placeholder="—"></textarea>
+          </div>
+          <button class="btn copper" onclick="submitInquiry()" id="submitBtn" data-sr="Pošalji upit" data-en="Send request">Pošalji upit</button>
+          <p class="form-note" data-sr="Upit ne naplaćuje ništa unaprijed. Termin se zaključava tek nakon moje potvrde." data-en="Sending a request costs nothing. The date is only locked once I confirm.">Upit ne naplaćuje ništa unaprijed. Termin se zaključava tek nakon moje potvrde.</p>
+        </div>
+        <div class="form-success" id="formSuccess">
+          <div class="check"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+          <h3 data-sr="Upit poslat!" data-en="Request sent!">Upit poslat!</h3>
+          <p data-sr="Javljam se uskoro s potvrdom. Vidimo se na vodi." data-en="I'll get back to you shortly. See you on the water.">Javljam se uskoro s potvrdom. Vidimo se na vodi.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section id="contact">
+  <div class="wrap contact-grid">
+    <div class="contact-info reveal">
+      <span class="sec-eyebrow" data-sr="Kontakt" data-en="Contact">Kontakt</span>
+      <h2 class="sec-title" data-sr="Javi se" data-en="Get in touch">Javi se</h2>
+      <ul class="contact-list">
+        <li><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span><a href="https://wa.me/38700000000" id="waLink">+387 — WhatsApp</a></li>
+        <li><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span><span data-sr="Foča, Republika Srpska, BiH" data-en="Foča, Bosnia and Herzegovina">Foča, Republika Srpska, BiH</span></li>
+        <li><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg></span><a href="mailto:info@focaflyspin.com">info@focaflyspin.com</a></li>
+      </ul>
+    </div>
+    <div class="contact-map reveal">
+      <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=18.72%2C43.48%2C18.83%2C43.53&layer=mapnik&marker=43.5024%2C18.7761" loading="lazy" title="Foča"></iframe>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="logo"><span class="dot"></span>Foča Fly&nbsp;&amp;&nbsp;Spin</div>
+    <div class="socials">
+      <a href="#" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+      <a href="#" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+      <a href="https://wa.me/38700000000" aria-label="WhatsApp"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>
+    </div>
+    <p data-sr="© 2026 Foča Fly & Spin · Vođeni ribolov na Drini i Ćehotini" data-en="© 2026 Foča Fly & Spin · Guided fishing on the Drina & Ćehotina">© 2026 Foča Fly & Spin · Vođeni ribolov na Drini i Ćehotini</p>
+  </div>
+</footer>
+
+<!-- ============ FIREBASE ============ -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+/* ====== FIREBASE CONFIG — ZAMIJENI svojim ====== */
+const firebaseConfig = {
+  apiKey: "TVOJ_API_KEY",
+  authDomain: "TVOJ_PROJEKAT.firebaseapp.com",
+  databaseURL: "https://TVOJ_PROJEKAT-default-rtdb.firebaseio.com",
+  projectId: "TVOJ_PROJEKAT",
+  storageBucket: "TVOJ_PROJEKAT.appspot.com",
+  messagingSenderId: "…",
+  appId: "…"
+};
+const ROOT = "focaFlySpin";          // fiksni root, bez tenant sloja
+const WHATSAPP = "38700000000";      // ZAMIJENI svojim brojem (bez +)
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/* ====== LANG ====== */
+let LANG = localStorage.getItem('ffs_lang') || 'sr';
+function setLang(l){
+  LANG = l;
+  localStorage.setItem('ffs_lang', l);
+  document.documentElement.lang = l;
+  document.getElementById('langSr').classList.toggle('active', l==='sr');
+  document.getElementById('langEn').classList.toggle('active', l==='en');
+  document.querySelectorAll('[data-sr]').forEach(el=>{
+    const v = el.getAttribute('data-'+l);
+    if(v!==null) el.innerHTML = v;
+  });
+  renderPackages();      // ponovo iscrtaj kartice na izabranom jeziku
+  buildCalendar();       // weekday labeli
+  updatePackageSelect();
+}
+
+/* ====== PACKAGES ====== */
+let PACKAGES = {};
+function loadPackages(){
+  db.ref(ROOT+'/paketi').on('value', snap=>{
+    PACKAGES = snap.val() || {};
+    renderPackages();
+    updatePackageSelect();
+  });
+}
+function money(n){ return new Intl.NumberFormat('de-DE').format(n); }
+function renderPackages(){
+  const grid = document.getElementById('pkgGrid');
+  const items = Object.entries(PACKAGES).filter(([_,p])=>p.aktivan!==false);
+  if(!items.length){
+    grid.innerHTML = `<div class="pkg-empty">${LANG==='sr'?'Paketi se uskoro objavljuju.':'Trips coming soon.'}</div>`;
+    return;
+  }
+  const typeLabel = {
+    fly:  LANG==='sr'?'Mušičarenje':'Fly',
+    spin: LANG==='sr'?'Varaličarenje':'Spin',
+    combo:LANG==='sr'?'Kombo':'Combo'
+  };
+  grid.innerHTML = items.map(([id,p])=>{
+    const naziv = LANG==='sr'? (p.nazivSr||p.nazivEn||'') : (p.nazivEn||p.nazivSr||'');
+    const opis  = LANG==='sr'? (p.opisSr||p.opisEn||'')  : (p.opisEn||p.opisSr||'');
+    const tip = p.tip||'fly';
+    const trajanje = p.trajanje==='cijeli'
+      ? (LANG==='sr'?'Cijeli dan':'Full day')
+      : (LANG==='sr'?'Pola dana':'Half day');
+    const unit = p.poGrupi
+      ? (LANG==='sr'?'/ grupa':'/ group')
+      : (LANG==='sr'?'/ osoba':'/ angler');
+    const oprema = p.opremaUkljucena
+      ? (LANG==='sr'?'Oprema uključena':'Gear included')
+      : (LANG==='sr'?'Ponesi svoju opremu':'Bring your own gear');
+    return `
+    <div class="pkg-card">
+      <span class="pkg-type ${tip}">${typeLabel[tip]||tip}</span>
+      <h3>${esc(naziv)}</h3>
+      <p class="pkg-desc">${esc(opis)}</p>
+      <div class="pkg-meta">
+        <div>${icoClock()}<span>${trajanje}</span></div>
+        <div>${icoUsers()}<span>${LANG==='sr'?'Do':'Up to'} ${p.maxOsoba||4} ${LANG==='sr'?'osoba':'anglers'}</span></div>
+        <div>${icoGear()}<span>${oprema}</span></div>
+      </div>
+      <div class="pkg-price">
+        <span class="amount">${money(p.cijena||0)} KM</span>
+        <span class="unit">${unit}</span>
+      </div>
+      <button class="btn" onclick="pickPackage('${id}')" data-sr="Rezerviši" data-en="Book">${LANG==='sr'?'Rezerviši':'Book'}</button>
+    </div>`;
+  }).join('');
+}
+function pickPackage(id){
+  document.getElementById('fPackage').value = id;
+  document.getElementById('booking').scrollIntoView({behavior:'smooth'});
+}
+function updatePackageSelect(){
+  const sel = document.getElementById('fPackage');
+  const prev = sel.value;
+  const items = Object.entries(PACKAGES).filter(([_,p])=>p.aktivan!==false);
+  sel.innerHTML = `<option value="">${LANG==='sr'?'— izaberi paket —':'— pick a trip —'}</option>` +
+    items.map(([id,p])=>{
+      const naziv = LANG==='sr'? (p.nazivSr||p.nazivEn||'') : (p.nazivEn||p.nazivSr||'');
+      return `<option value="${id}">${esc(naziv)} — ${money(p.cijena||0)} KM</option>`;
+    }).join('');
+  if(prev) sel.value = prev;
+}
+
+/* ====== CALENDAR ====== */
+let calDate = new Date(); calDate.setDate(1);
+let AVAIL = {};   // { "YYYY-MM-DD": "busy"|"blocked" }  (sve ostalo = slobodno)
+let selectedDate = null;
+
+function loadAvailability(){
+  db.ref(ROOT+'/termini').on('value', snap=>{
+    AVAIL = snap.val() || {};
+    buildCalendar();
+  });
+}
+function calShift(n){ calDate.setMonth(calDate.getMonth()+n); buildCalendar(); }
+function fmtKey(y,m,d){ return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+function buildCalendar(){
+  const wdSr=['Pon','Uto','Sri','Čet','Pet','Sub','Ned'];
+  const wdEn=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const wd = LANG==='sr'?wdSr:wdEn;
+  document.getElementById('calWeekdays').innerHTML = wd.map(d=>`<span>${d}</span>`).join('');
+
+  const y=calDate.getFullYear(), m=calDate.getMonth();
+  const monthsSr=['Januar','Februar','Mart','April','Maj','Jun','Jul','Avgust','Septembar','Oktobar','Novembar','Decembar'];
+  const monthsEn=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calMonth').textContent = `${(LANG==='sr'?monthsSr:monthsEn)[m]} ${y}`;
+
+  const first=new Date(y,m,1); let start=first.getDay(); start=(start===0)?6:start-1; // pon=0
+  const days=new Date(y,m+1,0).getDate();
+  const today=new Date(); today.setHours(0,0,0,0);
+
+  let html='';
+  for(let i=0;i<start;i++) html+='<div class="cal-day empty"></div>';
+  for(let d=1;d<=days;d++){
+    const key=fmtKey(y,m,d);
+    const cellDate=new Date(y,m,d);
+    let cls='cal-day ', click='', label=d;
+    if(cellDate<today){ cls+='past'; }
+    else if(AVAIL[key]==='busy'||AVAIL[key]==='blocked'||AVAIL[key]==='zauzeto'||AVAIL[key]==='blokirano'){ cls+='busy'; }
+    else { cls+='avail'; click=`onclick="selectDate('${key}')"`; }
+    if(selectedDate===key) cls+=' selected';
+    html+=`<div class="${cls}" ${click}>${label}</div>`;
+  }
+  document.getElementById('calDays').innerHTML=html;
+}
+function selectDate(key){
+  selectedDate=key;
+  buildCalendar();
+  const [y,mo,d]=key.split('-');
+  const monthsSr=['januar','februar','mart','april','maj','jun','jul','avgust','septembar','oktobar','novembar','decembar'];
+  const monthsEn=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const txt = LANG==='sr'
+    ? `${+d}. ${monthsSr[+mo-1]} ${y}.`
+    : `${monthsEn[+mo-1]} ${+d}, ${y}`;
+  const pill=document.getElementById('datePill');
+  pill.classList.add('show');
+  document.getElementById('datePillText').textContent = txt;
+  document.getElementById('booking').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+/* ====== SUBMIT INQUIRY ====== */
+function submitInquiry(){
+  const name=document.getElementById('fName').value.trim();
+  const contact=document.getElementById('fContact').value.trim();
+  const people=+document.getElementById('fPeople').value||1;
+  const pkgId=document.getElementById('fPackage').value;
+  const msg=document.getElementById('fMsg').value.trim();
+
+  if(!selectedDate){ alert(LANG==='sr'?'Izaberi datum u kalendaru.':'Pick a date on the calendar.'); document.getElementById('booking').scrollIntoView({behavior:'smooth'}); return; }
+  if(!name){ alert(LANG==='sr'?'Unesi ime.':'Enter your name.'); return; }
+  if(!contact){ alert(LANG==='sr'?'Unesi kontakt.':'Enter a contact.'); return; }
+  if(!pkgId){ alert(LANG==='sr'?'Izaberi paket.':'Pick a trip.'); return; }
+
+  const btn=document.getElementById('submitBtn');
+  btn.disabled=true; btn.textContent=LANG==='sr'?'Šaljem…':'Sending…';
+
+  const pkg=PACKAGES[pkgId]||{};
+  const pkgName=pkg.nazivSr||pkg.nazivEn||pkgId;
+  const inquiry={
+    ime:name, kontakt:contact, datum:selectedDate,
+    paketId:pkgId, paketNaziv:pkgName, brojOsoba:people,
+    poruka:msg, jezik:LANG, status:'nov',
+    timestamp: firebase.database.ServerValue.TIMESTAMP
+  };
+
+  db.ref(ROOT+'/upiti').push(inquiry)
+    .then(()=>{
+      document.getElementById('formFields').style.display='none';
+      document.getElementById('formSuccess').classList.add('show');
+      // opcioni WhatsApp prečac
+      const waMsg = encodeURIComponent(
+        (LANG==='sr'?'Upit za ribolov — ':'Fishing request — ')+
+        `${pkgName}, ${selectedDate}, ${people} ${LANG==='sr'?'osoba':'anglers'} (${name})`
+      );
+      window.open(`https://wa.me/${WHATSAPP}?text=${waMsg}`,'_blank');
+    })
+    .catch(err=>{
+      alert((LANG==='sr'?'Greška pri slanju: ':'Send failed: ')+err.message);
+      btn.disabled=false; btn.textContent=LANG==='sr'?'Pošalji upit':'Send request';
+    });
+}
+
+/* ====== HELPERS ====== */
+function esc(s){ return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function icoClock(){return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';}
+function icoUsers(){return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>';}
+function icoGear(){return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21c3-4 6-8 10-12M13 9l4-4M17 5l2-2 2 2-2 2zM5 21l2-6 4 4-6 2z"/></svg>';}
+
+/* ====== NAV / UI ====== */
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>20));
+const navToggle=document.getElementById('navToggle'), navLinks=document.getElementById('navLinks');
+navToggle.addEventListener('click',()=>navLinks.classList.toggle('open'));
+navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>navLinks.classList.remove('open')));
+
+/* reveal on scroll */
+const io=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* WA links */
+document.getElementById('waLink').href=`https://wa.me/${WHATSAPP}`;
+
+/* INIT */
+setLang(LANG);
+loadPackages();
+loadAvailability();
+</script>
+</body>
+</html>
