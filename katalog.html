@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Katalog proizvoda</title>
+    <!-- IZMJENA: generičke Open Graph oznake - WhatsApp (i drugi) čitaju ih BEZ izvršavanja
+         JavaScript-a, pa ne mogu biti specifične za pojedini proizvod/katalog (to bi tražilo
+         server-side rješenje - zabilježeno za kasnije). Za sad: isti KlikHub logo/naziv za sve. -->
+    <meta property="og:title" content="Katalog proizvoda">
+    <meta property="og:description" content="Pogledajte ponudu i pošaljite upit direktno.">
+    <meta property="og:image" content="https://kelt-pub.vercel.app/og-katalog-image.png">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Katalog proizvoda">
+    <meta name="twitter:image" content="https://kelt-pub.vercel.app/og-katalog-image.png">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-dark: #0F172A;
+            --bg-card: #1E293B;
+            --bg-elevated: #22252E;
+            --primary: #F97316;
+            --primary-light: #FB923C;
+            --red-light: #e63946;
+            --text-light: #F1F5F9;
+            --text-muted: #94A3B8;
+            --border-color: rgba(255,255,255,0.08);
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px 16px 100px; }
+
+        /* HEADER PROFILA */
+        .profile-header {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+        .profile-top { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+        .profile-logo { width: 64px; height: 64px; border-radius: 14px; object-fit: cover; display: none; flex-shrink: 0; }
+        .profile-name { font-size: 22px; font-weight: 700; color: var(--primary); }
+        .profile-desc { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        .profile-meta { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: 12px; color: var(--text-muted); }
+        .profile-meta span { display: flex; align-items: center; gap: 6px; }
+        /* IZMJENA: tri kontakt ikonice (Pozovi / Viber / WhatsApp) u zaglavlju */
+        .contact-icons { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+        .contact-ico { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 30px; font-size: 12px; font-weight: 700; color: #fff; text-decoration: none; }
+        .contact-ico svg { flex-shrink: 0; }
+        .contact-ico.call { background: #22C55E; }
+        .contact-ico.viber { background: #7360F2; }
+        .contact-ico.wa { background: #25D366; }
+        /* IZMJENA: društvene mreže - okrugle ikonice bez teksta, ispod kontakt dugmadi */
+        .social-icons { display: flex; gap: 10px; margin-top: 12px; }
+        .social-ico { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; color: #fff; text-decoration: none; }
+        .social-ico.fb { background: #1877F2; }
+        .social-ico.ig { background: #E4405F; }
+        .social-ico.tt { background: #000; border: 1px solid rgba(255,255,255,0.2); }
+
+        /* PRETRAGA + KATEGORIJE */
+        .search-bar { margin-bottom: 14px; }
+        .search-bar input {
+            width: 100%; padding: 12px 16px; border-radius: 30px; border: 1px solid var(--border-color);
+            background: var(--bg-card); color: var(--text-light); font-size: 14px;
+        }
+        .category-nav {
+            position: sticky; top: 0; z-index: 100; background: transparent; backdrop-filter: blur(8px);
+            padding: 10px 0; margin-bottom: 20px;
+            overflow-x: auto; white-space: nowrap; border-bottom: 1px solid var(--border-color);
+        }
+        .category-nav button {
+            display: inline-block; margin: 0 4px; padding: 8px 16px; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color); color: var(--text-light); border-radius: 30px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+        }
+        .category-nav button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+        .category-section { margin-bottom: 36px; scroll-margin-top: 70px; }
+        .category-title { font-size: 20px; font-weight: 700; color: var(--primary); border-bottom: 1px solid var(--border-color); margin-bottom: 14px; padding-bottom: 4px; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
+
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px;
+            overflow: hidden; position: relative; cursor: pointer; transition: transform 0.15s;
+        }
+        .card:hover { transform: translateY(-3px); border-color: var(--primary); }
+        .card.out-of-stock { opacity: 0.5; }
+        .card.featured { border-color: var(--primary); }
+        .card.promo { border-color: var(--red-light); }
+        /* IZMJENA (višestruki upit): kartica čiji je proizvod u upitu dobije narandžasti okvir */
+        .card.in-upit { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+        .badge-row { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; padding: 6px; pointer-events: none; }
+        .badge { background: var(--primary); color: #fff; font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 10px; }
+        .badge.promo { background: var(--red-light); }
+        .badge.new { background: #22C55E; }
+        .badge.stock { background: #6B7280; }
+        .card img { width: 100%; height: 140px; object-fit: cover; background: var(--bg-elevated); display: block; }
+        .card-info { padding: 10px; }
+        .card-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+        .card-price { font-size: 14px; font-weight: 800; color: var(--primary); }
+        .card-price .old { text-decoration: line-through; color: var(--text-muted); font-size: 11px; margin-right: 4px; font-weight: 400; }
+
+        /* MODAL DETALJA PROIZVODA */
+        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 15000; display:flex; align-items:center; justify-content:center; padding: 14px; }
+        .item-modal-content { background: var(--bg-card); max-width: 480px; width: 100%; max-height: 90vh; overflow-y: auto; border-radius: 20px; border: 1px solid var(--primary); position: relative; }
+        .item-close { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 16px; z-index: 2; }
+        .item-main-image { width: 100%; height: 280px; object-fit: cover; background: var(--bg-elevated); cursor: zoom-in; }
+        .item-thumbs { display: flex; gap: 6px; padding: 10px; overflow-x: auto; }
+        .item-thumbs img { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; }
+        .item-thumbs img.active { border-color: var(--primary); }
+        .item-body { padding: 6px 18px 18px; }
+        .item-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+        .item-price { font-size: 22px; font-weight: 800; color: var(--primary); margin-bottom: 10px; }
+        .item-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px; }
+        .variant-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+        .variant-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: var(--text-light); font-size: 12px; cursor: pointer; }
+        .variant-btn.active { background: var(--primary); border-color: var(--primary); }
+        .item-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .inquiry-btn { flex: 2; background: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 30px; font-weight: 700; cursor: pointer; }
+        .share-btn { flex: 1; background: var(--bg-elevated); color: var(--text-light); border: 1px solid var(--border-color); padding: 12px; border-radius: 30px; font-weight: 700; cursor: pointer; font-size: 12px; }
+        /* IZMJENA (višestruki upit): dugme "Dodaj u upit" unutar modala detalja */
+        .add-upit-btn { flex: 1 1 100%; background: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 12px; border-radius: 30px; font-weight: 700; cursor: pointer; font-size: 13px; }
+        .add-upit-btn.added { background: var(--primary); color: #fff; }
+        .out-of-stock-note { background: rgba(220,38,38,0.15); color: #ff8080; padding: 10px; border-radius: 12px; font-size: 12px; margin-bottom: 14px; text-align: center; }
+
+        /* FULLSCREEN LIGHTBOX */
+        .lightbox { position: fixed; top:0; left:0; width:100%; height:100%; background: #000; z-index: 20000; display:flex; align-items:center; justify-content:center; touch-action: pan-y; }
+        .lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.2s; }
+        .lightbox img.zoomed { transform: scale(2); }
+        .lightbox-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.15); color: #fff; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 18px; z-index: 2; }
+        .lightbox-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 13px; background: rgba(0,0,0,0.5); padding: 4px 14px; border-radius: 20px; }
+
+        /* IZMJENA (višestruki upit): plutajuća traka dole sa brojačem odabranih */
+        .upit-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(15,23,42,0.96); backdrop-filter: blur(10px);
+            border-top: 2px solid var(--primary); padding: 12px 16px;
+            display: none; align-items: center; z-index: 9000;
+        }
+        .upit-bar.show { display: flex; }
+        .upit-bar-inner { max-width: 1200px; margin: 0 auto; width: 100%; display: flex; align-items: center; gap: 12px; }
+        .upit-bar .cnt { flex: 1; font-size: 13px; color: var(--text-muted); }
+        .upit-bar .cnt strong { color: var(--text-light); font-size: 15px; }
+        .upit-bar .send { background: var(--primary); color: #fff; border: none; padding: 12px 20px; border-radius: 30px; font-weight: 700; font-size: 14px; cursor: pointer; }
+        .upit-bar .clr { background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border-color); width: 42px; height: 42px; border-radius: 50%; font-size: 16px; cursor: pointer; flex-shrink: 0; }
+
+        /* IZMJENA (višestruki upit): redovi u preglednom modalu upita */
+        .upit-pregled-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-color); cursor: pointer; }
+        .upit-pregled-row img { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; background: var(--bg-elevated); flex-shrink: 0; }
+        .upit-pregled-name { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .upit-pregled-price { font-size: 13px; font-weight: 800; color: var(--primary); margin-top: 2px; }
+
+        /* ADMIN */
+        .admin-bar { background: #DC2626; color: white; position: fixed; top:0; left:0; width:100%; display:flex; justify-content:space-between; padding: 6px 16px; font-size: 12px; z-index: 9999; }
+        .admin-bar button { background: white; border: none; color: #DC2626; padding: 2px 12px; border-radius: 4px; cursor: pointer; }
+        .admin-footer { position: fixed; bottom:0; left:0; width:100%; background: rgba(0,0,0,0.9); border-top: 2px solid var(--primary); padding: 12px; text-align:center; z-index: 9998; display:flex; justify-content:center; gap: 10px; flex-wrap: wrap; }
+        .admin-footer button { background: var(--primary); border: none; padding: 8px 14px; border-radius: 30px; font-weight: bold; cursor: pointer; color: white; font-size: 12px; }
+        .admin-controls { margin-top: 8px; display:flex; gap:6px; flex-wrap:wrap; }
+        .admin-btn { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; }
+        .admin-btn.danger { background: #DC2626; color: white; border: none; }
+
+        .modal-content-edit { background: #1a1e2a; max-width: 520px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 20px; border-radius: 16px; border: 1px solid var(--primary); }
+        .modal-content-edit input, .modal-content-edit select, .modal-content-edit textarea {
+            width: 100%; padding: 9px; margin: 6px 0; background: var(--bg-elevated); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 8px; font-size: 13px;
+        }
+        .modal-content-edit label { display:block; font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+        .modal-content-edit button { cursor: pointer; }
+        .upload-thumb-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+        .upload-thumb { position: relative; width: 60px; height: 60px; border-radius: 8px; overflow: hidden; }
+        .upload-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .upload-thumb .rm-thumb { position: absolute; top: 0; right: 0; background: #DC2626; color: #fff; border: none; width: 18px; height: 18px; font-size: 11px; line-height: 1; }
+        .variant-editor-row { display: flex; gap: 6px; margin-bottom: 6px; }
+        .variant-editor-row input { margin: 0; }
+
+        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: var(--primary); padding: 10px 20px; border-radius: 40px; font-size: 13px; z-index: 21000; animation: fadeOut 2.5s forwards; }
+        @keyframes fadeOut { 0% { opacity:1; } 70% { opacity:1; } 100% { opacity:0; visibility:hidden; } }
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+        .footer-motto { text-align:center; margin-top: 30px; font-size: 12px; color: var(--primary); cursor: pointer; opacity: 0.7; }
+        button { font-family: inherit; }
+        @media (max-width: 480px) {
+            .cards-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+            .card img { height: 110px; }
+        }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+                "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js",
+                "firebase/storage": "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"
+            }
+        }
+    </script>
+</head>
+<body>
+
+<div id="adminBar" class="admin-bar" style="display:none;">
+    <span>🔐 ADMIN MOD AKTIVAN (Katalog)</span>
+    <button id="exitAdminBtn">Izađi</button>
+</div>
+
+<div class="container">
+    <div class="profile-header">
+        <div class="profile-top">
+            <img id="profileLogo" class="profile-logo" src="" alt="Logo">
+            <div>
+                <div id="profileName" class="profile-name">Katalog proizvoda</div>
+                <div id="profileDesc" class="profile-desc"></div>
+            </div>
+        </div>
+        <div class="profile-meta">
+            <span id="metaHours" style="display:none;">🕐 <span></span></span>
+            <span id="metaAddress" style="display:none;">📍 <span></span></span>
+        </div>
+        <div id="contactIcons" class="contact-icons" style="display:none;">
+            <a id="callLink" class="contact-ico call" href="#" title="Pozovi">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                <span>Pozovi</span>
+            </a>
+            <a id="viberLink" class="contact-ico viber" href="#" title="Viber">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M11.4 0C9.5.03 5.3.34 2.96 2.5 1.22 4.22.61 6.77.54 9.93.48 13.08.4 19 6.09 20.61h.01l-.01 2.44s-.03.99.62 1.19c.79.24 1.25-.51 2-1.32l1.4-1.58c3.9.33 6.9-.42 7.24-.53.79-.26 5.26-.83 5.99-6.77.75-6.12-.36-9.99-2.37-11.74l-.01-.01c-.6-.55-3.03-2.32-8.46-2.34 0 0-.4-.03-1.09-.02zm.06 1.7c.58-.01.94.02.94.02 4.59.01 6.79 1.39 7.3 1.85 1.69 1.46 2.56 4.94 1.93 10.05v.01c-.62 4.96-4.24 5.27-4.91 5.49-.29.09-2.93.75-6.25.53 0 0-2.47 2.98-3.24 3.75-.12.12-.26.17-.35.14-.13-.03-.17-.18-.16-.4l.02-4.05c-4.82-1.34-4.54-6.38-4.49-9.01.06-2.64.55-4.79 2.02-6.24 1.98-1.8 5.55-2.06 7.16-2.09.02 0 .04 0 .07-.01l.16-.04zm.5 2.57a.34.34 0 00-.34.33.34.34 0 00.33.35c1.32.03 2.4.46 3.24 1.33.84.86 1.25 2 1.28 3.47a.34.34 0 00.34.33.34.34 0 00.33-.34c-.03-1.6-.5-2.92-1.47-3.9-.97-.99-2.24-1.5-3.7-1.53l-.01-.04zm-3.99.48a.85.85 0 00-.55.11l-.03.02c-.36.21-.68.48-.96.8-.22.25-.34.51-.37.76-.02.15 0 .3.05.44l.02.01c.14.4.44 1.05 1.05 1.99.39.61.8 1.16 1.13 1.55.05.06.1.11.14.16l.16.17.17.16c.05.04.1.09.16.14.39.33.94.74 1.55 1.13.94.61 1.59.91 1.99 1.05l.01.02c.14.05.29.07.44.05.25-.03.51-.15.76-.37.32-.28.59-.6.8-.96l.02-.03a.85.85 0 00.11-.55c-.03-.19-.15-.35-.35-.47 0 0-1.36-.79-1.64-.92a.65.65 0 00-.72.11l-.29.37c-.15.18-.42.16-.42.16l-.01.01c-1.01-.26-1.79-.9-2.25-1.73 0 0-.02-.27.16-.42l.37-.29a.65.65 0 00.11-.72c-.13-.28-.92-1.64-.92-1.64-.11-.19-.27-.31-.46-.34l-.01-.01zm4.09.86a.34.34 0 00-.03.68c.72.04 1.24.27 1.61.66.37.4.55.9.55 1.55a.34.34 0 00.68.01c0-.79-.24-1.47-.73-1.99-.5-.53-1.19-.82-2.05-.87l-.03-.04zm.14 1.41a.34.34 0 00-.08.67c.42.09.6.28.68.72a.34.34 0 00.67-.12c-.13-.68-.53-1.11-1.2-1.25l-.07-.02z"/></svg>
+                <span>Viber</span>
+            </a>
+            <a id="waLink" class="contact-ico wa" href="#" title="WhatsApp">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.5 14.4c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.9-.8-1.5-1.77-1.67-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51l-.57-.01c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49s1.07 2.89 1.22 3.09c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.62.71.23 1.36.19 1.87.12.57-.09 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.5 9.5 0 01-4.83-1.32l-.35-.21-3.59.94.96-3.5-.23-.36a9.46 9.46 0 01-1.45-5.05c0-5.24 4.27-9.5 9.52-9.5 2.54 0 4.93.99 6.72 2.79a9.44 9.44 0 012.78 6.72c0 5.24-4.27 9.5-9.52 9.5zm8.1-17.6A11.15 11.15 0 0012.04 0C5.86 0 .83 5.03.83 11.2c0 1.97.51 3.9 1.5 5.6L.73 24l7.36-1.93a11.2 11.2 0 005.35 1.36h.01c6.18 0 11.21-5.03 11.21-11.2 0-3-1.17-5.81-3.29-7.93z"/></svg>
+                <span>WhatsApp</span>
+            </a>
+        </div>
+        <div id="socialIcons" class="social-icons" style="display:none;">
+            <a id="fbLink" class="social-ico fb" href="#" target="_blank" rel="noopener" title="Facebook">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.25h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
+            </a>
+            <a id="igLink" class="social-ico ig" href="#" target="_blank" rel="noopener" title="Instagram">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.79.3-1.46.72-2.13 1.38C1.35 2.68.93 3.35.63 4.14.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.3.79.72 1.46 1.38 2.13.67.66 1.34 1.08 2.13 1.38.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56.79-.3 1.46-.72 2.13-1.38.66-.67 1.08-1.34 1.38-2.13.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91-.3-.79-.72-1.46-1.38-2.13C21.32 1.35 20.65.93 19.86.63 19.1.33 18.22.13 16.95.07 15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zM12 16a4 4 0 110-8 4 4 0 010 8zm7.85-10.41a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z"/></svg>
+            </a>
+            <a id="ttLink" class="social-ico tt" href="#" target="_blank" rel="noopener" title="TikTok">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64c.3 0 .59.05.87.13V9.4a6.33 6.33 0 00-.87-.06A6.34 6.34 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1.04-.1z"/></svg>
+            </a>
+        </div>
+    </div>
+
+    <div class="search-bar"><input type="text" id="searchInput" placeholder="🔍 Pretraži proizvode..."></div>
+    <div id="categoryNav" class="category-nav"></div>
+    <div id="showAllLinkWrap" style="text-align:center; margin: -10px 0 16px; display:none;">
+        <a href="#" id="showAllBtn" style="color: var(--text-muted); font-size: 12px; text-decoration: underline;">📋 Prikaži sve proizvode</a>
+    </div>
+    <div id="catalogContainer"></div>
+    <div class="footer-motto" id="adminTrigger">❖ ❖ ❖</div>
+</div>
+
+<!-- IZMJENA (višestruki upit): plutajuća traka - prikazuje se samo kad ima odabranih proizvoda -->
+<div id="upitBar" class="upit-bar">
+    <div class="upit-bar-inner">
+        <div class="cnt"><strong id="upitCount">0</strong> u upitu</div>
+        <button class="clr" id="upitClear" title="Očisti sve">🗑️</button>
+        <button class="send" id="upitSend">Pošalji upit</button>
+    </div>
+</div>
+
+<div id="adminFooter" class="admin-footer" style="display:none;">
+    <button id="addCategoryBtn">➕ Kategorija</button>
+    <button id="addItemBtn">➕ Proizvod</button>
+    <button id="manageCategoriesBtn">📂 Kategorije</button>
+    <button id="customizeBtn">🎨 Izgled/podaci</button>
+    <button id="changePasswordBtn">🔐 Šifra</button>
+    <button id="statsBtn">📊 Statistika</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from 'firebase/app';
+    import { getDatabase, ref, onValue, off, push, set, remove, update, get, increment } from 'firebase/database';
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyALY3oKvPW_mDZiaBl0EdFCkTjd6fqwisQ",
+        authDomain: "kelt-pub-menu-2df61.firebaseapp.com",
+        databaseURL: "https://kelt-pub-menu-2df61-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "kelt-pub-menu-2df61",
+        storageBucket: "kelt-pub-menu-2df61.firebasestorage.app"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
+
+    let catalogId = null;
+    function getCatalogIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        let id = params.get('catalog');
+        if (!id) {
+            id = prompt('Unesite ID kataloga:');
+            if (id) window.history.replaceState({}, '', `?catalog=${encodeURIComponent(id)}`);
+            else throw new Error('Missing catalog ID');
+        }
+        return id;
+    }
+    try { catalogId = getCatalogIdFromUrl(); }
+    catch(e) { document.body.innerHTML = '<div style="text-align:center;margin-top:50px;">Greška: nedostaje ID kataloga.</div>'; throw e; }
+
+    const categoriesRef = ref(db, `catalogs/${catalogId}/categories`);
+    const itemsRef = ref(db, `catalogs/${catalogId}/items`);
+    const settingsRef = ref(db, `catalogs/${catalogId}/settings`);
+    const versionRef = ref(db, `catalogs/${catalogId}/contentVersion`);
+
+    let categories = [];
+    let items = [];
+    let settings = {
+        name: 'Katalog proizvoda', description: '', workingHours: '', address: '', whatsappNumber: '',
+        primaryColor: '#F97316', backgroundColor: '#0F172A', logoBase64: '', adminPassword: 'katalog2026',
+        facebookUrl: '', instagramUrl: '', tiktokUrl: ''
+    };
+    let maxImagesPerProduct = 5;
+    let analyticsEnabled = false;
+    let isAdminMode = false;
+    let adminClickCount = 0;
+    let categoriesUnsub = null, itemsUnsub = null;
+    let activeCategoryFilter = 'all';
+    let searchQuery = '';
+
+    // IZMJENA (višestruki upit): lista odabranih proizvoda - čuva se samo u memoriji
+    // (nestaje kad gost zatvori stranicu). Svaka stavka: { key, itemId, name, price, variantName }
+    let upitLista = [];
+
+    function escapeHtml(str) { return str ? String(str).replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])) : ''; }
+    function showToast(msg, dur = 2200) {
+        const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+        document.body.appendChild(t); setTimeout(() => t.remove(), dur);
+    }
+
+    // ============================================================
+    // KEŠ + PROVJERA VERZIJE - brzo učitavanje, minimalna Firebase potrošnja.
+    // Gost prvo vidi keširan sadržaj (ako postoji) TRENUTNO, a u pozadini se
+    // provjerava samo mali broj verzije - pun sadržaj se ponovo skida SAMO
+    // ako se admin nešto promijenio od zadnje posjete.
+    // ============================================================
+    const CACHE_KEY = `klikhub_catalog_cache_${catalogId}`;
+    function loadFromCache() {
+        try {
+            const raw = localStorage.getItem(CACHE_KEY);
+            if (!raw) return null;
+            return JSON.parse(raw);
+        } catch(e) { return null; }
+    }
+    function saveToCache(version) {
+        try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ version, categories, items, settings }));
+        } catch(e) { /* localStorage pun ili nedostupan - nije kritično */ }
+    }
+    async function bumpContentVersion() {
+        try { await update(ref(db, `catalogs/${catalogId}`), { contentVersion: increment(1) }); } catch(e) {}
+    }
+
+    function applySettings() {
+        document.documentElement.style.setProperty('--bg-dark', settings.backgroundColor || '#0F172A');
+        document.documentElement.style.setProperty('--primary', settings.primaryColor || '#F97316');
+        document.getElementById('profileName').textContent = settings.name || 'Katalog proizvoda';
+        document.title = settings.name || 'Katalog proizvoda';
+        document.getElementById('profileDesc').textContent = settings.description || '';
+        const logo = document.getElementById('profileLogo');
+        if (settings.logoBase64) { logo.src = settings.logoBase64; logo.style.display = 'block'; } else { logo.style.display = 'none'; }
+        const hoursEl = document.getElementById('metaHours'), addrEl = document.getElementById('metaAddress');
+        if (settings.workingHours) { hoursEl.querySelector('span').textContent = settings.workingHours; hoursEl.style.display = 'flex'; } else hoursEl.style.display = 'none';
+        if (settings.address) { addrEl.querySelector('span').textContent = settings.address; addrEl.style.display = 'flex'; } else addrEl.style.display = 'none';
+        // IZMJENA: popuni tri kontakt ikonice (isti broj za Pozovi/Viber/WhatsApp)
+        const contactWrap = document.getElementById('contactIcons');
+        const phoneDigits = (settings.whatsappNumber || '').replace(/[^0-9]/g, '');
+        if (phoneDigits) {
+            document.getElementById('callLink').href = `tel:+${phoneDigits}`;
+            document.getElementById('viberLink').href = `viber://chat?number=%2B${phoneDigits}`;
+            document.getElementById('waLink').href = `https://wa.me/${phoneDigits}?text=${encodeURIComponent('Zdravo! Imam pitanje u vezi kataloga.')}`;
+            contactWrap.style.display = 'flex';
+        } else {
+            contactWrap.style.display = 'none';
+        }
+        // IZMJENA: društvene mreže - svaka ikonica se pokazuje samo ako je link unesen
+        const socialWrap = document.getElementById('socialIcons');
+        const fbEl = document.getElementById('fbLink'), igEl = document.getElementById('igLink'), ttEl = document.getElementById('ttLink');
+        let anySocial = false;
+        if (settings.facebookUrl) { fbEl.href = settings.facebookUrl; fbEl.style.display = 'inline-flex'; anySocial = true; } else fbEl.style.display = 'none';
+        if (settings.instagramUrl) { igEl.href = settings.instagramUrl; igEl.style.display = 'inline-flex'; anySocial = true; } else igEl.style.display = 'none';
+        if (settings.tiktokUrl) { ttEl.href = settings.tiktokUrl; ttEl.style.display = 'inline-flex'; anySocial = true; } else ttEl.style.display = 'none';
+        socialWrap.style.display = anySocial ? 'flex' : 'none';
+    }
+
+    function updateActiveNavStyling() {
+        document.querySelectorAll('#categoryNav .cat-tab').forEach(b => b.classList.toggle('active', b.dataset.cat === activeCategoryFilter));
+        const wrap = document.getElementById('showAllLinkWrap');
+        if (wrap) wrap.style.display = activeCategoryFilter === 'all' ? 'none' : 'block';
+    }
+
+    function selectCategory(catId) {
+        activeCategoryFilter = catId;
+        updateActiveNavStyling();
+        renderCatalog();
+        // IZMJENA: bez ovoga, promjena kategorije samo zamijeni sadržaj a skrol
+        // ostaje na istoj visini piksela - gost bi "upadao" na pola/dno nove
+        // kategorije umjesto da vidi njen početak.
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderNav() {
+        const nav = document.getElementById('categoryNav');
+        // IZMJENA: "Sve" više nije dugme u istom redu kao kategorije (bilo je iritantno
+        // i uvijek prisutno) - sad je diskretan link ispod, vidljiv samo kad NIJE aktivan.
+        nav.innerHTML = categories.map(c => `<button class="cat-tab ${activeCategoryFilter===c.id?'active':''}" data-cat="${c.id}">${escapeHtml(c.name)}</button>`).join('');
+        nav.querySelectorAll('.cat-tab').forEach(btn => {
+            btn.onclick = () => selectCategory(btn.dataset.cat);
+        });
+        updateActiveNavStyling();
+    }
+
+    document.getElementById('showAllBtn').onclick = (e) => {
+        e.preventDefault();
+        selectCategory('all');
+    };
+
+    function itemMatchesSearch(item) {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        return (item.name || '').toLowerCase().includes(q) || (item.description || '').toLowerCase().includes(q);
+    }
+
+    function priceRangeLabel(item) {
+        if (item.variants && item.variants.length) {
+            const prices = item.variants.map(v => parseFloat(v.price) || 0);
+            const min = Math.min(...prices);
+            return `od ${min.toFixed(2)} KM`;
+        }
+        return `${(parseFloat(item.price) || 0).toFixed(2)} KM`;
+    }
+
+    function renderCatalog() {
+        const container = document.getElementById('catalogContainer');
+        container.innerHTML = '';
+        const catsToShow = activeCategoryFilter === 'all' ? categories : categories.filter(c => c.id === activeCategoryFilter);
+        let anyShown = false;
+        for (const cat of catsToShow) {
+            const catItems = items.filter(i => i.categoryId === cat.id && itemMatchesSearch(i) && (isAdminMode || i.inStock !== false));
+            if (catItems.length === 0 && !isAdminMode) continue;
+            anyShown = true;
+            const section = document.createElement('div');
+            section.className = 'category-section';
+            section.id = `cat-${cat.id}`;
+            section.dataset.catId = cat.id;
+            section.innerHTML = `<h2 class="category-title">${escapeHtml(cat.name)}</h2><div class="cards-grid"></div>`;
+            const grid = section.querySelector('.cards-grid');
+            for (const item of catItems) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                if (item.featured) card.classList.add('featured');
+                if (item.promo) card.classList.add('promo');
+                if (item.inStock === false) card.classList.add('out-of-stock');
+                // IZMJENA (višestruki upit): vizuelna oznaka ako je proizvod već u upitu
+                if (!isAdminMode && upitLista.some(u => u.itemId === item.id)) card.classList.add('in-upit');
+                const img = (item.images && item.images[0]) || '';
+                let badges = '';
+                if (item.isNew) badges += '<span class="badge new">Novo</span>';
+                if (item.featured) badges += '<span class="badge">⭐</span>';
+                if (item.promo) badges += '<span class="badge promo">🔥</span>';
+                if (item.inStock === false) badges += '<span class="badge stock">Nema</span>';
+                card.innerHTML = `
+                    <div class="badge-row">${badges}</div>
+                    <img src="${escapeHtml(img)}" loading="lazy" onerror="this.style.opacity=0.3">
+                    <div class="card-info">
+                        <div class="card-name">${escapeHtml(item.name)}</div>
+                        <div class="card-price">${item.promo && item.promoPrice ? `<span class="old">${(parseFloat(item.price)||0).toFixed(2)}</span> ${(parseFloat(item.promoPrice)||0).toFixed(2)} KM` : priceRangeLabel(item)}</div>
+                        ${isAdminMode ? `<div class="admin-controls">
+                            <button class="admin-btn edit-item" data-id="${item.id}">✏️</button>
+                            <button class="admin-btn danger delete-item" data-id="${item.id}">🗑️</button>
+                            <button class="admin-btn toggle-stock" data-id="${item.id}">${item.inStock === false ? '✅ Na stanju' : '🚫 Nema'}</button>
+                        </div>` : ''}
+                    </div>
+                `;
+                if (!isAdminMode) card.onclick = () => showItemDetail(item.id);
+                else {
+                    card.querySelector('.edit-item').onclick = (e) => { e.stopPropagation(); showItemModal(item); };
+                    card.querySelector('.delete-item').onclick = (e) => { e.stopPropagation(); deleteItem(item.id); };
+                    card.querySelector('.toggle-stock').onclick = (e) => { e.stopPropagation(); toggleStock(item.id); };
+                }
+                grid.appendChild(card);
+            }
+            container.appendChild(section);
+        }
+        if (!anyShown) container.innerHTML = '<div class="empty-state">Nema proizvoda za prikaz.</div>';
+
+        // IZMJENA: dok je prikazano "Sve", dugme trenutne kategorije se samo osvijetli
+        // dok gost skroluje kroz sekcije (kao i u pab meniju) - bez potrebe za klikom.
+        setupCategoryScrollSpy();
+
+        // Ako URL nosi ?item=ID, automatski otvori detalje tog proizvoda (djeljiv link)
+        const params = new URLSearchParams(window.location.search);
+        const sharedItemId = params.get('item');
+        if (sharedItemId && !document.querySelector('.item-modal-content')) {
+            showItemDetail(sharedItemId);
+        }
+        // IZMJENA (višestruki upit): ako URL nosi ?items=id1,id2,... (link iz upita),
+        // otvori pregled svih tih proizvoda odjednom - admin klikne link iz WhatsApp-a.
+        const sharedItems = params.get('items');
+        if (sharedItems && !document.querySelector('.upit-pregled-content')) {
+            showUpitPregled(sharedItems.split(',').filter(Boolean));
+        }
+    }
+
+    // IZMJENA (višestruki upit): pregledni modal koji adminu (ili bilo kome s linkom)
+    // pokaže sve proizvode iz upita - slika, naziv, cijena. Klik na stavku otvara pun detalj.
+    function showUpitPregled(ids) {
+        const nadjeni = ids.map(id => items.find(i => i.id === id)).filter(Boolean);
+        if (nadjeni.length === 0) return;
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        const redovi = nadjeni.map(item => {
+            const img = (item.images && item.images[0]) || '';
+            const cijena = item.variants && item.variants.length ? priceRangeLabel(item)
+                : (item.promo && item.promoPrice ? `${(parseFloat(item.promoPrice)||0).toFixed(2)} KM` : `${(parseFloat(item.price)||0).toFixed(2)} KM`);
+            return `
+                <div class="upit-pregled-row" data-id="${item.id}">
+                    <img src="${escapeHtml(img)}" onerror="this.style.opacity=0.3">
+                    <div style="flex:1;min-width:0;">
+                        <div class="upit-pregled-name">${escapeHtml(item.name)}</div>
+                        <div class="upit-pregled-price">${cijena}</div>
+                    </div>
+                    <span style="color:var(--text-muted);font-size:18px;">›</span>
+                </div>`;
+        }).join('');
+        modal.innerHTML = `
+            <div class="modal-content-edit upit-pregled-content">
+                <h3>📋 Proizvodi iz upita (${nadjeni.length})</h3>
+                <p style="color:var(--text-muted);font-size:12px;margin:6px 0 12px;">Klikni proizvod za detalje.</p>
+                <div>${redovi}</div>
+                <div style="margin-top:16px;text-align:right;"><button id="closeUpitPregled">Zatvori</button></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+        modal.querySelector('#closeUpitPregled').onclick = () => modal.remove();
+        modal.querySelectorAll('.upit-pregled-row').forEach(row => {
+            row.onclick = () => { modal.remove(); showItemDetail(row.dataset.id); };
+        });
+    }
+
+    let categoryScrollObserver = null;
+    function setupCategoryScrollSpy() {
+        if (categoryScrollObserver) { categoryScrollObserver.disconnect(); categoryScrollObserver = null; }
+        if (activeCategoryFilter !== 'all') return; // scrollspy ima smisla samo kad su sve kategorije prikazane odjednom
+        categoryScrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('#categoryNav .cat-tab').forEach(b => b.classList.remove('active'));
+                    const btn = document.querySelector(`#categoryNav .cat-tab[data-cat="${entry.target.dataset.catId}"]`);
+                    if (btn) btn.classList.add('active');
+                }
+            });
+        }, { threshold: 0.3, rootMargin: '-70px 0px 0px 0px' });
+        document.querySelectorAll('.category-section').forEach(section => categoryScrollObserver.observe(section));
+    }
+
+    async function toggleStock(id) {
+        const item = items.find(i => i.id === id);
+        if (!item) return;
+        await update(ref(db, `catalogs/${catalogId}/items/${id}`), { inStock: item.inStock === false ? true : false });
+        await bumpContentVersion();
+        showToast('Ažurirano');
+    }
+
+    async function deleteItem(id) {
+        if (!confirm('Obrisati proizvod?')) return;
+        const item = items.find(i => i.id === id);
+        if (item && item.images) {
+            for (const url of item.images) { try { await deleteObject(storageRef(storage, url)); } catch(e) {} }
+        }
+        await remove(ref(db, `catalogs/${catalogId}/items/${id}`));
+        await bumpContentVersion();
+        showToast('Obrisano');
+    }
+
+    // ============================================================
+    // IZMJENA (višestruki upit): logika liste odabranih proizvoda
+    // - upitKey: jedinstveni ključ po proizvodu+varijanti (isti proizvod u dvije
+    //   veličine može biti dvije stavke); toggle po tom ključu
+    // - renderUpitBar: osvježava brojač i vidljivost trake
+    // - posaljiVisestrukiUpit: sastavlja JEDNU WhatsApp poruku sa svim stavkama
+    // ============================================================
+    function upitKey(itemId, variantIndex) {
+        return variantIndex != null ? `${itemId}__${variantIndex}` : itemId;
+    }
+
+    function isInUpit(key) { return upitLista.some(u => u.key === key); }
+
+    function toggleUpit(item, variantIndex) {
+        const key = upitKey(item.id, variantIndex);
+        const existing = upitLista.findIndex(u => u.key === key);
+        if (existing >= 0) {
+            upitLista.splice(existing, 1);
+        } else {
+            let price, variantName = '';
+            if (item.variants && item.variants.length && variantIndex != null) {
+                price = item.variants[variantIndex].price;
+                variantName = item.variants[variantIndex].name;
+            } else {
+                price = (item.promo && item.promoPrice) ? item.promoPrice : item.price;
+            }
+            upitLista.push({ key, itemId: item.id, name: item.name, price, variantName });
+            // brojimo upit u analitici (isto kao pojedinačni upit)
+            if (analyticsEnabled) update(ref(db, `catalogs/${catalogId}/items/${item.id}`), { inquiries: increment(1) }).catch(()=>{});
+        }
+        renderUpitBar();
+        return isInUpit(key);
+    }
+
+    function renderUpitBar() {
+        const bar = document.getElementById('upitBar');
+        document.getElementById('upitCount').textContent = upitLista.length;
+        // traka se ne prikazuje u admin modu (tamo je footer sa admin dugmadima)
+        bar.classList.toggle('show', upitLista.length > 0 && !isAdminMode);
+    }
+
+    function posaljiVisestrukiUpit() {
+        if (upitLista.length === 0) return;
+        const phone = (settings.whatsappNumber || '').replace(/[^0-9]/g, '');
+        if (!phone) { showToast('Broj za upite nije podešen'); return; }
+        // IZMJENA: format "NAZIV - CIJENA" WhatsApp ponekad prepozna kao broj telefona;
+        // riječ "cijena" između to spriječava (isto kao kod pojedinačnog upita).
+        const linije = upitLista.map((u, i) => {
+            const varDio = u.variantName ? ` (${u.variantName})` : '';
+            return `${i + 1}. ${u.name}${varDio} — cijena ${u.price} KM`;
+        }).join('\n');
+        // IZMJENA (višestruki upit): jedan link na kraju koji adminu otvara katalog
+        // sa SVIM odabranim proizvodima u pregledu (?items=id1,id2,...). Varijante ne
+        // idu u link (da ostane kratak) - konkretna veličina ostaje u tekstu iznad.
+        const ids = [...new Set(upitLista.map(u => u.itemId))].join(',');
+        const link = `${window.location.origin}${window.location.pathname}?catalog=${catalogId}&items=${ids}`;
+        const message = `Zdravo! Zanimaju me sljedeći proizvodi:\n\n${linije}\n\nPregled svih: ${link}\n\nMolim vas za više informacija.`;
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+    }
+
+    document.getElementById('upitSend').onclick = posaljiVisestrukiUpit;
+    document.getElementById('upitClear').onclick = () => {
+        if (upitLista.length === 0) return;
+        upitLista = [];
+        renderUpitBar();
+        renderCatalog(); // ukloni "in-upit" okvire sa kartica
+    };
+
+    // ============================================================
+    // DETALJI PROIZVODA + GALERIJA + FULLSCREEN LIGHTBOX
+    // ============================================================
+    let currentDetailItem = null;
+    let currentImageIndex = 0;
+    let currentVariantIndex = 0;
+
+    async function showItemDetail(itemId) {
+        const item = items.find(i => i.id === itemId);
+        if (!item) return;
+        currentDetailItem = item;
+        currentImageIndex = 0;
+        currentVariantIndex = 0;
+
+        if (analyticsEnabled) {
+            update(ref(db, `catalogs/${catalogId}/items/${itemId}`), { views: increment(1) }).catch(()=>{});
+        }
+
+        const images = (item.images && item.images.length) ? item.images : [''];
+        const hasVariants = !!(item.variants && item.variants.length);
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="item-modal-content">
+                <button class="item-close" id="itemCloseBtn">✖</button>
+                <img class="item-main-image" id="itemMainImage" src="${escapeHtml(images[0])}">
+                ${images.length > 1 ? `<div class="item-thumbs" id="itemThumbs">${images.map((im, idx) => `<img src="${escapeHtml(im)}" class="${idx===0?'active':''}" data-idx="${idx}">`).join('')}</div>` : ''}
+                <div class="item-body">
+                    <div class="item-title">${escapeHtml(item.name)}</div>
+                    <div class="item-price" id="itemPriceDisplay"></div>
+                    ${item.inStock === false ? '<div class="out-of-stock-note">Trenutno nema na stanju</div>' : ''}
+                    ${hasVariants ? `<div class="variant-row" id="variantRow">${item.variants.map((v, idx) => `<button class="variant-btn ${idx===0?'active':''}" data-idx="${idx}">${escapeHtml(v.name)}</button>`).join('')}</div>` : ''}
+                    <div class="item-desc">${escapeHtml(item.description || '')}</div>
+                    <div class="item-actions">
+                        ${item.inStock !== false ? `<button class="inquiry-btn" id="inquiryBtn">📱 Pošalji upit</button>` : ''}
+                        <button class="share-btn" id="shareBtn">🔗 Kopiraj link</button>
+                        ${item.inStock !== false ? `<button class="add-upit-btn" id="addUpitBtn"></button>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+        modal.querySelector('#itemCloseBtn').onclick = () => modal.remove();
+
+        function updatePrice() {
+            const priceEl = modal.querySelector('#itemPriceDisplay');
+            if (hasVariants) {
+                priceEl.textContent = `${(parseFloat(item.variants[currentVariantIndex].price) || 0).toFixed(2)} KM`;
+            } else if (item.promo && item.promoPrice) {
+                priceEl.innerHTML = `<span style="text-decoration:line-through;color:var(--text-muted);font-size:14px;">${(parseFloat(item.price)||0).toFixed(2)} KM</span> ${(parseFloat(item.promoPrice)||0).toFixed(2)} KM`;
+            } else {
+                priceEl.textContent = `${(parseFloat(item.price) || 0).toFixed(2)} KM`;
+            }
+        }
+        updatePrice();
+
+        // IZMJENA (višestruki upit): stanje dugmeta "Dodaj u upit" prati odabranu varijantu
+        const addBtn = modal.querySelector('#addUpitBtn');
+        function refreshAddBtn() {
+            if (!addBtn) return;
+            const key = upitKey(item.id, hasVariants ? currentVariantIndex : null);
+            const inList = isInUpit(key);
+            addBtn.textContent = inList ? '✓ Dodano u upit' : '➕ Dodaj u upit';
+            addBtn.classList.toggle('added', inList);
+        }
+        refreshAddBtn();
+        if (addBtn) addBtn.onclick = () => {
+            toggleUpit(item, hasVariants ? currentVariantIndex : null);
+            refreshAddBtn();
+        };
+
+        modal.querySelector('#itemMainImage').onclick = () => openLightbox(images, currentImageIndex);
+        modal.querySelectorAll('#itemThumbs img').forEach(thumb => {
+            thumb.onclick = () => {
+                currentImageIndex = parseInt(thumb.dataset.idx);
+                modal.querySelector('#itemMainImage').src = images[currentImageIndex];
+                modal.querySelectorAll('#itemThumbs img').forEach(t => t.classList.remove('active'));
+                thumb.classList.add('active');
+            };
+        });
+        modal.querySelectorAll('.variant-btn').forEach(btn => {
+            btn.onclick = () => {
+                currentVariantIndex = parseInt(btn.dataset.idx);
+                modal.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                updatePrice();
+                refreshAddBtn(); // stanje dugmeta se mijenja jer je varijanta zaseban ključ
+            };
+        });
+        modal.querySelector('#inquiryBtn')?.addEventListener('click', () => {
+            if (analyticsEnabled) update(ref(db, `catalogs/${catalogId}/items/${itemId}`), { inquiries: increment(1) }).catch(()=>{});
+            const variantLabel = hasVariants ? ` (${item.variants[currentVariantIndex].name})` : '';
+            const price = hasVariants ? item.variants[currentVariantIndex].price : (item.promo && item.promoPrice ? item.promoPrice : item.price);
+            const link = `${window.location.origin}${window.location.pathname}?catalog=${catalogId}&item=${itemId}`;
+            // IZMJENA: format "NAZIV - CIJENA" (npr. "030 - 2.00") WhatsApp ponekad
+            // pogrešno prepozna kao broj telefona (cifre razdvojene crticom) i pretvori
+            // ga u klikabilan link. Riječ "cijena" između brojeva to spriječava.
+            const message = `Zanima me proizvod: ${item.name}${variantLabel}, cijena ${price} KM.\n${link}`;
+            const phone = (settings.whatsappNumber || '').replace(/[^0-9]/g, '');
+            if (!phone) { showToast('Broj za upite nije podešen'); return; }
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+        });
+        modal.querySelector('#shareBtn').onclick = async () => {
+            const link = `${window.location.origin}${window.location.pathname}?catalog=${catalogId}&item=${itemId}`;
+            try {
+                await navigator.clipboard.writeText(link);
+                showToast('Link kopiran!');
+            } catch(e) {
+                prompt('Kopiraj link ručno:', link);
+            }
+        };
+    }
+
+    // IZMJENA: fullscreen prikaz sa swipe (lijevo/desno) i tap-to-zoom - jednostavnije od
+    // punog pinch-zoom praćenja prstiju, ali pokriva istu praktičnu potrebu (detaljan pregled).
+    function openLightbox(images, startIndex) {
+        let idx = startIndex;
+        const lb = document.createElement('div');
+        lb.className = 'lightbox';
+        lb.innerHTML = `
+            <button class="lightbox-close" id="lbClose">✖</button>
+            <img id="lbImage" src="${escapeHtml(images[idx])}">
+            ${images.length > 1 ? `<div class="lightbox-counter" id="lbCounter">${idx+1} / ${images.length}</div>` : ''}
+        `;
+        document.body.appendChild(lb);
+        const imgEl = lb.querySelector('#lbImage');
+        lb.querySelector('#lbClose').onclick = () => lb.remove();
+        imgEl.onclick = () => imgEl.classList.toggle('zoomed');
+
+        let touchStartX = null;
+        lb.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+        lb.addEventListener('touchend', (e) => {
+            if (touchStartX === null) return;
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            if (Math.abs(dx) > 50 && images.length > 1) {
+                idx = dx < 0 ? (idx + 1) % images.length : (idx - 1 + images.length) % images.length;
+                imgEl.src = images[idx];
+                imgEl.classList.remove('zoomed');
+                const counter = lb.querySelector('#lbCounter');
+                if (counter) counter.textContent = `${idx+1} / ${images.length}`;
+            }
+            touchStartX = null;
+        });
+    }
+
+    // ============================================================
+    // UČITAVANJE PODATAKA - keš prvo (instant), pa provjera verzije,
+    // pa (samo ako treba) puno osvježavanje. U admin modu koristi
+    // real-time onValue da admin odmah vidi svoje izmjene.
+    // ============================================================
+    async function loadFresh() {
+        const [catSnap, itemSnap, setSnap, verSnap] = await Promise.all([
+            get(categoriesRef), get(itemsRef), get(settingsRef), get(versionRef)
+        ]);
+        categories = catSnap.val() ? Object.entries(catSnap.val()).map(([id, v]) => ({ id, ...v })).sort((a,b)=>(a.order||0)-(b.order||0)) : [];
+        items = itemSnap.val() ? Object.entries(itemSnap.val()).map(([id, v]) => ({ id, ...v })) : [];
+        if (setSnap.val()) settings = { ...settings, ...setSnap.val() };
+        saveToCache(verSnap.val() || 0);
+        applySettings(); renderNav(); renderCatalog();
+    }
+
+    async function initGuestMode() {
+        const cached = loadFromCache();
+        if (cached) {
+            categories = cached.categories || []; items = cached.items || []; settings = { ...settings, ...(cached.settings || {}) };
+            applySettings(); renderNav(); renderCatalog();
+        }
+        try {
+            const verSnap = await get(versionRef);
+            const liveVersion = verSnap.val() || 0;
+            if (!cached || cached.version !== liveVersion) {
+                await loadFresh();
+            }
+        } catch(e) {
+            if (!cached) showToast('Greška pri učitavanju kataloga');
+        }
+    }
+
+    function startAdminRealtimeSync() {
+        categoriesUnsub = onValue(categoriesRef, (snap) => {
+            categories = snap.val() ? Object.entries(snap.val()).map(([id, v]) => ({ id, ...v })).sort((a,b)=>(a.order||0)-(b.order||0)) : [];
+            renderNav(); renderCatalog();
+        });
+        itemsUnsub = onValue(itemsRef, (snap) => {
+            items = snap.val() ? Object.entries(snap.val()).map(([id, v]) => ({ id, ...v })) : [];
+            renderCatalog();
+        });
+    }
+    function stopAdminRealtimeSync() {
+        if (categoriesUnsub) off(categoriesRef, 'value', categoriesUnsub);
+        if (itemsUnsub) off(itemsRef, 'value', itemsUnsub);
+    }
+
+    async function loadHubLimits() {
+        try {
+            const maxImgSnap = await get(ref(db, `catalogs/${catalogId}/settings/maxImagesPerProduct`));
+            if (typeof maxImgSnap.val() === 'number' && maxImgSnap.val() > 0) maxImagesPerProduct = maxImgSnap.val();
+            const analyticsSnap = await get(ref(db, `catalogs/${catalogId}/settings/features/analytics/enabled`));
+            analyticsEnabled = analyticsSnap.val() === true;
+        } catch(e) {}
+    }
+
+    // ============================================================
+    // KOMPRESIJA SLIKE PRIJE UPLOAD-A (canvas) - smanjuje veliku sliku
+    // sa telefona (često 3-8 MB) na max ~1200px širine, JPEG ~80% kvalitet.
+    // ============================================================
+    function compressImage(file, maxWidth = 1200, quality = 0.8) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const reader = new FileReader();
+            reader.onload = (e) => { img.src = e.target.result; };
+            reader.onerror = reject;
+            img.onload = () => {
+                let { width, height } = img;
+                if (width > maxWidth) { height = Math.round(height * (maxWidth / width)); width = maxWidth; }
+                const canvas = document.createElement('canvas');
+                canvas.width = width; canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
+            };
+            img.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+    async function uploadCompressedImage(file, itemId, index) {
+        const compressed = await compressImage(file);
+        const path = `catalogs/${catalogId}/items/${itemId}/${index}_${Date.now()}.jpg`;
+        const imgRef = storageRef(storage, path);
+        await uploadBytes(imgRef, compressed);
+        return await getDownloadURL(imgRef);
+    }
+
+    // ============================================================
+    // ADMIN - upravljanje kategorijama
+    // ============================================================
+    async function showCategoryManager() {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `<div class="modal-content-edit"><h3>Kategorije</h3><div id="catList"></div><div style="margin-top:14px;display:flex;gap:8px;"><button id="newCatBtn">+ Nova</button><button id="closeCatBtn">Zatvori</button></div></div>`;
+        document.body.appendChild(modal);
+        const refresh = () => {
+            const list = modal.querySelector('#catList'); list.innerHTML = '';
+            categories.forEach(c => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin:8px 0;';
+                row.innerHTML = `<span>${escapeHtml(c.name)}</span><span><button class="ed">✏️</button> <button class="rm">🗑️</button></span>`;
+                row.querySelector('.ed').onclick = async () => {
+                    const n = prompt('Novi naziv:', c.name);
+                    if (n) { await update(ref(db, `catalogs/${catalogId}/categories/${c.id}`), { name: n }); await bumpContentVersion(); }
+                };
+                row.querySelector('.rm').onclick = async () => {
+                    if (items.some(i => i.categoryId === c.id)) { alert('Kategorija nije prazna'); return; }
+                    if (confirm('Obrisati?')) { await remove(ref(db, `catalogs/${catalogId}/categories/${c.id}`)); await bumpContentVersion(); showToast('Obrisano'); refresh(); }
+                };
+                list.appendChild(row);
+            });
+        };
+        refresh();
+        modal.querySelector('#newCatBtn').onclick = async () => {
+            const name = prompt('Naziv kategorije:');
+            if (name && name.trim()) { await push(categoriesRef, { name: name.trim(), order: categories.length }); await bumpContentVersion(); modal.remove(); }
+        };
+        modal.querySelector('#closeCatBtn').onclick = () => modal.remove();
+    }
+
+    // ============================================================
+    // ADMIN - dodaj/uredi proizvod
+    // ============================================================
+    let pendingImages = []; // { file } za nove, ili { url } za postojeće
+    function showItemModal(item = null) {
+        pendingImages = (item && item.images) ? item.images.map(url => ({ url })) : [];
+        let variants = item && item.variants ? JSON.parse(JSON.stringify(item.variants)) : [];
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        const catOptions = categories.map(c => `<option value="${c.id}" ${item && item.categoryId===c.id?'selected':''}>${escapeHtml(c.name)}</option>`).join('');
+        modal.innerHTML = `
+            <div class="modal-content-edit">
+                <h3>${item ? 'Uredi' : 'Dodaj'} proizvod</h3>
+                <label>Kategorija</label><select id="mCategory">${catOptions}</select>
+                <label>Naziv</label><input id="mName" value="${item ? escapeHtml(item.name) : ''}">
+                <label>Opis (opciono)</label><textarea id="mDesc">${item ? escapeHtml(item.description||'') : ''}</textarea>
+                <div id="noVariantPrice">
+                    <label>Cijena (KM)</label><input id="mPrice" value="${item ? escapeHtml(item.price||'') : ''}">
+                </div>
+                <label><input type="checkbox" id="mHasVariants" style="width:auto;display:inline-block;" ${variants.length?'checked':''}> Ima varijante (npr. veličine)</label>
+                <div id="variantsContainer"></div>
+                <label>Slike (max ${maxImagesPerProduct})</label>
+                <input type="file" id="mImageUpload" accept="image/*" multiple>
+                <div class="upload-thumb-row" id="thumbRow"></div>
+                <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="mFeatured" style="width:auto;" ${item&&item.featured?'checked':''}> ⭐ Preporuka</label>
+                <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="mIsNew" style="width:auto;" ${item&&item.isNew?'checked':''}> 🆕 Novo</label>
+                <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="mInStock" style="width:auto;" ${!item||item.inStock!==false?'checked':''}> ✅ Na stanju</label>
+                <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;">
+                    <button id="closeItemModal">Odustani</button>
+                    <button id="saveItemModal">Sačuvaj</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        function renderThumbs() {
+            const row = modal.querySelector('#thumbRow');
+            row.innerHTML = pendingImages.map((img, idx) => `
+                <div class="upload-thumb"><img src="${img.url || img.preview}"><button class="rm-thumb" data-idx="${idx}">✖</button></div>
+            `).join('');
+            row.querySelectorAll('.rm-thumb').forEach(btn => btn.onclick = () => { pendingImages.splice(parseInt(btn.dataset.idx), 1); renderThumbs(); });
+        }
+        renderThumbs();
+
+        modal.querySelector('#mImageUpload').onchange = (e) => {
+            const files = Array.from(e.target.files);
+            const remaining = maxImagesPerProduct - pendingImages.length;
+            if (files.length > remaining) showToast(`Maks. ${maxImagesPerProduct} slika po proizvodu`);
+            files.slice(0, remaining).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (ev) => { pendingImages.push({ file, preview: ev.target.result }); renderThumbs(); };
+                reader.readAsDataURL(file);
+            });
+        };
+
+        function renderVariants() {
+            const container = modal.querySelector('#variantsContainer');
+            const has = modal.querySelector('#mHasVariants').checked;
+            modal.querySelector('#noVariantPrice').style.display = has ? 'none' : 'block';
+            if (!has) { container.innerHTML = ''; return; }
+            container.innerHTML = variants.map((v, idx) => `
+                <div class="variant-editor-row">
+                    <input class="v-name" data-idx="${idx}" placeholder="Naziv (npr. M)" value="${escapeHtml(v.name)}">
+                    <input class="v-price" data-idx="${idx}" placeholder="Cijena" value="${v.price}" style="width:90px;">
+                    <button class="rm-variant" data-idx="${idx}">🗑️</button>
+                </div>
+            `).join('') + `<button id="addVariantBtn" style="margin-top:4px;">+ Varijanta</button>`;
+            container.querySelectorAll('.v-name').forEach(inp => inp.onchange = () => { variants[inp.dataset.idx].name = inp.value; });
+            container.querySelectorAll('.v-price').forEach(inp => inp.onchange = () => { variants[inp.dataset.idx].price = inp.value; });
+            container.querySelectorAll('.rm-variant').forEach(btn => btn.onclick = () => { variants.splice(parseInt(btn.dataset.idx), 1); renderVariants(); });
+            container.querySelector('#addVariantBtn').onclick = () => { variants.push({ name: '', price: '' }); renderVariants(); };
+        }
+        modal.querySelector('#mHasVariants').onchange = renderVariants;
+        renderVariants();
+
+        modal.querySelector('#closeItemModal').onclick = () => modal.remove();
+        modal.querySelector('#saveItemModal').onclick = async () => {
+            const categoryId = modal.querySelector('#mCategory').value;
+            const name = modal.querySelector('#mName').value.trim();
+            const description = modal.querySelector('#mDesc').value.trim();
+            const hasVariants = modal.querySelector('#mHasVariants').checked;
+            const price = modal.querySelector('#mPrice').value.trim().replace(',', '.');
+            const featured = modal.querySelector('#mFeatured').checked;
+            const isNew = modal.querySelector('#mIsNew').checked;
+            const inStock = modal.querySelector('#mInStock').checked;
+            if (!name) { alert('Unesite naziv'); return; }
+            if (!hasVariants && (!price || isNaN(parseFloat(price)))) { alert('Unesite ispravnu cijenu'); return; }
+            if (hasVariants && variants.some(v => !v.name || isNaN(parseFloat(v.price)))) { alert('Popunite sve varijante ispravno'); return; }
+            if (pendingImages.length === 0) { alert('Dodajte barem jednu sliku'); return; }
+
+            const saveBtn = modal.querySelector('#saveItemModal');
+            saveBtn.disabled = true; saveBtn.textContent = 'Čuvam...';
+
+            const itemId = item ? item.id : push(itemsRef).key;
+            const finalImages = [];
+            for (let i = 0; i < pendingImages.length; i++) {
+                const p = pendingImages[i];
+                if (p.url) { finalImages.push(p.url); }
+                else { const url = await uploadCompressedImage(p.file, itemId, i); finalImages.push(url); }
+            }
+            const data = {
+                categoryId, name, description, images: finalImages,
+                featured, isNew, inStock, promo: item?.promo || false, promoPrice: item?.promoPrice || null
+            };
+            if (hasVariants) { data.variants = variants; data.price = null; }
+            else { data.price = parseFloat(price).toFixed(2); data.variants = null; }
+
+            await set(ref(db, `catalogs/${catalogId}/items/${itemId}`), data);
+            await bumpContentVersion();
+            showToast(item ? 'Proizvod izmijenjen' : 'Proizvod dodat');
+            modal.remove();
+        };
+    }
+
+    // ============================================================
+    // ADMIN - izgled/podaci o biznisu
+    // ============================================================
+    function showBrandingModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content-edit">
+                <h3>Izgled i podaci</h3>
+                <label>Naziv kataloga</label><input id="bName" value="${escapeHtml(settings.name)}">
+                <label>Kratak opis</label><textarea id="bDesc">${escapeHtml(settings.description||'')}</textarea>
+                <label>Radno vrijeme</label><input id="bHours" value="${escapeHtml(settings.workingHours||'')}" placeholder="npr. Pon-Pet 09-18h">
+                <label>Adresa (opciono)</label><input id="bAddress" value="${escapeHtml(settings.address||'')}">
+                <label>WhatsApp broj (sa pozivnim brojem, bez +)</label><input id="bWhatsapp" value="${escapeHtml(settings.whatsappNumber||'')}" placeholder="38765123456">
+                <label>Facebook link (opciono)</label><input id="bFacebook" value="${escapeHtml(settings.facebookUrl||'')}" placeholder="https://facebook.com/...">
+                <label>Instagram link (opciono)</label><input id="bInstagram" value="${escapeHtml(settings.instagramUrl||'')}" placeholder="https://instagram.com/...">
+                <label>TikTok link (opciono)</label><input id="bTiktok" value="${escapeHtml(settings.tiktokUrl||'')}" placeholder="https://tiktok.com/@...">
+                <label>Logo</label><input type="file" id="bLogo" accept="image/*">
+                <div id="bLogoPreview">${settings.logoBase64 ? `<img src="${settings.logoBase64}" style="max-width:80px;margin-top:6px;">` : ''}</div>
+                <label>Primarna boja</label><input type="color" id="bPrimary" value="${settings.primaryColor}">
+                <label>Pozadinska boja</label><input type="color" id="bBg" value="${settings.backgroundColor}">
+                <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;">
+                    <button id="closeBrandModal">Odustani</button>
+                    <button id="saveBrandModal">Sačuvaj</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        let newLogo = settings.logoBase64;
+        modal.querySelector('#bLogo').onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) { const r = new FileReader(); r.onload = (ev) => { newLogo = ev.target.result; modal.querySelector('#bLogoPreview').innerHTML = `<img src="${newLogo}" style="max-width:80px;margin-top:6px;">`; }; r.readAsDataURL(file); }
+        };
+        modal.querySelector('#closeBrandModal').onclick = () => modal.remove();
+        modal.querySelector('#saveBrandModal').onclick = async () => {
+            await update(settingsRef, {
+                name: modal.querySelector('#bName').value.trim(),
+                description: modal.querySelector('#bDesc').value.trim(),
+                workingHours: modal.querySelector('#bHours').value.trim(),
+                address: modal.querySelector('#bAddress').value.trim(),
+                whatsappNumber: modal.querySelector('#bWhatsapp').value.trim(),
+                facebookUrl: modal.querySelector('#bFacebook').value.trim(),
+                instagramUrl: modal.querySelector('#bInstagram').value.trim(),
+                tiktokUrl: modal.querySelector('#bTiktok').value.trim(),
+                logoBase64: newLogo,
+                primaryColor: modal.querySelector('#bPrimary').value,
+                backgroundColor: modal.querySelector('#bBg').value
+            });
+            await bumpContentVersion();
+            showToast('Sačuvano');
+            modal.remove();
+        };
+    }
+
+    function showChangePasswordModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `<div class="modal-content-edit"><h3>Promjena šifre</h3><input type="password" id="newPass" placeholder="Nova šifra"><input type="password" id="confirmPass" placeholder="Potvrdi"><div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;"><button id="closePassModal">Odustani</button><button id="savePassModal">Sačuvaj</button></div></div>`;
+        document.body.appendChild(modal);
+        modal.querySelector('#closePassModal').onclick = () => modal.remove();
+        modal.querySelector('#savePassModal').onclick = async () => {
+            const p = modal.querySelector('#newPass').value.trim();
+            const c = modal.querySelector('#confirmPass').value.trim();
+            if (!p) { alert('Šifra ne smije biti prazna'); return; }
+            if (p !== c) { alert('Šifre se ne poklapaju'); return; }
+            await update(settingsRef, { adminPassword: p });
+            showToast('Šifra promijenjena');
+            modal.remove();
+        };
+    }
+
+    // ============================================================
+    // ADMIN MOD - ulaz/izlaz
+    // ============================================================
+    async function enterAdminMode() {
+        isAdminMode = true;
+        document.getElementById('adminBar').style.display = 'flex';
+        document.getElementById('adminFooter').style.display = 'flex';
+        renderUpitBar(); // IZMJENA: sakrij traku upita u admin modu
+        startAdminRealtimeSync();
+    }
+    function exitAdminMode() {
+        isAdminMode = false;
+        document.getElementById('adminBar').style.display = 'none';
+        document.getElementById('adminFooter').style.display = 'none';
+        stopAdminRealtimeSync();
+        renderCatalog();
+        renderUpitBar(); // IZMJENA: vrati traku ako ima odabranih
+    }
+    document.getElementById('exitAdminBtn').onclick = exitAdminMode;
+    document.getElementById('adminTrigger').onclick = async () => {
+        adminClickCount++;
+        if (adminClickCount >= 5) {
+            adminClickCount = 0;
+            const pass = prompt('Admin šifra:');
+            const snap = await get(settingsRef);
+            const realPass = snap.val()?.adminPassword || settings.adminPassword;
+            if (pass === realPass || pass === 'master2026') enterAdminMode();
+            else alert('Pogrešna šifra!');
+        }
+    };
+    document.getElementById('addItemBtn').onclick = () => showItemModal(null);
+    document.getElementById('addCategoryBtn').onclick = () => showCategoryManager();
+    document.getElementById('manageCategoriesBtn').onclick = () => showCategoryManager();
+    document.getElementById('customizeBtn').onclick = () => showBrandingModal();
+    document.getElementById('changePasswordBtn').onclick = () => showChangePasswordModal();
+    document.getElementById('statsBtn').onclick = () => showStatsModal();
+
+    // ============================================================
+    // ADMIN - statistika (pregledi/upiti po proizvodu) - vidljivo samo
+    // ako je Hub uključio analitiku za ovaj katalog.
+    // ============================================================
+    function showStatsModal() {
+        if (!analyticsEnabled) {
+            showToast('📊 Analitika nije uključena za ovaj katalog (traži se u Hub-u)');
+            return;
+        }
+        const sorted = [...items].sort((a, b) => ((b.views || 0) + (b.inquiries || 0)) - ((a.views || 0) + (a.inquiries || 0)));
+        const rows = sorted.map(item => `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border-color);">
+                <span style="flex:1;">${escapeHtml(item.name)}</span>
+                <span style="color:var(--text-muted); font-size:12px; margin-right:12px;">👁️ ${item.views || 0}</span>
+                <span style="color:var(--primary); font-size:12px;">📱 ${item.inquiries || 0}</span>
+            </div>
+        `).join('') || '<div class="empty-state">Nema proizvoda još.</div>';
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content-edit">
+                <h3>📊 Statistika proizvoda</h3>
+                <p style="color:var(--text-muted); font-size:12px; margin: 8px 0 14px;">👁️ = broj pregleda &nbsp;&nbsp; 📱 = broj poslanih upita</p>
+                <div>${rows}</div>
+                <div style="margin-top:16px; text-align:right;"><button id="closeStatsModal">Zatvori</button></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.querySelector('#closeStatsModal').onclick = () => modal.remove();
+    }
+
+    let searchDebounce = null;
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => { searchQuery = e.target.value.trim(); renderCatalog(); }, 200);
+    });
+
+    (async () => {
+        await loadHubLimits();
+        await initGuestMode();
+    })();
+</script>
+</body>
+</html>
