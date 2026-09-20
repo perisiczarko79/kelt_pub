@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f0d0b">
+<title>Zahtjev za slobodan dan</title>
+<style>
+:root{
+  --bg:#0f0d0b;--panel:#17130f;--panel2:#201a14;
+  --gold:#d6ad62;--gold2:#f0d28b;--text:#f1eadf;
+  --muted:#a99e90;--border:#3b3025;--danger:#c96b5d;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:radial-gradient(circle at top,#211a13 0,#0f0d0b 55%);
+  color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  min-height:100vh;
+}
+.wrap{max-width:520px;margin:0 auto;padding:22px 16px 40px}
+.logo{
+  text-align:center;color:var(--gold2);font-weight:800;letter-spacing:.12em;
+  font-size:1.35rem;margin:8px 0 4px
+}
+.sub{text-align:center;color:var(--muted);font-size:.82rem;margin-bottom:24px}
+.card{
+  background:rgba(23,19,15,.96);border:1px solid var(--border);
+  border-radius:18px;padding:20px;box-shadow:0 16px 45px rgba(0,0,0,.3)
+}
+h1{font-size:1.2rem;margin:0 0 6px}
+.intro{color:var(--muted);font-size:.86rem;line-height:1.45;margin:0 0 20px}
+label{display:block;font-size:.78rem;color:var(--muted);margin:15px 0 7px}
+select,input,textarea{
+  width:100%;border:1px solid var(--border);border-radius:12px;
+  background:#0f0d0b;color:var(--text);padding:13px;font-size:1rem;outline:none
+}
+select:focus,input:focus,textarea:focus{border-color:var(--gold)}
+textarea{min-height:90px;resize:vertical}
+button{
+  width:100%;border:0;border-radius:12px;padding:14px;margin-top:18px;
+  background:linear-gradient(135deg,var(--gold2),var(--gold));color:#17110b;
+  font-weight:800;font-size:1rem;cursor:pointer
+}
+button:disabled{opacity:.55;cursor:wait}
+.status{display:none;margin-top:15px;padding:12px;border-radius:11px;font-size:.86rem;line-height:1.4}
+.status.ok{display:block;background:#16351f;color:#bfe8c8;border:1px solid #2d6940}
+.status.err{display:block;background:#3a1714;color:#f0b6ad;border:1px solid #71382f}
+.small{font-size:.72rem;color:var(--muted);text-align:center;margin-top:15px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">KELT PUB</div>
+  <div class="sub" id="tenantLabel">KlikHub · Zahtjev za slobodan dan</div>
+
+  <div class="card">
+    <h1>Zahtjev za slobodan dan</h1>
+    <p class="intro">
+      Izaberi svoje ime i datum kada želiš slobodan dan.
+      Zahtjev ide vlasniku na odobrenje.
+    </p>
+
+    <label for="staff">Konobar</label>
+    <select id="staff">
+      <option value="">Učitavanje...</option>
+    </select>
+
+    <label for="date">Datum</label>
+    <input id="date" type="date">
+
+    <label for="note">Napomena (opciono)</label>
+    <textarea id="note" maxlength="300" placeholder="Npr. porodična obaveza..."></textarea>
+
+    <button id="sendBtn">Pošalji zahtjev</button>
+
+    <div id="status" class="status"></div>
+    <div class="small">Zahtjev nije odobren dok ga vlasnik ne potvrdi.</div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+    "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+  }
+}
+</script>
+
+<script type="module">
+import { initializeApp } from 'firebase/app';
+import { getDatabase, ref, get, push, set } from 'firebase/database';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyALY3oKvPW_mDZiaBl0EdFCkTjd6fqwisQ",
+  authDomain: "kelt-pub-menu-2df61.firebaseapp.com",
+  databaseURL: "https://kelt-pub-menu-2df61-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "kelt-pub-menu-2df61",
+  storageBucket: "kelt-pub-menu-2df61.firebasestorage.app"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const params = new URLSearchParams(location.search);
+const tenantId = params.get('tenant');
+
+const staffEl = document.getElementById('staff');
+const dateEl = document.getElementById('date');
+const noteEl = document.getElementById('note');
+const sendBtn = document.getElementById('sendBtn');
+const statusEl = document.getElementById('status');
+const tenantLabel = document.getElementById('tenantLabel');
+
+function showStatus(text, type){
+  statusEl.textContent = text;
+  statusEl.className = 'status ' + type;
+}
+
+function todayKey(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+
+dateEl.min = todayKey();
+
+async function load(){
+  if(!tenantId){
+    document.body.innerHTML =
+      '<div style="padding:30px;color:#f1eadf;font-family:sans-serif;background:#0f0d0b;min-height:100vh">Nedostaje <b>?tenant=ID</b> u linku.</div>';
+    return;
+  }
+
+  try{
+    const snap = await get(ref(db, `shiftSchedules/${tenantId}`));
+    const data = snap.val() || {};
+    const staff = Array.isArray(data.staff) ? data.staff : [];
+
+    staffEl.innerHTML = '<option value="">Izaberi ime...</option>';
+
+    staff.filter(Boolean).forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      staffEl.appendChild(opt);
+    });
+
+    const nameSnap = await get(ref(db, `klikhub/tenants/${tenantId}/name`));
+    if(nameSnap.exists() && nameSnap.val()){
+      tenantLabel.textContent = `${nameSnap.val()} · Zahtjev za slobodan dan`;
+      document.title = `Zahtjev za slobodan dan — ${nameSnap.val()}`;
+    }
+
+    if(staff.length === 0){
+      showStatus('Nema upisanih konobara u ovom planeru.', 'err');
+    }
+  }catch(err){
+    console.error(err);
+    showStatus('Greška pri učitavanju. Provjeri internet vezu.', 'err');
+  }
+}
+
+sendBtn.addEventListener('click', async () => {
+  const name = staffEl.value;
+  const date = dateEl.value;
+  const note = noteEl.value.trim();
+
+  if(!name){
+    showStatus('Izaberi svoje ime.', 'err');
+    return;
+  }
+  if(!date){
+    showStatus('Izaberi datum.', 'err');
+    return;
+  }
+  if(date < todayKey()){
+    showStatus('Ne možeš tražiti slobodan dan za datum koji je već prošao.', 'err');
+    return;
+  }
+
+  sendBtn.disabled = true;
+  sendBtn.textContent = 'Slanje...';
+
+  try{
+    const requestsRef = ref(db, `shiftSchedules/${tenantId}/requests`);
+    const newRequest = push(requestsRef);
+
+    await set(newRequest, {
+      name,
+      date,
+      note,
+      status: 'pending',
+      createdAt: Date.now()
+    });
+
+    showStatus('Zahtjev je poslat ✓ Vlasnik ga sada može odobriti ili odbiti.', 'ok');
+    dateEl.value = '';
+    noteEl.value = '';
+  }catch(err){
+    console.error(err);
+    showStatus('Zahtjev nije poslat. Provjeri Firebase pravila pristupa.', 'err');
+  }finally{
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'Pošalji zahtjev';
+  }
+});
+
+load();
+</script>
+</body>
+</html>
